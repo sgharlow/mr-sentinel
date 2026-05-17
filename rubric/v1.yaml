@@ -1,0 +1,203 @@
+version: v1
+description: |
+  MR Sentinel default rubric. Fifteen rules across four categories: contract & spec,
+  quality, security, operational. Every rule maps to a named control. Override per-project
+  by placing a .mr-sentinel.yaml at the root of your GitLab repo. Content (evaluator
+  prompts and examples) is placeholder for Days 9-14 milestone fill.
+
+rules:
+  # ──────── Contract & spec gates (5) — derived from CDPD methodology ────────
+  - rule_id: contract-has-spec-link
+    category: contract_spec
+    control_mapping: ["CDPD-§3", "ISO-27001-A.14.2.1"]
+    severity: warning
+    evaluator_prompt: |
+      Does the MR description reference a spec, RFC, or issue link describing the
+      intended behavior? Look for issue refs (#123), spec URLs, or RFC numbers.
+    example_pass: "MR description includes 'Closes #4521' linking to a spec issue."
+    example_fail: "MR description is empty or only contains 'small fix'."
+    suggested_remediation: |
+      Link the MR to a spec issue or RFC. If the change is genuinely too small for
+      a spec, label it `trivial` to opt out.
+
+  - rule_id: acceptance-criteria-testable
+    category: contract_spec
+    control_mapping: ["CDPD-§5", "SOC2-CC8.1"]
+    severity: warning
+    evaluator_prompt: |
+      Do the acceptance criteria in the linked spec map to assertions in the test diff?
+      Each criterion should be machine-verifiable.
+    example_pass: "Spec lists 3 criteria; diff adds 3 corresponding tests."
+    example_fail: "Spec criterion 'should be fast' has no measurable test."
+    suggested_remediation: |
+      Rewrite vague criteria as measurable assertions (response time < 200ms, etc.)
+      and add tests that exercise them.
+
+  - rule_id: spec-implementation-match
+    category: contract_spec
+    control_mapping: ["CDPD-§7"]
+    severity: error
+    evaluator_prompt: |
+      Compare the implementation diff against the spec. Flag any behavior introduced
+      that is not described in the spec, or spec behavior not implemented.
+    example_pass: "Diff implements exactly the endpoints listed in spec §4."
+    example_fail: "Diff adds a new admin route the spec does not mention."
+    suggested_remediation: |
+      Either update the spec to cover the new behavior, or remove the out-of-scope
+      change to a separate MR.
+
+  - rule_id: integration-boundaries-explicit
+    category: contract_spec
+    control_mapping: ["CDPD-§6", "ISO-27001-A.14.2.5"]
+    severity: warning
+    evaluator_prompt: |
+      Where the diff crosses an integration boundary (HTTP, message bus, DB, IPC),
+      is the contract documented (OpenAPI, proto, schema)?
+    example_pass: "New REST endpoint includes an OpenAPI fragment in the diff."
+    example_fail: "New service-to-service call has no contract artifact."
+    suggested_remediation: |
+      Add the OpenAPI/proto/schema fragment alongside the implementation. Document
+      both request and response shapes.
+
+  - rule_id: kill-switch-path
+    category: contract_spec
+    control_mapping: ["CDPD-§9", "SOC2-CC7.5"]
+    severity: warning
+    evaluator_prompt: |
+      For changes that introduce or alter user-facing behavior, is there a feature
+      flag, env toggle, or documented rollback path?
+    example_pass: "New feature wrapped in FEATURE_FOO_ENABLED env flag."
+    example_fail: "New billing logic enabled unconditionally with no flag."
+    suggested_remediation: |
+      Wrap the change in a feature flag or document the rollback procedure in the
+      MR description.
+
+  # ──────── Quality gates (4) ────────
+  - rule_id: changed-method-coverage
+    category: quality
+    control_mapping: ["SOC2-CC8.1", "ISO-27001-A.14.2.8"]
+    severity: error
+    evaluator_prompt: |
+      For every method modified in the diff, is there at least one test covering the
+      new behavior? Coverage threshold: 80% on changed lines.
+    example_pass: "All 4 modified methods have new or updated tests."
+    example_fail: "New `validate_invoice` method has no test."
+    suggested_remediation: |
+      Add tests covering each modified method, exercising the new behavior and at
+      least one failure path.
+
+  - rule_id: mutation-resilience-critical-paths
+    category: quality
+    control_mapping: ["SOC2-CC8.1"]
+    severity: warning
+    evaluator_prompt: |
+      For diffs touching files labeled `critical_path: true` (in repo metadata),
+      do mutation tests still pass at the configured threshold?
+    example_pass: "Mutation test score for billing/ remains ≥ 0.75."
+    example_fail: "Auth refactor reduced mutation score from 0.82 → 0.61."
+    suggested_remediation: |
+      Strengthen tests to kill the surviving mutants. See mutmut/cosmic-ray output.
+
+  - rule_id: no-skipped-tests-introduced
+    category: quality
+    control_mapping: ["SOC2-CC8.1"]
+    severity: error
+    evaluator_prompt: |
+      Does the diff add `pytest.skip`, `xfail`, `@Ignore`, `it.skip`, `test.skip`, or
+      similar without a linked issue explaining why?
+    example_pass: "No new test skips in diff."
+    example_fail: "Two new `@pytest.mark.skip` decorators with no comment."
+    suggested_remediation: |
+      Either fix the test, delete it, or link an issue tracking the skip and reference
+      it in a comment.
+
+  - rule_id: no-commented-out-code
+    category: quality
+    control_mapping: ["SOC2-CC8.1"]
+    severity: info
+    evaluator_prompt: |
+      Does the diff add blocks of commented-out code (3+ consecutive lines)?
+    example_pass: "Diff has only documentation comments."
+    example_fail: "Old auth function left as a 20-line commented block."
+    suggested_remediation: |
+      Delete commented code. Git history preserves the old version if you need it.
+
+  # ──────── Security gates (3) ────────
+  - rule_id: dependency-advisory-check
+    category: security
+    control_mapping: ["SOC2-CC7.1", "ISO-27001-A.12.6.1", "NIST-SA-11"]
+    severity: blocker
+    evaluator_prompt: |
+      Does the diff add or upgrade a dependency that has a known HIGH or CRITICAL
+      advisory? Use GitLab's dependency-scanning + dependabot/security advisories.
+    example_pass: "New dependency `httpx==0.27.2` has no open advisories."
+    example_fail: "Upgrade to `requests==2.20.0` reintroduces CVE-2018-18074."
+    suggested_remediation: |
+      Pin to a non-vulnerable version. If no fixed version exists, document the
+      mitigation and request an exception via the security control board.
+
+  - rule_id: no-secrets-in-diff
+    category: security
+    control_mapping: ["SOC2-CC6.1", "ISO-27001-A.9.4.3", "OWASP-ASVS-V2"]
+    severity: blocker
+    evaluator_prompt: |
+      Does the diff include any detected secret pattern (API keys, tokens, private
+      keys, connection strings with passwords)? Use detect-secrets or gitleaks output.
+    example_pass: "No secret patterns detected."
+    example_fail: "AWS access key id present in test fixture."
+    suggested_remediation: |
+      Remove the secret, rotate the credential immediately, and add the pattern to
+      the project's pre-commit hook.
+
+  - rule_id: auth-on-new-public-endpoints
+    category: security
+    control_mapping: ["SOC2-CC6.1", "OWASP-ASVS-V1"]
+    severity: blocker
+    evaluator_prompt: |
+      For every new route or handler exposed publicly, is there an explicit auth
+      annotation (decorator, middleware, gateway rule)? Default-deny stance.
+    example_pass: "New /admin/users route has @require_role('admin')."
+    example_fail: "New /internal/dump route has no auth decoration."
+    suggested_remediation: |
+      Add the auth annotation, or move the route behind an internal-only path with
+      a documented network-level control.
+
+  # ──────── Operational gates (3) ────────
+  - rule_id: observability-on-new-endpoints
+    category: operational
+    control_mapping: ["SOC2-CC7.2", "ISO-27001-A.12.4.1"]
+    severity: warning
+    evaluator_prompt: |
+      Do new HTTP/gRPC endpoints emit structured logs (request id, latency, status)
+      and at least one metric (counter or histogram)?
+    example_pass: "New endpoint logs `request_id` and emits `http_requests_total`."
+    example_fail: "New /webhook handler has no logging at all."
+    suggested_remediation: |
+      Add a structured log line per request and increment a counter labeled by
+      endpoint + status.
+
+  - rule_id: error-budget-impact-declared
+    category: operational
+    control_mapping: ["SOC2-CC4.1"]
+    severity: warning
+    evaluator_prompt: |
+      For diffs touching files in services with an SLO file (`slo.yaml`), does the
+      MR description note the expected error-budget impact?
+    example_pass: "MR description: 'No expected impact on 99.9% availability SLO.'"
+    example_fail: "Diff rewrites the request hot path with no SLO note."
+    suggested_remediation: |
+      Add an 'Error-budget impact' section to the MR description. If unsure, run
+      the load-test suite and attach results.
+
+  - rule_id: rollback-documented-for-migrations
+    category: operational
+    control_mapping: ["SOC2-CC7.5", "ISO-27001-A.14.2.2"]
+    severity: error
+    evaluator_prompt: |
+      For diffs that add database migration files, is the rollback path documented?
+      Either a `down`/reverse migration, or a written procedure in the MR description.
+    example_pass: "Migration includes both `up()` and `down()` methods."
+    example_fail: "New ALTER TABLE migration has no reverse step."
+    suggested_remediation: |
+      Add the reverse migration, or — if the change is one-way — document the
+      recovery procedure (restore from backup, run reconciliation script, etc.).
