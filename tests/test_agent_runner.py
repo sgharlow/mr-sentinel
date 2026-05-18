@@ -143,14 +143,67 @@ def test_render_comment_shows_verdict_score_and_failures() -> None:
         iid=1, project_path="sgharlow/governance-demo-app",
         title="t", description="d", author_username="a",
         source_branch="s", target_branch="t", state="opened",
-        web_url="", sha="", labels=[],
+        web_url="", sha="abc12345", labels=[],
     )
     md = render_comment(eval_, mr)
+    assert "<!-- mr-sentinel:v1 -->" in md  # marker for upsert
     assert "🛑" in md
     assert "verdict: **block**" in md
     assert "score 4.0/10" in md
     assert "auth-on-new-public-endpoints" in md
     assert "Add decorator." in md
+    assert "abc12345" in md  # sha shown in comment
     # Passes go in a collapsed section
     assert "<details>" in md
     assert "no-secrets-in-diff" in md
+
+
+def test_render_comment_includes_followup_issue_url_and_pipeline() -> None:
+    from app.agent_runner import render_comment
+    eval_ = Evaluation(
+        overall_score=2.0, verdict="block", summary="bad",
+        rule_evaluations=[
+            RuleEvaluation(rule_id="auth-on-new-public-endpoints", outcome="fail",
+                           evidence="x", remediation="y"),
+        ],
+        rubric_version="v1",
+    )
+    mr = MergeRequest(iid=1, project_path="p/q", title="t", description="d",
+                     author_username="a", source_branch="s", target_branch="t",
+                     state="opened", web_url="", sha="deadbeef", labels=[])
+    md = render_comment(eval_, mr,
+                       followup_issue_url="https://gitlab.com/p/q/-/issues/9",
+                       pipeline_status="failed")
+    assert "https://gitlab.com/p/q/-/issues/9" in md
+    assert "Follow-up issue" in md
+    assert "pipeline `failed`" in md
+
+
+def test_render_followup_issue_body_lists_failures_as_checklist() -> None:
+    from app.agent_runner import render_followup_issue_body
+    eval_ = Evaluation(
+        overall_score=2.0, verdict="block", summary="bad",
+        rule_evaluations=[
+            RuleEvaluation(rule_id="auth-on-new-public-endpoints", outcome="fail",
+                           evidence="route /admin/dump has no auth",
+                           remediation="add decorator"),
+            RuleEvaluation(rule_id="no-secrets-in-diff", outcome="fail",
+                           evidence="SSN found", remediation="remove SSN"),
+            RuleEvaluation(rule_id="quality-01", outcome="pass", evidence="ok"),
+        ],
+        rubric_version="v1",
+    )
+    mr = MergeRequest(iid=42, project_path="sgharlow/governance-demo-app",
+                     title="Add /admin/dump", description="",
+                     author_username="alice", source_branch="alice/admin",
+                     target_branch="main", state="opened",
+                     web_url="https://gitlab.com/sgharlow/governance-demo-app/-/merge_requests/42",
+                     sha="abc12345", labels=[])
+    body = render_followup_issue_body(eval_, mr)
+    assert "sgharlow/governance-demo-app!42" in body
+    assert "Failing rules (2)" in body
+    assert "[ ] **`auth-on-new-public-endpoints`**" in body
+    assert "route /admin/dump has no auth" in body
+    assert "add decorator" in body
+    # Passes should not appear
+    assert "quality-01" not in body

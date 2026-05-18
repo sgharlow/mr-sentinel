@@ -256,13 +256,27 @@ def _derive_summary(rule_evals: list[RuleEvaluation]) -> str:
     return f"{len(fails)} rule(s) failed: " + ", ".join(r.rule_id for r in fails[:3])
 
 
-def render_comment(evaluation: Evaluation, mr: MergeRequest) -> str:
-    """Render the evaluation as a Markdown comment to post on the MR."""
+AGENT_COMMENT_MARKER = "<!-- mr-sentinel:v1 -->"
+
+
+def render_comment(
+    evaluation: Evaluation, mr: MergeRequest,
+    *,
+    followup_issue_url: str | None = None,
+    pipeline_status: str | None = None,
+) -> str:
+    """Render the evaluation as a Markdown comment to post on the MR.
+
+    Includes a hidden marker so we can find + update this comment instead of
+    posting a new one on every re-evaluation.
+    """
     verdict_emoji = {"pass": "✅", "warn": "⚠️", "block": "🛑"}.get(evaluation.verdict, "❔")
     lines = [
+        AGENT_COMMENT_MARKER,
         f"## {verdict_emoji} MR Sentinel — verdict: **{evaluation.verdict}** (score {evaluation.overall_score:.1f}/10)",
         "",
-        f"_Applied rubric `{evaluation.rubric_version}` to {len(evaluation.rule_evaluations)} rules._",
+        f"_Applied rubric `{evaluation.rubric_version}` to {len(evaluation.rule_evaluations)} rules._  ",
+        f"_Commit `{mr.sha[:8]}` · pipeline `{pipeline_status or 'n/a'}`_",
         "",
         f"**Summary.** {evaluation.summary}",
         "",
@@ -280,6 +294,10 @@ def render_comment(evaluation: Evaluation, mr: MergeRequest) -> str:
                 lines.append(f"  - _Remediation:_ {r.remediation}")
         lines.append("")
 
+    if followup_issue_url:
+        lines.append(f"📋 **Follow-up issue:** {followup_issue_url}")
+        lines.append("")
+
     lines.append(
         f"<details><summary>Passes ({len(passes)}) · Skipped ({len(skips)})</summary>\n"
     )
@@ -289,4 +307,27 @@ def render_comment(evaluation: Evaluation, mr: MergeRequest) -> str:
         lines.append(f"- ⏭️ `{r.rule_id}` — {r.evidence}")
     lines.append("\n</details>")
 
+    return "\n".join(lines)
+
+
+def render_followup_issue_body(evaluation: Evaluation, mr: MergeRequest) -> str:
+    """Render a remediation issue body listing each failed rule as a checklist item."""
+    fails = [r for r in evaluation.rule_evaluations if r.outcome == "fail"]
+    lines = [
+        f"Compliance follow-up for {mr.project_path}!{mr.iid} — _{mr.title}_.",
+        "",
+        f"MR Sentinel scored this merge request **{evaluation.overall_score:.1f}/10** ({evaluation.verdict}) against rubric `{evaluation.rubric_version}`.",
+        "",
+        f"Source: {mr.web_url}",
+        f"Commit: `{mr.sha[:8]}`",
+        "",
+        f"## Failing rules ({len(fails)})",
+        "",
+    ]
+    for r in fails:
+        lines.append(f"- [ ] **`{r.rule_id}`** — {r.evidence}")
+        if r.remediation:
+            lines.append(f"      _Suggested fix:_ {r.remediation}")
+    lines.append("")
+    lines.append("_This issue was opened automatically by MR Sentinel. Close it when all checks pass on the MR._")
     return "\n".join(lines)

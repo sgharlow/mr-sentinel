@@ -100,6 +100,28 @@ async def persist_evaluation(mr: MergeRequest, evaluation: Evaluation) -> int:
     return int(score_id)
 
 
+async def already_evaluated(
+    project_path: str, mr_iid: int, commit_sha: str, rubric_version: str
+) -> bool:
+    """Return True if (project, mr_iid, sha, rubric_version) was already scored.
+
+    Used to short-circuit re-evaluation when GitLab fires an update event that
+    didn't change the diff (label change, description edit, etc.).
+    """
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        return bool(await conn.fetchval(
+            """
+            SELECT EXISTS(
+                SELECT 1 FROM mr_scores
+                WHERE project_path = $1 AND mr_iid = $2
+                  AND commit_sha = $3 AND rubric_version = $4
+            )
+            """,
+            project_path, mr_iid, commit_sha, rubric_version,
+        ))
+
+
 async def audit(actor: str, action: str, project_path: str | None = None,
                 mr_iid: int | None = None, details: dict[str, Any] | None = None) -> None:
     pool = await get_pool()
