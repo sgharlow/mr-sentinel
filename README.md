@@ -11,7 +11,7 @@
 
 ## Status
 
-Day 2 of 26. Repo initialization complete. Webhook handler scaffolded. Rubric schema v1 in place. **GCP infrastructure bootstrapped** on the shared `aicin-477004` project (previous Google Cloud Run Hackathon, reused per existing-credentials directive). See [`mr-sentinel-hackathon-spec.md`](mr-sentinel-hackathon-spec.md) for the full spec and 26-day build plan.
+**Day 1–3 milestone closed.** Day 2 of 26. End-to-end loop verified: GitLab MR → webhook fired → Cloud Run 202 Accepted → app logged event. GCP infrastructure bootstrapped on shared `aicin-477004`. See [`mr-sentinel-hackathon-spec.md`](mr-sentinel-hackathon-spec.md) for the full spec and 26-day build plan.
 
 ### GCP resources live
 
@@ -19,9 +19,13 @@ Day 2 of 26. Repo initialization complete. Webhook handler scaffolded. Rubric sc
 |---|---|
 | Project | `aicin-477004` (region `us-central1`) |
 | Cloud Run service | `mr-sentinel-webhook` — https://mr-sentinel-webhook-n6oitfxdra-uc.a.run.app |
+| Cloud SQL Postgres 15 | `mr-sentinel-db` (db-f1-micro) · connection `aicin-477004:us-central1:mr-sentinel-db` · db `mrsentinel` · user `app` (unix socket via Cloud SQL Auth Proxy at `/cloudsql/<conn>`) |
 | Artifact Registry | `us-central1-docker.pkg.dev/aicin-477004/mr-sentinel` |
-| Secret: webhook token | `mr-sentinel-gitlab-webhook-secret` (v1 populated — 64 hex chars) — bound to service as `GITLAB_WEBHOOK_SECRET` env var |
-| Secret: GitLab PAT | `mr-sentinel-gitlab-token` (placeholder — no version yet) |
+| GitLab demo repo | https://gitlab.com/sgharlow/governance-demo-app (webhook id 78485229) |
+| Secret: webhook token | `mr-sentinel-gitlab-webhook-secret` — bound to service as `GITLAB_WEBHOOK_SECRET` |
+| Secret: GitLab PAT | `mr-sentinel-gitlab-token` (v1) — for outbound GitLab API/MCP calls |
+| Secret: DB app password | `mr-sentinel-db-app-password` — bound to service as `DB_PASSWORD` |
+| Secret: DB root password | `mr-sentinel-db-password` — postgres user; held for ops only |
 | APIs enabled | Vertex AI, Agent Builder (Discovery Engine), Cloud Run, Cloud SQL, Secret Manager, Artifact Registry, Cloud Build, IAM, Service Networking, Cloud Resource Manager, Cloud Logging, Cloud Monitoring |
 
 Service endpoints:
