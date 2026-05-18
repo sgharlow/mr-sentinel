@@ -10,7 +10,7 @@ set -euo pipefail
 PROJECT_ID="${PROJECT_ID:-aicin-477004}"
 REGION="${REGION:-us-central1}"
 SERVICE_NAME="${SERVICE_NAME:-mr-sentinel-webhook}"
-IMAGE_TAG="${IMAGE_TAG:-0.1.2}"
+IMAGE_TAG="${IMAGE_TAG:-0.2.2}"
 IMAGE="${REGION}-docker.pkg.dev/${PROJECT_ID}/mr-sentinel/webhook:${IMAGE_TAG}"
 
 log() { printf '\033[1;34m[cloud-run-deploy]\033[0m %s\n' "$*"; }
@@ -41,13 +41,16 @@ gcloud run deploy "$SERVICE_NAME" \
   --region="$REGION" \
   --platform=managed \
   --allow-unauthenticated \
-  --set-secrets='GITLAB_WEBHOOK_SECRET=mr-sentinel-gitlab-webhook-secret:latest' \
-  --memory=512Mi \
+  --set-secrets='GITLAB_WEBHOOK_SECRET=mr-sentinel-gitlab-webhook-secret:latest,GITLAB_TOKEN=mr-sentinel-gitlab-token:latest,DB_PASSWORD=mr-sentinel-db-app-password:latest' \
+  --set-env-vars="GCP_PROJECT_ID=$PROJECT_ID,DB_HOST=/cloudsql/$PROJECT_ID:$REGION:mr-sentinel-db,DB_NAME=mrsentinel,DB_USER=app" \
+  --add-cloudsql-instances="$PROJECT_ID:$REGION:mr-sentinel-db" \
+  --memory=1Gi \
   --cpu=1 \
+  --no-cpu-throttling \
   --max-instances=10 \
   --min-instances=0 \
-  --concurrency=80 \
-  --timeout=60 \
+  --concurrency=20 \
+  --timeout=120 \
   --project="$PROJECT_ID" \
   --quiet
 
