@@ -17,7 +17,12 @@ app = FastAPI(title="MR Sentinel", version="0.1.0")
 
 def _expected_webhook_secret() -> str | None:
     """Return the configured GitLab webhook secret, or None if unset (dev mode)."""
-    return os.environ.get("GITLAB_WEBHOOK_SECRET")
+    value = os.environ.get("GITLAB_WEBHOOK_SECRET")
+    if value is None:
+        return None
+    # Cloud Run injects Secret Manager values verbatim, so trailing newlines from
+    # `openssl rand | gcloud secrets versions add` survive into the container env.
+    return value.strip() or None
 
 
 def _verify_token(provided: str | None) -> bool:
@@ -45,8 +50,8 @@ async def _process_mr_event(event: dict[str, Any]) -> None:
     )
 
 
-@app.get("/healthz")
-async def healthz() -> dict[str, str]:
+@app.get("/health")
+async def health() -> dict[str, str]:
     return {"status": "ok"}
 
 
