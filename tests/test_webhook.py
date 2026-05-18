@@ -22,8 +22,8 @@ def client_no_secret(monkeypatch: pytest.MonkeyPatch) -> TestClient:
     return TestClient(app)
 
 
-def test_healthz_returns_ok(client: TestClient) -> None:
-    response = client.get("/healthz")
+def test_health_returns_ok(client: TestClient) -> None:
+    response = client.get("/health")
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}
 
@@ -69,4 +69,17 @@ def test_webhook_rejects_non_object_payload(client: TestClient) -> None:
 
 def test_webhook_dev_mode_accepts_without_secret(client_no_secret: TestClient) -> None:
     response = client_no_secret.post("/gitlab/webhook", json={"object_kind": "ping"})
+    assert response.status_code == 202
+
+
+def test_webhook_strips_trailing_newline_from_env_secret(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Cloud Run + `openssl rand | gcloud secrets versions add` leaves a trailing \\n.
+    The handler must compare against the stripped value."""
+    monkeypatch.setenv("GITLAB_WEBHOOK_SECRET", "secret-with-newline\n")
+    client = TestClient(app)
+    response = client.post(
+        "/gitlab/webhook",
+        json={"object_kind": "ping"},
+        headers={"X-Gitlab-Token": "secret-with-newline"},
+    )
     assert response.status_code == 202

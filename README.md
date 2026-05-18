@@ -18,12 +18,25 @@ Day 2 of 26. Repo initialization complete. Webhook handler scaffolded. Rubric sc
 | Resource | Identifier |
 |---|---|
 | Project | `aicin-477004` (region `us-central1`) |
+| Cloud Run service | `mr-sentinel-webhook` — https://mr-sentinel-webhook-n6oitfxdra-uc.a.run.app |
 | Artifact Registry | `us-central1-docker.pkg.dev/aicin-477004/mr-sentinel` |
-| Secret: webhook token | `mr-sentinel-gitlab-webhook-secret` (v1 populated — 64 hex chars) |
+| Secret: webhook token | `mr-sentinel-gitlab-webhook-secret` (v1 populated — 64 hex chars) — bound to service as `GITLAB_WEBHOOK_SECRET` env var |
 | Secret: GitLab PAT | `mr-sentinel-gitlab-token` (placeholder — no version yet) |
 | APIs enabled | Vertex AI, Agent Builder (Discovery Engine), Cloud Run, Cloud SQL, Secret Manager, Artifact Registry, Cloud Build, IAM, Service Networking, Cloud Resource Manager, Cloud Logging, Cloud Monitoring |
 
-Re-run any time via [`scripts/gcp-bootstrap.sh`](scripts/gcp-bootstrap.sh) — idempotent. Defaults to `PROJECT_ID=aicin-477004`; override with the env var.
+Service endpoints:
+- `GET /health` — liveness check (not `/healthz` — Cloud Run intercepts that path)
+- `GET /docs` — FastAPI Swagger UI
+- `POST /gitlab/webhook` — webhook handler, requires `X-Gitlab-Token` header
+
+Re-run any time:
+
+```bash
+bash scripts/gcp-bootstrap.sh         # project, APIs, secrets, registry (idempotent)
+bash scripts/cloud-run-deploy.sh      # Cloud Build + Cloud Run deploy
+bash scripts/smoke-test.sh            # 4-test health + auth check
+bash scripts/diag.sh                  # service status + recent logs
+```
 
 ## What this is
 
