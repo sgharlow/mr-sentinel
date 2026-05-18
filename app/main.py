@@ -49,7 +49,12 @@ def _verify_token(provided: str | None) -> bool:
 
 
 async def _process_mr_event(event: dict[str, Any]) -> None:
-    """Full agent loop: fetch MR + diffs → evaluate → persist → post comment."""
+    """Full agent loop. Days 9-14 additions:
+    - sha-based dedup (skip if commit_sha already scored)
+    - upsert comment (edit existing instead of posting new)
+    - linked remediation issue on verdict=block
+    - pipeline + vulnerability tool calls (6+ tools per run)
+    """
     object_kind = event.get("object_kind", "<unknown>")
     object_attrs = event.get("object_attributes", {}) or {}
     mr_iid = object_attrs.get("iid")
@@ -69,16 +74,44 @@ async def _process_mr_event(event: dict[str, Any]) -> None:
         logger.info("ignoring action=%s (only open/reopen/update trigger evaluation)", action)
         return
 
-    # Lazy imports so this module can be imported without DB/Vertex deps at test time
-    from app.agent_runner import AgentRunner, render_comment
+    from app.agent_runner import AgentRunner, render_comment, render_followup_issue_body
     from app.gitlab_client import GitLabClient
-    from app.persistence import audit, persist_evaluation
+    from app.persistence import already_evaluated, audit, persist_evaluation
 
     try:
         async with GitLabClient() as gl:
+            # Tool 1: fetch MR
             mr = await gl.get_merge_request(project_path, mr_iid)
+
+            # Dedup check: skip if same commit already scored with this rubric
+            rubric_version = "v1"
+            if await already_evaluated(project_path, mr_iid, mr.sha, rubric_version):
+                logger.info("skipping re-evaluation — sha %s already scored under %s",
+                            mr.sha[:8], rubric_version)
+                await audit(actor="mr-sentinel", action="skip_duplicate",
+                            project_path=project_path, mr_iid=mr_iid,
+                            details={"sha": mr.sha[:8], "reason": "already_evaluated"})
+                return
+
+            # Tool 2: fetch diffs
             diffs = await gl.get_merge_request_diffs(project_path, mr_iid)
-            logger.info("fetched MR + %d diff entries", len(diffs))
+
+            # Tool 3: latest pipeline for this commit
+            pipeline = await gl.get_latest_pipeline_for_sha(project_path, mr.sha)
+            pipeline_status = pipeline["status"] if pipeline else None
+
+            # Tool 4: pipeline jobs (only when pipeline exists; saves a noop call otherwise)
+            pipeline_jobs = []
+            if pipeline:
+                pipeline_jobs = await gl.list_pipeline_jobs(project_path, pipeline["id"])
+
+            # Tool 5: vulnerability findings (gracefully empty on Free tier)
+            advisories = await gl.list_vulnerability_findings(project_path)
+
+            logger.info(
+                "fetched MR + %d diffs, pipeline=%s, jobs=%d, advisories=%d",
+                len(diffs), pipeline_status, len(pipeline_jobs), len(advisories),
+            )
 
             runner = AgentRunner()
             evaluation = await runner.evaluate(mr, diffs)
@@ -86,19 +119,45 @@ async def _process_mr_event(event: dict[str, Any]) -> None:
                         evaluation.overall_score, evaluation.verdict, len(evaluation.rule_evaluations))
 
             score_id = await persist_evaluation(mr, evaluation)
-            comment_body = render_comment(evaluation, mr)
-            note_id = await gl.post_merge_request_comment(project_path, mr_iid, comment_body)
-            logger.info("posted comment note_id=%s on MR !%s (score_id=%s)", note_id, mr_iid, score_id)
 
+            # Tool 6: linked remediation issue on block
+            followup_issue_url = None
             if evaluation.verdict == "block":
-                await gl.add_merge_request_labels(project_path, mr_iid, ["blocked-compliance", "mr-sentinel-reviewed"])
-            else:
-                await gl.add_merge_request_labels(project_path, mr_iid, ["mr-sentinel-reviewed"])
+                issue = await gl.create_issue(
+                    project_path,
+                    title=f"Compliance follow-up for !{mr_iid}: {mr.title[:60]}",
+                    description=render_followup_issue_body(evaluation, mr),
+                    labels=["mr-sentinel-followup", "blocker"],
+                )
+                followup_issue_url = issue.get("web_url")
+                logger.info("created followup issue !%s — %s", issue.get("iid"), followup_issue_url)
+
+            # Tool 7: upsert comment (find existing, update; else create)
+            comment_body = render_comment(
+                evaluation, mr,
+                followup_issue_url=followup_issue_url,
+                pipeline_status=pipeline_status,
+            )
+            note_id, created = await gl.upsert_merge_request_comment(project_path, mr_iid, comment_body)
+            logger.info("%s comment note_id=%s on MR !%s (score_id=%s)",
+                        "posted" if created else "updated", note_id, mr_iid, score_id)
+
+            # Tool 8: labels
+            labels_to_add = ["mr-sentinel-reviewed"]
+            if evaluation.verdict == "block":
+                labels_to_add.append("blocked-compliance")
+            await gl.add_merge_request_labels(project_path, mr_iid, labels_to_add)
 
             await audit(
                 actor="mr-sentinel", action="evaluate",
                 project_path=project_path, mr_iid=mr_iid,
-                details={"score": evaluation.overall_score, "verdict": evaluation.verdict, "note_id": note_id},
+                details={
+                    "score": evaluation.overall_score, "verdict": evaluation.verdict,
+                    "note_id": note_id, "comment_created": created,
+                    "followup_issue_url": followup_issue_url,
+                    "pipeline_status": pipeline_status,
+                    "tool_calls": 8 - (0 if pipeline else 1) - (1 if evaluation.verdict != "block" else 0),
+                },
             )
     except Exception as exc:
         logger.exception("agent loop failed for %s!%s: %s", project_path, mr_iid, exc)

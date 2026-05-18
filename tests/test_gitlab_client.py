@@ -143,3 +143,111 @@ async def test_missing_token_raises() -> None:
     finally:
         if saved is not None:
             os.environ["GITLAB_TOKEN"] = saved
+
+
+async def test_find_agent_note_returns_id_when_marker_present(
+    token: str, project_path: str, encoded_project: str
+) -> None:
+    notes = [
+        {"id": 100, "body": "first comment", "author": {"username": "alice"}},
+        {"id": 101, "body": "## 🛑 MR Sentinel ...\n<!-- mr-sentinel:v1 -->\nverdict block",
+         "author": {"username": "sgharlow"}},
+        {"id": 102, "body": "another human reply", "author": {"username": "bob"}},
+    ]
+    async with respx.mock(base_url="https://gitlab.com/api/v4") as router:
+        router.get(f"/projects/{encoded_project}/merge_requests/42/notes").respond(200, json=notes)
+        async with GitLabClient() as client:
+            note_id = await client.find_agent_note(project_path, 42)
+    assert note_id == 101
+
+
+async def test_find_agent_note_returns_none_when_no_marker(
+    token: str, project_path: str, encoded_project: str
+) -> None:
+    async with respx.mock(base_url="https://gitlab.com/api/v4") as router:
+        router.get(f"/projects/{encoded_project}/merge_requests/42/notes").respond(
+            200, json=[{"id": 1, "body": "no marker here", "author": {"username": "alice"}}]
+        )
+        async with GitLabClient() as client:
+            note_id = await client.find_agent_note(project_path, 42)
+    assert note_id is None
+
+
+async def test_update_merge_request_note(
+    token: str, project_path: str, encoded_project: str
+) -> None:
+    async with respx.mock(base_url="https://gitlab.com/api/v4") as router:
+        router.put(f"/projects/{encoded_project}/merge_requests/42/notes/9001").respond(
+            200, json={"id": 9001, "body": "updated"}
+        )
+        async with GitLabClient() as client:
+            note_id = await client.update_merge_request_note(project_path, 42, 9001, "updated body")
+    assert note_id == 9001
+
+
+async def test_upsert_comment_creates_when_no_existing(
+    token: str, project_path: str, encoded_project: str
+) -> None:
+    async with respx.mock(base_url="https://gitlab.com/api/v4") as router:
+        router.get(f"/projects/{encoded_project}/merge_requests/42/notes").respond(
+            200, json=[{"id": 1, "body": "human note", "author": {"username": "alice"}}]
+        )
+        router.post(f"/projects/{encoded_project}/merge_requests/42/notes").respond(
+            201, json={"id": 555}
+        )
+        async with GitLabClient() as client:
+            note_id, created = await client.upsert_merge_request_comment(project_path, 42, "new body")
+    assert note_id == 555
+    assert created is True
+
+
+async def test_upsert_comment_updates_when_marker_found(
+    token: str, project_path: str, encoded_project: str
+) -> None:
+    async with respx.mock(base_url="https://gitlab.com/api/v4") as router:
+        router.get(f"/projects/{encoded_project}/merge_requests/42/notes").respond(
+            200, json=[{"id": 700, "body": "## MR Sentinel\n<!-- mr-sentinel:v1 -->\nold",
+                       "author": {"username": "sgharlow"}}]
+        )
+        router.put(f"/projects/{encoded_project}/merge_requests/42/notes/700").respond(
+            200, json={"id": 700}
+        )
+        async with GitLabClient() as client:
+            note_id, created = await client.upsert_merge_request_comment(project_path, 42, "updated body")
+    assert note_id == 700
+    assert created is False
+
+
+async def test_get_latest_pipeline_returns_none_when_empty(
+    token: str, project_path: str, encoded_project: str
+) -> None:
+    async with respx.mock(base_url="https://gitlab.com/api/v4") as router:
+        router.get(f"/projects/{encoded_project}/pipelines").respond(200, json=[])
+        async with GitLabClient() as client:
+            pipeline = await client.get_latest_pipeline_for_sha(project_path, "deadbeef")
+    assert pipeline is None
+
+
+async def test_get_latest_pipeline_returns_first(
+    token: str, project_path: str, encoded_project: str
+) -> None:
+    async with respx.mock(base_url="https://gitlab.com/api/v4") as router:
+        router.get(f"/projects/{encoded_project}/pipelines").respond(
+            200, json=[{"id": 99, "status": "success", "sha": "deadbeef"}]
+        )
+        async with GitLabClient() as client:
+            pipeline = await client.get_latest_pipeline_for_sha(project_path, "deadbeef")
+    assert pipeline is not None
+    assert pipeline["id"] == 99
+
+
+async def test_list_vulnerability_findings_swallows_403(
+    token: str, project_path: str, encoded_project: str
+) -> None:
+    async with respx.mock(base_url="https://gitlab.com/api/v4") as router:
+        router.get(f"/projects/{encoded_project}/vulnerability_findings").respond(
+            403, json={"message": "Premium tier required"}
+        )
+        async with GitLabClient() as client:
+            findings = await client.list_vulnerability_findings(project_path)
+    assert findings == []

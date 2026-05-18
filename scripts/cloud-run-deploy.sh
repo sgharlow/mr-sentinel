@@ -10,7 +10,7 @@ set -euo pipefail
 PROJECT_ID="${PROJECT_ID:-aicin-477004}"
 REGION="${REGION:-us-central1}"
 SERVICE_NAME="${SERVICE_NAME:-mr-sentinel-webhook}"
-IMAGE_TAG="${IMAGE_TAG:-0.2.2}"
+IMAGE_TAG="${IMAGE_TAG:-0.3.0}"
 IMAGE="${REGION}-docker.pkg.dev/${PROJECT_ID}/mr-sentinel/webhook:${IMAGE_TAG}"
 
 log() { printf '\033[1;34m[cloud-run-deploy]\033[0m %s\n' "$*"; }

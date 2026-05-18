@@ -170,3 +170,99 @@ class GitLabClient:
         if response.status_code not in (200, 201):
             raise GitLabError(response.status_code, response.text, action="create_issue")
         return response.json()
+
+    async def list_merge_request_notes(self, project_path: str, mr_iid: int) -> list[dict[str, Any]]:
+        """List all notes/comments on the MR. Used to find the agent's prior comment."""
+        encoded = self._encode_project(project_path)
+        response = await self._request("GET", f"/projects/{encoded}/merge_requests/{mr_iid}/notes",
+                                       params={"per_page": 100})
+        if response.status_code != 200:
+            raise GitLabError(response.status_code, response.text, action="list_merge_request_notes")
+        return response.json()
+
+    async def find_agent_note(
+        self, project_path: str, mr_iid: int, marker: str = "<!-- mr-sentinel:v1 -->"
+    ) -> int | None:
+        """Return the note_id of the prior agent comment, or None."""
+        notes = await self.list_merge_request_notes(project_path, mr_iid)
+        # Latest first — GitLab returns chronological; reverse so we pick the most recent
+        for note in reversed(notes):
+            if marker in (note.get("body") or ""):
+                return note["id"]
+        return None
+
+    async def update_merge_request_note(
+        self, project_path: str, mr_iid: int, note_id: int, body: str
+    ) -> int:
+        """Edit an existing note. Returns the note id (unchanged on success)."""
+        encoded = self._encode_project(project_path)
+        response = await self._request(
+            "PUT",
+            f"/projects/{encoded}/merge_requests/{mr_iid}/notes/{note_id}",
+            data={"body": body},
+        )
+        if response.status_code not in (200, 201):
+            raise GitLabError(response.status_code, response.text, action="update_merge_request_note")
+        return response.json()["id"]
+
+    async def upsert_merge_request_comment(
+        self, project_path: str, mr_iid: int, body: str, *,
+        marker: str = "<!-- mr-sentinel:v1 -->",
+    ) -> tuple[int, bool]:
+        """Post comment if none exists, otherwise update the existing one.
+
+        Returns (note_id, created) where created=True means new note, False means edited.
+        """
+        existing_id = await self.find_agent_note(project_path, mr_iid, marker=marker)
+        if existing_id is not None:
+            return (await self.update_merge_request_note(project_path, mr_iid, existing_id, body), False)
+        return (await self.post_merge_request_comment(project_path, mr_iid, body), True)
+
+    async def get_latest_pipeline_for_sha(
+        self, project_path: str, sha: str
+    ) -> dict[str, Any] | None:
+        """Return the most-recent pipeline run against the given commit sha, or None."""
+        encoded = self._encode_project(project_path)
+        response = await self._request(
+            "GET",
+            f"/projects/{encoded}/pipelines",
+            params={"sha": sha, "order_by": "updated_at", "sort": "desc", "per_page": 1},
+        )
+        if response.status_code != 200:
+            raise GitLabError(response.status_code, response.text, action="get_latest_pipeline_for_sha")
+        pipelines = response.json()
+        return pipelines[0] if pipelines else None
+
+    async def list_pipeline_jobs(
+        self, project_path: str, pipeline_id: int
+    ) -> list[dict[str, Any]]:
+        """Return jobs for the given pipeline run."""
+        encoded = self._encode_project(project_path)
+        response = await self._request(
+            "GET", f"/projects/{encoded}/pipelines/{pipeline_id}/jobs",
+            params={"per_page": 100},
+        )
+        if response.status_code != 200:
+            raise GitLabError(response.status_code, response.text, action="list_pipeline_jobs")
+        return response.json()
+
+    async def list_vulnerability_findings(
+        self, project_path: str
+    ) -> list[dict[str, Any]]:
+        """Return security vulnerability findings if the project + tier exposes them.
+
+        Many GitLab Free / Premium projects return 403 here — caller should treat
+        that as 'no data available' and skip the dep-advisory rule.
+        """
+        encoded = self._encode_project(project_path)
+        response = await self._request(
+            "GET",
+            f"/projects/{encoded}/vulnerability_findings",
+            params={"per_page": 50},
+        )
+        if response.status_code == 200:
+            return response.json()
+        if response.status_code in (403, 404):
+            logger.info("vulnerability_findings not accessible (status=%d, likely free tier)", response.status_code)
+            return []
+        raise GitLabError(response.status_code, response.text, action="list_vulnerability_findings")
