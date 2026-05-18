@@ -11,7 +11,19 @@
 
 ## Status
 
-Day 2 of 26. Repo initialization complete. Webhook handler scaffolded. Rubric schema v1 in place. See [`mr-sentinel-hackathon-spec.md`](mr-sentinel-hackathon-spec.md) for the full spec and 26-day build plan.
+Day 2 of 26. Repo initialization complete. Webhook handler scaffolded. Rubric schema v1 in place. **GCP infrastructure bootstrapped** on the shared `aicin-477004` project (previous Google Cloud Run Hackathon, reused per existing-credentials directive). See [`mr-sentinel-hackathon-spec.md`](mr-sentinel-hackathon-spec.md) for the full spec and 26-day build plan.
+
+### GCP resources live
+
+| Resource | Identifier |
+|---|---|
+| Project | `aicin-477004` (region `us-central1`) |
+| Artifact Registry | `us-central1-docker.pkg.dev/aicin-477004/mr-sentinel` |
+| Secret: webhook token | `mr-sentinel-gitlab-webhook-secret` (v1 populated — 64 hex chars) |
+| Secret: GitLab PAT | `mr-sentinel-gitlab-token` (placeholder — no version yet) |
+| APIs enabled | Vertex AI, Agent Builder (Discovery Engine), Cloud Run, Cloud SQL, Secret Manager, Artifact Registry, Cloud Build, IAM, Service Networking, Cloud Resource Manager, Cloud Logging, Cloud Monitoring |
+
+Re-run any time via [`scripts/gcp-bootstrap.sh`](scripts/gcp-bootstrap.sh) — idempotent. Defaults to `PROJECT_ID=aicin-477004`; override with the env var.
 
 ## What this is
 
