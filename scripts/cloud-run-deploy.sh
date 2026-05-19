@@ -10,7 +10,11 @@ set -euo pipefail
 PROJECT_ID="${PROJECT_ID:-aicin-477004}"
 REGION="${REGION:-us-central1}"
 SERVICE_NAME="${SERVICE_NAME:-mr-sentinel-webhook}"
-IMAGE_TAG="${IMAGE_TAG:-0.3.0}"
+# Default IMAGE_TAG to the current git short SHA so every deploy gets a unique,
+# traceable tag. Override via `IMAGE_TAG=x.y.z bash scripts/cloud-run-deploy.sh`
+# when shipping a marketing-readable version. Falls back to `dev` when not in a
+# git checkout (e.g., running from a tarball).
+IMAGE_TAG="${IMAGE_TAG:-$(git rev-parse --short HEAD 2>/dev/null || echo dev)}"
 IMAGE="${REGION}-docker.pkg.dev/${PROJECT_ID}/mr-sentinel/webhook:${IMAGE_TAG}"
 
 log() { printf '\033[1;34m[cloud-run-deploy]\033[0m %s\n' "$*"; }

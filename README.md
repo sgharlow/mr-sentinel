@@ -155,7 +155,7 @@ Override semantics:
 make test
 ```
 
-Coverage targets: changed-line coverage ≥ 80%, rubric schema validation 100%.
+CI runs the full pytest suite plus a separate rubric-schema-validation step on every push (see `.github/workflows/ci.yml`). Line coverage is aspirational — not gated in CI yet; a `pytest-cov` gate is on the post-hackathon backlog.
 
 ## Repository layout
 
