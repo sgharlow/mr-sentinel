@@ -25,7 +25,7 @@ async def lifespan(app: FastAPI):
         logger.warning("error closing DB pool on shutdown: %s", exc)
 
 
-app = FastAPI(title="MR Sentinel", version="0.3.0", lifespan=lifespan)
+app = FastAPI(title="MR Sentinel", version="0.3.1", lifespan=lifespan)
 
 
 def _expected_webhook_secret() -> str | None:
@@ -87,37 +87,13 @@ async def _process_mr_event(event: dict[str, Any]) -> None:
 
     try:
         async with GitLabClient() as gl:
-            # Tool 1: fetch MR
+            # Tool 1: fetch MR (gives us the commit sha for dedup)
             mr = await gl.get_merge_request(project_path, mr_iid)
 
-            # Dedup check: skip if same commit already scored with this rubric
-            rubric_version = "v1"
-            if await already_evaluated(project_path, mr_iid, mr.sha, rubric_version):
-                logger.info("skipping re-evaluation — sha %s already scored under %s",
-                            mr.sha[:8], rubric_version)
-                await audit(actor="mr-sentinel", action="skip_duplicate",
-                            project_path=project_path, mr_iid=mr_iid,
-                            details={"sha": mr.sha[:8], "reason": "already_evaluated"})
-                return
-
-            # Tool 2: fetch diffs
-            diffs = await gl.get_merge_request_diffs(project_path, mr_iid)
-
-            # Tool 3: latest pipeline for this commit
-            pipeline = await gl.get_latest_pipeline_for_sha(project_path, mr.sha)
-            pipeline_status = pipeline["status"] if pipeline else None
-
-            # Tool 4: pipeline jobs (only when pipeline exists; saves a noop call otherwise)
-            pipeline_jobs = []
-            if pipeline:
-                pipeline_jobs = await gl.list_pipeline_jobs(project_path, pipeline["id"])
-
-            # Tool 5: vulnerability findings (gracefully empty on Free tier)
-            advisories = await gl.list_vulnerability_findings(project_path)
-
-            # Tool 5a: per-project rubric override (`.mr-sentinel.yaml` at repo root).
-            # Fail-closed semantics: if present but invalid, log + audit, then fall
-            # back to the bundled rubric. If missing entirely, just use bundled.
+            # Tool 2: per-project rubric override (`.mr-sentinel.yaml` at repo root).
+            # Resolved BEFORE the dedup check so the dedup key includes the
+            # actually-active rubric version (not a hardcoded "v1"). Fail-closed
+            # semantics: if present but invalid, audit, fall back to bundled v1.
             override_yaml = await gl.get_file_content(project_path, PROJECT_OVERRIDE_PATH)
             override_rubric = None
             override_source = "bundled"
@@ -125,13 +101,41 @@ async def _process_mr_event(event: dict[str, Any]) -> None:
                 try:
                     override_rubric = parse_rubric(override_yaml)
                     override_source = "project_override"
-                    logger.info("using project override rubric (v%s)", override_rubric.get("version"))
+                    logger.info("using project override rubric (%s)", override_rubric.get("version"))
                 except RubricValidationError as exc:
                     logger.warning("invalid .mr-sentinel.yaml — falling back to bundled: %s", exc)
                     await audit(actor="mr-sentinel", action="override_invalid",
                                 project_path=project_path, mr_iid=mr_iid,
                                 details={"error": str(exc)[:300]})
                     override_source = "bundled_after_invalid_override"
+
+            # Active version for dedup: override's version if valid, else "v1" (bundled).
+            active_rubric_version = (override_rubric or {}).get("version") or "v1"
+
+            # Dedup check: skip if same commit already scored under the active rubric
+            if await already_evaluated(project_path, mr_iid, mr.sha, active_rubric_version):
+                logger.info("skipping re-evaluation — sha %s already scored under %s",
+                            mr.sha[:8], active_rubric_version)
+                await audit(actor="mr-sentinel", action="skip_duplicate",
+                            project_path=project_path, mr_iid=mr_iid,
+                            details={"sha": mr.sha[:8], "reason": "already_evaluated",
+                                     "rubric_version": active_rubric_version})
+                return
+
+            # Tool 3: fetch diffs
+            diffs = await gl.get_merge_request_diffs(project_path, mr_iid)
+
+            # Tool 4: latest pipeline for this commit
+            pipeline = await gl.get_latest_pipeline_for_sha(project_path, mr.sha)
+            pipeline_status = pipeline["status"] if pipeline else None
+
+            # Tool 5: pipeline jobs (only when pipeline exists; saves a noop call otherwise)
+            pipeline_jobs = []
+            if pipeline:
+                pipeline_jobs = await gl.list_pipeline_jobs(project_path, pipeline["id"])
+
+            # Tool 6: vulnerability findings (gracefully empty on Free tier)
+            advisories = await gl.list_vulnerability_findings(project_path)
 
             logger.info(
                 "fetched MR + %d diffs, pipeline=%s, jobs=%d, advisories=%d, rubric=%s",
@@ -145,7 +149,7 @@ async def _process_mr_event(event: dict[str, Any]) -> None:
 
             score_id = await persist_evaluation(mr, evaluation)
 
-            # Tool 6: linked remediation issue on block
+            # Tool 7: linked remediation issue on block
             followup_issue_url = None
             if evaluation.verdict == "block":
                 issue = await gl.create_issue(
@@ -157,7 +161,7 @@ async def _process_mr_event(event: dict[str, Any]) -> None:
                 followup_issue_url = issue.get("web_url")
                 logger.info("created followup issue !%s — %s", issue.get("iid"), followup_issue_url)
 
-            # Tool 7: upsert comment (find existing, update; else create)
+            # Tool 8: upsert comment (find existing, update; else create)
             comment_body = render_comment(
                 evaluation, mr,
                 followup_issue_url=followup_issue_url,
@@ -167,7 +171,7 @@ async def _process_mr_event(event: dict[str, Any]) -> None:
             logger.info("%s comment note_id=%s on MR !%s (score_id=%s)",
                         "posted" if created else "updated", note_id, mr_iid, score_id)
 
-            # Tool 8: labels
+            # Tool 9: labels
             labels_to_add = ["mr-sentinel-reviewed"]
             if evaluation.verdict == "block":
                 labels_to_add.append("blocked-compliance")
