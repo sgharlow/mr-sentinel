@@ -26,7 +26,7 @@
 | Secret: GitLab PAT | `mr-sentinel-gitlab-token` (v1) — for outbound GitLab API/MCP calls |
 | Secret: DB app password | `mr-sentinel-db-app-password` — bound to service as `DB_PASSWORD` |
 | Secret: DB root password | `mr-sentinel-db-password` — postgres user; held for ops only |
-| APIs enabled | Vertex AI, Agent Builder (Discovery Engine), Cloud Run, Cloud SQL, Secret Manager, Artifact Registry, Cloud Build, IAM, Service Networking, Cloud Resource Manager, Cloud Logging, Cloud Monitoring |
+| APIs enabled | Vertex AI, Cloud Run, Cloud SQL, Secret Manager, Artifact Registry, Cloud Build, IAM, Service Networking, Cloud Resource Manager, Cloud Logging, Cloud Monitoring (Discovery Engine enabled by bootstrap but not in use — see `docs/mcp-endpoint-audit.md`) |
 
 Service endpoints:
 - `GET /health` — liveness check (not `/healthz` — Cloud Run intercepts that path)
@@ -55,47 +55,56 @@ The agent class missing from the market is one that **applies a written rubric t
 │                         User's GitLab Project                         │
 │             (MR opened / updated → webhook fires)                     │
 └────────────────────────────────┬─────────────────────────────────────┘
-                                 │
+                                 │  POST /gitlab/webhook
+                                 │  X-Gitlab-Token: <secret>
                                  ▼
               ┌──────────────────────────────────────┐
-              │       Cloud Run: webhook handler     │
-              │       (Python, FastAPI, async)       │
+              │   Cloud Run: webhook handler         │
+              │   (Python 3.11, FastAPI, uvicorn)    │
+              │   202 Accepted → BackgroundTask      │
               └──────────────────┬───────────────────┘
                                  │
                                  ▼
               ┌──────────────────────────────────────┐
-              │     Google Cloud Agent Builder       │
-              │          (Gemini 3, orchestration)   │
+              │   Agent loop (app/main.py)           │
               │                                      │
-              │   Plan → Tool calls → Reason → Act   │
+              │   1. dedup check (sha + rubric_ver)  │
+              │   2-5. fetch MR/diffs/pipeline/jobs/ │
+              │        vulnerability findings        │
+              │   6. Gemini evaluate vs. rubric      │
+              │   7-9. persist · upsert comment ·    │
+              │        labels · followup issue       │
               └──┬────────────────┬───────────────┬──┘
                  │                │               │
                  ▼                ▼               ▼
          ┌───────────────┐ ┌─────────────┐ ┌────────────────┐
-         │ GitLab MCP    │ │ Vertex AI   │ │ Secret Manager │
-         │ server        │ │ Data Store  │ │ (tokens, keys) │
-         │ (partner)     │ │ (rubric)    │ │                │
+         │ GitLab REST   │ │ Vertex AI   │ │ Secret Manager │
+         │ API (8 tools) │ │ Gemini 2.5  │ │ (4 secrets)    │
+         │               │ │ Flash       │ │                │
          └───────────────┘ └─────────────┘ └────────────────┘
                  │
                  ▼
          ┌────────────────────────────────┐
-         │  Cloud SQL (PostgreSQL):       │
-         │   – per-MR scoring history     │
-         │   – team / project rollups     │
-         │   – audit log                  │
+         │  Cloud SQL (PostgreSQL 15):    │
+         │   – mr_scores                  │
+         │   – rule_outcomes              │
+         │   – audit_log                  │
+         │   – schema_migrations          │
          └────────────┬───────────────────┘
                       │
                       ▼
          ┌────────────────────────────────┐
          │  Cloud Run: leadership UI      │
-         │   (React + Recharts, served    │
-         │    from same Cloud Run service)│
+         │   (server-rendered HTML,       │
+         │    same Cloud Run service)     │
          └────────────────────────────────┘
 ```
 
 ## Cloud
 
-This project is **Google Cloud only**. By hackathon rule and by design choice, no AWS, no Azure, no third-party LLM APIs. AI is Gemini via Agent Builder + Vertex AI Data Store. Compute is Cloud Run. State is Cloud SQL (PostgreSQL). Secrets are Secret Manager.
+This project is **Google Cloud only**. By hackathon rule and by design choice, no AWS, no Azure, no third-party LLM APIs. AI is Vertex AI Gemini 2.5 Flash via the direct Vertex SDK. Compute is Cloud Run (one service hosting both webhook and dashboard). State is Cloud SQL PostgreSQL 15. Secrets are Secret Manager. GitLab integration is the REST API (8 endpoints per MR — `docs/mcp-endpoint-audit.md` holds the matrix as a future-migration reference for the MCP transport).
+
+The architectural simplifications taken — direct Vertex SDK instead of Agent Builder, inlined rubric instead of a Vertex Data Store, GitLab REST instead of MCP — are documented at the top of `app/agent_runner.py`. They keep the orchestration loop visible in plain Python, the audit trail replayable from Cloud SQL, and the deployment surface small.
 
 ## Setup (local development)
 
@@ -124,14 +133,21 @@ Environment variables (do not commit values — use `.env.local` for dev, Secret
 | `GITLAB_WEBHOOK_SECRET` | Token expected in `X-Gitlab-Token` header on inbound webhooks |
 | `GITLAB_BASE_URL` | Defaults to `https://gitlab.com` |
 | `GITLAB_TOKEN` | Personal access token for outbound GitLab API/MCP calls |
-| `GCP_PROJECT_ID` | Used by Agent Builder, Vertex, Cloud SQL bindings |
+| `GCP_PROJECT_ID` | Used by Vertex AI (Gemini) and Cloud SQL connector bindings |
 | `RUBRIC_VERSION` | Defaults to `v1` |
 
 ## Rubric customization
 
-The rubric lives in `rubric/v1.yaml`. Schema in `rubric/schema.json`. Fifteen rules across four categories: contract & spec gates, quality gates, security gates, operational gates. Each rule maps to a named control.
+The default rubric lives in `rubric/v1.yaml`. Schema in `rubric/schema.json`. Fifteen rules across four categories: contract & spec gates, quality gates, security gates, operational gates. Each rule maps to a named control.
 
-To customize per-project: add a `.mr-sentinel.yaml` to the root of your GitLab project that overrides specific rules. Schema-validated on load — invalid configs fail closed.
+To customize per-project: drop a `.mr-sentinel.yaml` at the root of your GitLab repo (on the default branch). On every webhook fire, MR Sentinel fetches the file via `GET /repository/files/.mr-sentinel.yaml/raw`, validates it against `rubric/schema.json`, and uses it in place of the bundled v1 for that evaluation.
+
+Override semantics:
+
+- The override is a **full rubric replacement** — same shape as `rubric/v1.yaml`, exactly 15 rules (enforced by schema), valid `version` field. Copy `rubric/v1.yaml` as a starting point and edit.
+- **Fail-closed:** if the file is present but invalid (bad YAML, schema violation), the agent falls back to the bundled v1 and writes an `override_invalid` row to the `audit_log` table with the validation error.
+- **No file → bundled v1.** A 404 is treated as "no override, use defaults."
+- The `audit_log.details.rubric_source` field records which rubric was used per evaluation: `bundled`, `project_override`, or `bundled_after_invalid_override`.
 
 ## Tests
 

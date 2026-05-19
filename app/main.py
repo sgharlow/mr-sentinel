@@ -25,7 +25,7 @@ async def lifespan(app: FastAPI):
         logger.warning("error closing DB pool on shutdown: %s", exc)
 
 
-app = FastAPI(title="MR Sentinel", version="0.2.0", lifespan=lifespan)
+app = FastAPI(title="MR Sentinel", version="0.3.0", lifespan=lifespan)
 
 
 def _expected_webhook_secret() -> str | None:
@@ -74,7 +74,14 @@ async def _process_mr_event(event: dict[str, Any]) -> None:
         logger.info("ignoring action=%s (only open/reopen/update trigger evaluation)", action)
         return
 
-    from app.agent_runner import AgentRunner, render_comment, render_followup_issue_body
+    from app.agent_runner import (
+        AgentRunner,
+        PROJECT_OVERRIDE_PATH,
+        RubricValidationError,
+        parse_rubric,
+        render_comment,
+        render_followup_issue_body,
+    )
     from app.gitlab_client import GitLabClient
     from app.persistence import already_evaluated, audit, persist_evaluation
 
@@ -108,12 +115,30 @@ async def _process_mr_event(event: dict[str, Any]) -> None:
             # Tool 5: vulnerability findings (gracefully empty on Free tier)
             advisories = await gl.list_vulnerability_findings(project_path)
 
+            # Tool 5a: per-project rubric override (`.mr-sentinel.yaml` at repo root).
+            # Fail-closed semantics: if present but invalid, log + audit, then fall
+            # back to the bundled rubric. If missing entirely, just use bundled.
+            override_yaml = await gl.get_file_content(project_path, PROJECT_OVERRIDE_PATH)
+            override_rubric = None
+            override_source = "bundled"
+            if override_yaml is not None:
+                try:
+                    override_rubric = parse_rubric(override_yaml)
+                    override_source = "project_override"
+                    logger.info("using project override rubric (v%s)", override_rubric.get("version"))
+                except RubricValidationError as exc:
+                    logger.warning("invalid .mr-sentinel.yaml — falling back to bundled: %s", exc)
+                    await audit(actor="mr-sentinel", action="override_invalid",
+                                project_path=project_path, mr_iid=mr_iid,
+                                details={"error": str(exc)[:300]})
+                    override_source = "bundled_after_invalid_override"
+
             logger.info(
-                "fetched MR + %d diffs, pipeline=%s, jobs=%d, advisories=%d",
-                len(diffs), pipeline_status, len(pipeline_jobs), len(advisories),
+                "fetched MR + %d diffs, pipeline=%s, jobs=%d, advisories=%d, rubric=%s",
+                len(diffs), pipeline_status, len(pipeline_jobs), len(advisories), override_source,
             )
 
-            runner = AgentRunner()
+            runner = AgentRunner(rubric=override_rubric)
             evaluation = await runner.evaluate(mr, diffs)
             logger.info("evaluation: score=%.1f verdict=%s rules=%d",
                         evaluation.overall_score, evaluation.verdict, len(evaluation.rule_evaluations))
@@ -156,6 +181,7 @@ async def _process_mr_event(event: dict[str, Any]) -> None:
                     "note_id": note_id, "comment_created": created,
                     "followup_issue_url": followup_issue_url,
                     "pipeline_status": pipeline_status,
+                    "rubric_source": override_source,
                     "tool_calls": 8 - (0 if pipeline else 1) - (1 if evaluation.verdict != "block" else 0),
                 },
             )

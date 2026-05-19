@@ -28,6 +28,9 @@ logger = logging.getLogger("mr_sentinel.agent")
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_RUBRIC_PATH = REPO_ROOT / "rubric" / "v1.yaml"
+RUBRIC_SCHEMA_PATH = REPO_ROOT / "rubric" / "schema.json"
+
+PROJECT_OVERRIDE_PATH = ".mr-sentinel.yaml"
 
 OUTPUT_SCHEMA: dict[str, Any] = {
     "type": "object",
@@ -73,6 +76,38 @@ class Evaluation:
 
 def load_rubric(path: Path = DEFAULT_RUBRIC_PATH) -> dict[str, Any]:
     return yaml.safe_load(path.read_text(encoding="utf-8"))
+
+
+class RubricValidationError(ValueError):
+    """Raised when a rubric (bundled or per-project override) fails schema validation."""
+
+
+def parse_rubric(yaml_text: str) -> dict[str, Any]:
+    """Parse a YAML rubric string and validate against rubric/schema.json.
+
+    Used by the per-project `.mr-sentinel.yaml` override path: if a consumer
+    drops the file at the root of their GitLab repo, we fetch it, validate it,
+    and use it instead of the bundled v1. Invalid override → caller falls back
+    to the bundled rubric.
+    """
+    import json
+    import jsonschema
+
+    try:
+        rubric = yaml.safe_load(yaml_text)
+    except yaml.YAMLError as exc:
+        raise RubricValidationError(f"invalid YAML: {exc}") from exc
+
+    if not isinstance(rubric, dict):
+        raise RubricValidationError(f"rubric root must be a mapping, got {type(rubric).__name__}")
+
+    schema = json.loads(RUBRIC_SCHEMA_PATH.read_text(encoding="utf-8"))
+    try:
+        jsonschema.validate(instance=rubric, schema=schema)
+    except jsonschema.ValidationError as exc:
+        raise RubricValidationError(f"schema validation failed: {exc.message}") from exc
+
+    return rubric
 
 
 _REQUIRED_OUTPUT_KEYS_HINT = (
@@ -157,12 +192,15 @@ class AgentRunner:
         location: str = "us-central1",
         model_name: str = "gemini-2.5-flash",
         rubric_path: Path = DEFAULT_RUBRIC_PATH,
+        rubric: dict[str, Any] | None = None,
         model_factory: Any = None,
     ) -> None:
         self.project_id = project_id or os.environ.get("GCP_PROJECT_ID") or os.environ.get("GCP_PROJECT")
         self.location = location
         self.model_name = model_name
-        self.rubric = load_rubric(rubric_path)
+        # `rubric` arg takes precedence — used by the per-project override path
+        # and by tests that want to inject a custom rubric without touching disk.
+        self.rubric = rubric if rubric is not None else load_rubric(rubric_path)
         self._model_factory = model_factory  # injectable for tests
 
     def _get_model(self) -> Any:

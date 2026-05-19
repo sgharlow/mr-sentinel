@@ -246,6 +246,29 @@ class GitLabClient:
             raise GitLabError(response.status_code, response.text, action="list_pipeline_jobs")
         return response.json()
 
+    async def get_file_content(
+        self, project_path: str, file_path: str, ref: str = "HEAD"
+    ) -> str | None:
+        """Fetch a single file's raw bytes from the project's repository.
+
+        Returns the file content as a string, or None if the file does not
+        exist (404). Used by the per-project `.mr-sentinel.yaml` override
+        path. `ref` defaults to `HEAD` which GitLab resolves to the project's
+        default branch.
+        """
+        encoded_project = self._encode_project(project_path)
+        encoded_path = quote(file_path, safe="")
+        response = await self._request(
+            "GET",
+            f"/projects/{encoded_project}/repository/files/{encoded_path}/raw",
+            params={"ref": ref},
+        )
+        if response.status_code == 200:
+            return response.text
+        if response.status_code == 404:
+            return None
+        raise GitLabError(response.status_code, response.text, action="get_file_content")
+
     async def list_vulnerability_findings(
         self, project_path: str
     ) -> list[dict[str, Any]]:

@@ -251,3 +251,43 @@ async def test_list_vulnerability_findings_swallows_403(
         async with GitLabClient() as client:
             findings = await client.list_vulnerability_findings(project_path)
     assert findings == []
+
+
+async def test_get_file_content_returns_text(
+    token: str, project_path: str, encoded_project: str
+) -> None:
+    encoded_file = ".mr-sentinel.yaml"  # quote(safe="") leaves dots/hyphens alone
+    raw_yaml = "version: v1\nrules: []\n"
+    async with respx.mock(base_url="https://gitlab.com/api/v4") as router:
+        router.get(
+            f"/projects/{encoded_project}/repository/files/{encoded_file}/raw"
+        ).respond(200, text=raw_yaml)
+        async with GitLabClient() as client:
+            content = await client.get_file_content(project_path, ".mr-sentinel.yaml")
+    assert content == raw_yaml
+
+
+async def test_get_file_content_returns_none_on_404(
+    token: str, project_path: str, encoded_project: str
+) -> None:
+    async with respx.mock(base_url="https://gitlab.com/api/v4") as router:
+        router.get(
+            f"/projects/{encoded_project}/repository/files/.mr-sentinel.yaml/raw"
+        ).respond(404, json={"message": "404 File Not Found"})
+        async with GitLabClient() as client:
+            content = await client.get_file_content(project_path, ".mr-sentinel.yaml")
+    assert content is None
+
+
+async def test_get_file_content_raises_on_500(
+    token: str, project_path: str, encoded_project: str
+) -> None:
+    async with respx.mock(base_url="https://gitlab.com/api/v4") as router:
+        router.get(
+            f"/projects/{encoded_project}/repository/files/.mr-sentinel.yaml/raw"
+        ).respond(500, text="boom")
+        async with GitLabClient() as client:
+            with pytest.raises(GitLabError) as exc_info:
+                await client.get_file_content(project_path, ".mr-sentinel.yaml")
+    assert exc_info.value.status == 500
+    assert exc_info.value.action == "get_file_content"
