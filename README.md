@@ -11,7 +11,7 @@
 
 ## Status
 
-**Day 1–3 milestone closed.** Day 2 of 26. End-to-end loop verified: GitLab MR → webhook fired → Cloud Run 202 Accepted → app logged event. GCP infrastructure bootstrapped on shared `aicin-477004`. See [`mr-sentinel-hackathon-spec.md`](mr-sentinel-hackathon-spec.md) for the full spec and 26-day build plan.
+**Days 1-3, 4-8, 9-14 milestones closed (3 of 6).** Day 4 of 26. End-to-end loop verified live on Cloud Run: GitLab MR webhook → fetch MR + diffs + pipeline + vulnerabilities → fetch optional `.mr-sentinel.yaml` per-project rubric override → Vertex AI Gemini 2.5 Flash evaluation against 15 rubric rules → upsert structured comment + labels on the MR → open linked remediation issue on block verdicts → persist score + child rule outcomes + audit row to Cloud SQL. Latency ~30s p50. 44/44 tests green, CI green. GCP infrastructure on shared `aicin-477004`. See [`mr-sentinel-hackathon-spec.md`](mr-sentinel-hackathon-spec.md) for the full spec and 26-day build plan.
 
 ### GCP resources live
 
@@ -23,7 +23,7 @@
 | Artifact Registry | `us-central1-docker.pkg.dev/aicin-477004/mr-sentinel` |
 | GitLab demo repo | https://gitlab.com/sgharlow/governance-demo-app (webhook id 78485229) |
 | Secret: webhook token | `mr-sentinel-gitlab-webhook-secret` — bound to service as `GITLAB_WEBHOOK_SECRET` |
-| Secret: GitLab PAT | `mr-sentinel-gitlab-token` (v1) — for outbound GitLab API/MCP calls |
+| Secret: GitLab PAT | `mr-sentinel-gitlab-token` (v1) — for outbound GitLab REST API calls |
 | Secret: DB app password | `mr-sentinel-db-app-password` — bound to service as `DB_PASSWORD` |
 | Secret: DB root password | `mr-sentinel-db-password` — postgres user; held for ops only |
 | APIs enabled | Vertex AI, Cloud Run, Cloud SQL, Secret Manager, Artifact Registry, Cloud Build, IAM, Service Networking, Cloud Resource Manager, Cloud Logging, Cloud Monitoring (Discovery Engine enabled by bootstrap but not in use — see `docs/mcp-endpoint-audit.md`) |
@@ -161,25 +161,48 @@ Coverage targets: changed-line coverage ≥ 80%, rubric schema validation 100%.
 
 ```
 mr-sentinel/
-├── app/                  # FastAPI webhook handler
+├── app/                              # FastAPI service + agent orchestration
 │   ├── __init__.py
-│   └── main.py
-├── tests/                # pytest suite
-│   ├── test_webhook.py
-│   └── test_rubric.py
+│   ├── main.py                       # webhook handler + _process_mr_event loop
+│   ├── agent_runner.py               # rubric load + Gemini call + parse + comment render
+│   ├── gitlab_client.py              # async GitLab REST client (8 endpoints)
+│   └── persistence.py                # asyncpg pool + mr_scores/rule_outcomes/audit_log writes
+├── tests/                            # pytest — 44 tests
+│   ├── test_webhook.py               # /health + webhook auth + payload validation
+│   ├── test_agent_runner.py          # rubric load/parse + prompt assembly + comment render
+│   ├── test_gitlab_client.py         # 8 REST endpoints + override fetch + upsert pattern
+│   └── test_rubric.py                # schema validation + rule counts + id uniqueness
 ├── rubric/
-│   ├── v1.yaml           # the rubric (15 rules)
-│   └── schema.json       # JSONSchema for rubric validation
+│   ├── v1.yaml                       # bundled rubric (15 rules, 4 categories)
+│   └── schema.json                   # JSONSchema for rubric validation
+├── db/
+│   ├── migrate.py                    # asyncpg-based migration runner
+│   └── migrations/
+│       ├── 001_initial.sql           # mr_scores + rule_outcomes + audit_log + schema_migrations
+│       └── 002_app_grants.sql        # GRANT to `app` user + default privileges
+├── scripts/
+│   ├── gcp-bootstrap.sh              # project + APIs + secrets + Artifact Registry (idempotent)
+│   ├── gitlab-bootstrap.sh           # create the governance-demo-app target repo
+│   ├── cloud-run-deploy.sh           # Cloud Build + Cloud Run deploy
+│   ├── db-migrate.sh                 # cloud-sql-proxy + db/migrate.py
+│   ├── smoke-test.sh                 # 4-test health + auth check on deployed service
+│   ├── diag.sh                       # service status + recent logs
+│   ├── test-override-live.sh         # live-fire the `.mr-sentinel.yaml` override path
+│   └── cleanup-override-verification.sh   # teardown for the live-fire test
 ├── docs/
-│   └── mcp-endpoint-audit.md   # GitLab MCP coverage matrix (risk #1)
-├── Dockerfile            # Cloud Run target
-├── Makefile              # local dev shortcuts
-├── requirements.txt      # runtime deps
-├── requirements-dev.txt  # test/lint deps
-├── pyproject.toml        # pytest + tooling config
-├── LICENSE               # MIT
-├── CODE_OF_CONDUCT.md
-└── mr-sentinel-hackathon-spec.md   # the full spec
+│   └── mcp-endpoint-audit.md         # REST endpoint matrix + future-MCP migration reference
+├── .github/workflows/
+│   └── ci.yml                        # pytest + rubric schema validation on push/PR
+├── Dockerfile                        # Python 3.11-slim → uvicorn → :8080
+├── Makefile                          # install / test / run-local / lint shortcuts
+├── requirements.txt                  # runtime deps (FastAPI, asyncpg, jsonschema, vertexai, ...)
+├── requirements-dev.txt              # test/lint deps (pytest, respx, jsonschema, ...)
+├── pyproject.toml                    # pytest + ruff config
+├── .env.example                      # local-dev env vars template
+├── .gcloudignore                     # Cloud Build context excludes
+├── LICENSE                           # MIT
+├── CODE_OF_CONDUCT.md                # Contributor Covenant 2.1
+└── mr-sentinel-hackathon-spec.md     # the full spec (15 sections)
 ```
 
 ## Contributing

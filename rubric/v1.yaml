@@ -1,9 +1,9 @@
 version: v1
 description: |
   MR Sentinel default rubric. Fifteen rules across four categories: contract & spec,
-  quality, security, operational. Every rule maps to a named control. Override per-project
-  by placing a .mr-sentinel.yaml at the root of your GitLab repo. Content (evaluator
-  prompts and examples) is placeholder for Days 9-14 milestone fill.
+  quality, security, operational. Every rule maps to one or more named controls
+  (CDPD, SOC2, ISO 27001, OWASP, NIST). Override per-project by placing a
+  .mr-sentinel.yaml at the root of your GitLab repo — see README §Rubric customization.
 
 rules:
   # ──────── Contract & spec gates (5) — derived from CDPD methodology ────────
