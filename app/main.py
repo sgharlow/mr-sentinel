@@ -189,7 +189,10 @@ async def _process_mr_event(event: dict[str, Any]) -> None:
                     "followup_issue_url": followup_issue_url,
                     "pipeline_status": pipeline_status,
                     "rubric_source": override_source,
-                    "tool_calls": 8 - (0 if pipeline else 1) - (1 if evaluation.verdict != "block" else 0),
+                    # Count of distinct MR-affecting GitLab actions used (max 8 per
+                    # spec §4). The override-fetch is a config read, not an MR
+                    # action — it's recorded via rubric_source above.
+                    "mr_action_calls": 8 - (0 if pipeline else 1) - (1 if evaluation.verdict != "block" else 0),
                 },
             )
     except Exception as exc:

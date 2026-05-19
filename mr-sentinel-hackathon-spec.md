@@ -124,7 +124,7 @@ The rubric ships with the repo; users override per project.
 | Criterion | How MR Sentinel scores |
 |---|---|
 | **Technological Implementation** | Multi-tool agent (8 GitLab REST endpoints per MR), explicit deterministic plan in Python, Gemini reasoning persisted to Cloud SQL as a replayable audit log, full GCP-native stack (Cloud Run, Cloud SQL, Secret Manager, Artifact Registry, Vertex AI), real production patterns (constant-time auth, sha-based dedup, comment upsert). |
-| **Design** | Three surfaces — MR comment (structured, scannable), leadership dashboard (Recharts, dark theme), audit log view (filterable). Each designed for a different persona. |
+| **Design** | Three surfaces, three personas: (1) structured Markdown MR comment with verdict badge, score, failure list, collapsed pass/skip sections, and a linked follow-up issue on block; (2) `/dashboard` leadership view — verdict distribution, top-5 failing rules, recent-MR drill-down; (3) `/audit/{project}/{mr_iid}` — per-rule outcomes table (failures first, with control_mapping) and a 50-row audit_log timeline. Dark theme, server-rendered HTML, no client-side framework. |
 | **Potential Impact** | Every regulated-industry engineering org has this pain. The control-mapping framing is the differentiator that takes this from "AI code reviewer" to "compliance-grade governance." Productizable. |
 | **Quality of the Idea** | The rubric-as-product framing is the moat. Most submissions will be "AI reviews PR." MR Sentinel ships *with* a methodology, and the rubric is configurable per project. |
 
