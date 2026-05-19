@@ -25,7 +25,10 @@ async def lifespan(app: FastAPI):
         logger.warning("error closing DB pool on shutdown: %s", exc)
 
 
-app = FastAPI(title="MR Sentinel", version="0.3.1", lifespan=lifespan)
+app = FastAPI(title="MR Sentinel", version="0.4.0", lifespan=lifespan)
+
+from app.dashboard import router as dashboard_router  # noqa: E402
+app.include_router(dashboard_router)
 
 
 def _expected_webhook_secret() -> str | None:
