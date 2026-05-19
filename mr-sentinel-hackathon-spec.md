@@ -28,9 +28,15 @@ An engineering leader running a team of 10–500 developers in an environment wh
 
 ## 4. The solution
 
-MR Sentinel is a Gemini-powered agent built on Google Cloud Agent Builder that integrates with GitLab via the official MCP server. The agent triggers on MR events, executes a multi-step plan against a configurable rubric, and takes real action against the MR: structured comment, labels, linked follow-up issues, optional merge-block, optional Slack notification. A separate Cloud Run dashboard surfaces aggregate quality signals to leadership.
+MR Sentinel is a Gemini-powered agent running on Cloud Run that integrates with GitLab via its REST API. The agent triggers on MR webhooks, executes a multi-step plan against a configurable rubric, and takes real action against the MR: structured comment, labels, linked follow-up issues, label-based merge-block. A separate Cloud Run dashboard surfaces aggregate quality signals to leadership.
 
-The rubric is the product's center of gravity. It ships with a v1 derived from the author's published methodologies (the AI Control Framework and the CDPD spec-driven development pattern), and is configurable per project via a YAML file in the repo. Rules map 1:1 to controls a compliance auditor would recognize, which is the deliberate design choice that distinguishes this from a generic "AI code reviewer" — every comment ties back to a named control, every action produces an audit artifact.
+**Architectural simplifications taken — deliberate, documented in code:**
+
+- **Gemini via direct Vertex AI SDK, not Agent Builder.** For a 15-rule rubric with one MR per invocation, the orchestration loop is short enough (≤8 deterministic tool calls plus one Gemini call) that the Agent Builder runtime adds latency and operational surface without adding behavior. The plan/reason/act loop lives in `app/main.py::_process_mr_event` as plain Python — every step is visible in Cloud Logging and replayable. If the rubric grows past ~50 rules or per-project planning becomes non-trivial, revisit Agent Builder.
+- **Inlined rubric in the Gemini system prompt, not a Vertex AI Data Store.** Fifteen rules at ~3-5K tokens fits comfortably in the prompt and removes a retrieval roundtrip. The same `rubric/v1.yaml` is loaded at module import and rendered into the system prompt. If rules grow past ~50 or per-project customization gets complex, revisit `vertexai.preview.rag` or Discovery Engine.
+- **GitLab REST API directly, not the GitLab MCP server.** Eight endpoints suffice for the full agent loop (see `docs/mcp-endpoint-audit.md` for the matrix). REST is documented, stable, and avoids the MCP-transport variance noted in spec §12 risk #1. The endpoint matrix is preserved as a future migration reference.
+
+The rubric is the product's center of gravity. It ships with a v1 derived from the author's published methodologies (the AI Control Framework and the CDPD spec-driven development pattern), and is configurable per project via a `.mr-sentinel.yaml` file at the root of the consumer's repo. Rules map 1:1 to controls a compliance auditor would recognize, which is the deliberate design choice that distinguishes this from a generic "AI code reviewer" — every comment ties back to a named control, every action produces an audit artifact.
 
 ## 5. Architecture
 
@@ -39,52 +45,59 @@ The rubric is the product's center of gravity. It ships with a v1 derived from t
 │                         User's GitLab Project                         │
 │             (MR opened / updated → webhook fires)                     │
 └────────────────────────────────┬─────────────────────────────────────┘
-                                 │
+                                 │  POST /gitlab/webhook
+                                 │  X-Gitlab-Token: <secret>
                                  ▼
               ┌──────────────────────────────────────┐
-              │       Cloud Run: webhook handler     │
-              │       (Python, FastAPI, async)       │
+              │   Cloud Run: webhook handler         │
+              │   (Python 3.11, FastAPI, uvicorn)    │
+              │   202 Accepted → BackgroundTask      │
               └──────────────────┬───────────────────┘
                                  │
                                  ▼
               ┌──────────────────────────────────────┐
-              │     Google Cloud Agent Builder       │
-              │          (Gemini 3, orchestration)   │
+              │   Agent loop (app/main.py)           │
               │                                      │
-              │   Plan → Tool calls → Reason → Act   │
+              │   1. dedup check (sha + rubric_ver)  │
+              │   2-5. fetch MR/diffs/pipeline/jobs/ │
+              │        vulnerability findings        │
+              │   6. Gemini evaluate vs. rubric      │
+              │   7-9. persist · upsert comment ·    │
+              │        labels · followup issue       │
               └──┬────────────────┬───────────────┬──┘
                  │                │               │
                  ▼                ▼               ▼
          ┌───────────────┐ ┌─────────────┐ ┌────────────────┐
-         │ GitLab MCP    │ │ Vertex AI   │ │ Secret Manager │
-         │ server        │ │ Data Store  │ │ (tokens, keys) │
-         │ (partner)     │ │ (rubric)    │ │                │
+         │ GitLab REST   │ │ Vertex AI   │ │ Secret Manager │
+         │ API (8 tools) │ │ Gemini 2.5  │ │ (4 secrets)    │
+         │               │ │ Flash       │ │                │
          └───────────────┘ └─────────────┘ └────────────────┘
                  │
                  ▼
          ┌────────────────────────────────┐
-         │  Cloud SQL (PostgreSQL):       │
-         │   – per-MR scoring history     │
-         │   – team / project rollups     │
-         │   – audit log                  │
+         │  Cloud SQL (PostgreSQL 15):    │
+         │   – mr_scores                  │
+         │   – rule_outcomes              │
+         │   – audit_log                  │
+         │   – schema_migrations          │
          └────────────┬───────────────────┘
                       │
                       ▼
          ┌────────────────────────────────┐
          │  Cloud Run: leadership UI      │
-         │   (React + Recharts, served    │
-         │    from same Cloud Run service)│
+         │   (server-rendered HTML,       │
+         │    same Cloud Run service)     │
          └────────────────────────────────┘
 ```
 
 ### Component rationale
 
-- **Gemini 3 + Agent Builder** — required by hackathon. Agent Builder is the orchestration surface; Gemini is the reasoning engine. Plan → tool call → reflect → act loop visible in the trace pane.
-- **GitLab MCP server** — the partner integration; structurally load-bearing. Tools used: `get_merge_request`, `get_merge_request_diff`, `list_pipeline_jobs`, `list_dependabot_alerts` (or equivalent security advisory tool), `post_merge_request_comment`, `add_merge_request_labels`, `create_issue`, `list_project_members`.
-- **Vertex AI Data Store** — stores the rubric as searchable retrieval ground. Each rule indexed with control mapping, example pass/fail diffs, suggested remediation.
-- **Cloud SQL (PostgreSQL)** — scoring history, trends, audit log. PostgreSQL chosen for portability; nothing in the schema is GCP-specific.
-- **Cloud Run** — hosts the webhook handler and the leadership UI. Stateless, scales to zero.
-- **Secret Manager** — GitLab tokens, Slack webhooks. No secrets in code or env files.
+- **Vertex AI Gemini 2.5 Flash via direct SDK** — meets the hackathon's "Google Cloud AI" requirement. The 15-rule rubric is inlined in the system prompt, so a Vertex Data Store is not load-bearing. The plan → tool call → reflect → act loop lives in plain Python (`app/main.py::_process_mr_event`), making every step visible in Cloud Logging and replayable from the persisted audit log. See `app/agent_runner.py:4-8` for the architectural simplification note.
+- **GitLab REST API (8 tools per MR)** — `get_merge_request`, `get_merge_request_diffs`, `get_latest_pipeline_for_sha`, `list_pipeline_jobs`, `list_vulnerability_findings`, `post_merge_request_comment` / `find_agent_note` / `update_merge_request_note` (upsert pattern), `add_merge_request_labels`, `create_issue`. REST avoids the MCP transport variance flagged in §12 risk #1 while still hitting the 8+ tool-call target in §8 "Technological Implementation."
+- **Cloud SQL (PostgreSQL 15, db-f1-micro)** — scoring history, trends, audit log. Schema in `db/migrations/`. PostgreSQL chosen for portability; nothing in the schema is GCP-specific. Connection from Cloud Run is via the Cloud SQL Auth Proxy at the unix socket `/cloudsql/<connection-name>`.
+- **Cloud Run** — hosts the webhook handler and the leadership UI as one service (`--cpu-throttling` disabled so background-task evaluation continues after the 202 response). Stateless, scales to zero, max 10 instances.
+- **Secret Manager (4 secrets)** — `mr-sentinel-gitlab-webhook-secret` (inbound webhook auth), `mr-sentinel-gitlab-token` (outbound API calls), `mr-sentinel-db-app-password` (Cloud SQL app user), `mr-sentinel-db-password` (Cloud SQL root user, ops-only). Mounted as env vars by Cloud Run at start.
+- **Artifact Registry** — Docker images at `us-central1-docker.pkg.dev/aicin-477004/mr-sentinel/webhook:<version>`.
 
 ## 6. Core user stories
 
@@ -110,7 +123,7 @@ The rubric ships with the repo; users override per project.
 
 | Criterion | How MR Sentinel scores |
 |---|---|
-| **Technological Implementation** | Heavy multi-tool agent (8+ GitLab MCP endpoints), explicit multi-step planning, Gemini reasoning surfaced in trace, full GCP-native stack, real production patterns (Secret Manager, Cloud SQL, IAM). |
+| **Technological Implementation** | Multi-tool agent (8 GitLab REST endpoints per MR), explicit deterministic plan in Python, Gemini reasoning persisted to Cloud SQL as a replayable audit log, full GCP-native stack (Cloud Run, Cloud SQL, Secret Manager, Artifact Registry, Vertex AI), real production patterns (constant-time auth, sha-based dedup, comment upsert). |
 | **Design** | Three surfaces — MR comment (structured, scannable), leadership dashboard (Recharts, dark theme), audit log view (filterable). Each designed for a different persona. |
 | **Potential Impact** | Every regulated-industry engineering org has this pain. The control-mapping framing is the differentiator that takes this from "AI code reviewer" to "compliance-grade governance." Productizable. |
 | **Quality of the Idea** | The rubric-as-product framing is the moat. Most submissions will be "AI reviews PR." MR Sentinel ships *with* a methodology, and the rubric is configurable per project. |
@@ -119,9 +132,9 @@ The rubric ships with the repo; users override per project.
 
 | Window | Milestone | Done when |
 |---|---|---|
-| **Days 1–3** (May 16–18) | GCP credit + project setup | Cloud project created, $100 credit requested (form deadline June 4), Agent Builder enabled, sample MCP call against personal GitLab succeeds end-to-end |
-| **Days 4–8** (May 19–23) | Core loop: webhook → agent → comment | A real MR opened on the demo repo triggers a real comment from the agent within 30 seconds |
-| **Days 9–14** (May 24–29) | Multi-step actions + rubric | Agent uses 6+ MCP tools per run, applies the v1 rubric, creates linked issues, posts to Slack |
+| **Days 1–3** (May 16–18) | GCP project setup + bootstrap | ✅ **Closed 2026-05-17.** Project `aicin-477004` reused per existing-credentials policy, 12 APIs enabled, 4 secrets in Secret Manager, Artifact Registry created, $100 credit form pending (deadline June 4). |
+| **Days 4–8** (May 19–23) | Core loop: webhook → agent → comment | ✅ **Closed 2026-05-17.** Real MR on `gitlab.com/sgharlow/governance-demo-app` triggers a real comment in ~32s via the live Cloud Run service. |
+| **Days 9–14** (May 24–29) | Multi-step actions + rubric | ✅ **Closed 2026-05-17.** Agent uses 8 GitLab REST tools per run, applies the v1 rubric (15 rules), sha-dedups, upserts comments, opens linked remediation issues on block verdicts. |
 | **Days 15–19** (May 30 – June 3) | Leadership dashboard | Cloud Run UI live with seeded trend data, drill-down to MR audit log |
 | **Days 20–23** (June 4–7) | Polish, edge cases, demo data | Demo repo seeded with 8–12 archetypal MRs, every rule has at least one tripping example, README + LICENSE + architecture doc complete |
 | **Days 24–26** (June 8–10) | Demo video, final test, submission | 3-min video locked, hosted demo URL stable, repo public with MIT license detectable in About section |
@@ -137,17 +150,17 @@ The demo target is a purpose-built public GitLab repo (`gitlab.com/sgharlow/gove
 
 **Shot 3 (0:25–0:40)** — scroll the diff. Three files, eighty lines. Two new dependencies. An auth refactor. *"By the time a reviewer has time for this, the author has shipped two more MRs."*
 
-**Shot 4 (0:40–0:55)** — Agent Builder canvas in GCP console. Tool registry visible: GitLab MCP, Vertex retrieval, Slack. *"MR Sentinel runs on Gemini in Agent Builder. The rubric lives in a Vertex data store — fifteen rules, every one mapped to a named control."*
+**Shot 4 (0:40–0:55)** — split-screen: Cloud Run service in GCP console on the left, the open MR in GitLab on the right. *"MR Sentinel runs on Vertex AI Gemini behind a Cloud Run webhook. Fifteen rules, every one mapped to a named control — and the rubric is what ships in this repo."* The `rubric/v1.yaml` file slides in as a brief inset.
 
-**Shot 5 (0:55–1:20)** — Gemini's plan streams in. Five steps light up green as MCP tools fire below in sequence.
+**Shot 5 (0:55–1:20)** — Cloud Logging stream alongside the agent loop in source. Eight GitLab API calls fire in sequence: get MR, get diffs, get pipeline, list jobs, list vulnerabilities, Gemini evaluate, upsert comment, label MR. Each log line lights green as it lands.
 
-**Shot 6 (1:20–1:50)** — trace view, sanitized chain-of-thought. *"New endpoint exposes PII. No test covers the unauthenticated path. Dependency advisory finds CVE-XXXX in transitive dep. Cannot pass compliance gate."*
+**Shot 6 (1:20–1:50)** — the persisted evaluation JSON from Cloud SQL, surfaced in the leadership UI's audit-log view. *"New endpoint exposes PII. No test covers the unauthenticated path. Cannot pass compliance gate."* The text quotes the actual `summary` field from the Gemini response, with the failing rule_ids highlighted.
 
-**Shot 7 (1:50–2:15)** — back to the MR. Comment streams in with the rubric scores. Label `blocked-compliance` appears. Linked remediation issue auto-creates. Slack notification fires in a side panel.
+**Shot 7 (1:50–2:15)** — back to the MR. Comment streams in with the rubric scores. Label `blocked-compliance` appears. Linked remediation issue auto-creates with a checklist of the failing rules.
 
 **Shot 8 (2:15–2:35)** — leadership dashboard. This week: 142 MRs scanned, 18 blocked, average score 7.8, drift down 23% WoW. Per-team bar chart. Trend line.
 
-**Shot 9 (2:35–2:55)** — author on camera. *"Twelve tool calls, one rubric, one paper trail. The audit becomes the byproduct of doing the work, not a separate exercise. That's the difference."*
+**Shot 9 (2:35–2:55)** — author on camera. *"Eight tool calls, one Gemini evaluation, one rubric, one paper trail. The audit becomes the byproduct of doing the work, not a separate exercise. That's the difference."*
 
 **Shot 10 (2:55–3:00)** — end card: repo URL, demo URL, MIT license, sgharlow handle.
 
@@ -166,8 +179,8 @@ The demo target is a purpose-built public GitLab repo (`gitlab.com/sgharlow/gove
 
 | Risk | Likelihood | Impact | Mitigation |
 |---|---|---|---|
-| GitLab MCP server has gaps for required endpoints | Medium | High | Days 1–3 validate every endpoint needed before committing to the full feature set; degrade gracefully to REST API for any endpoint MCP doesn't cover |
-| Cloud Run + Agent Builder integration friction | Medium | Medium | Start with the GoogleCloudPlatform/agent-starter-pack template; resist building from scratch |
+| ~~GitLab MCP server has gaps for required endpoints~~ | ~~Medium~~ | ~~High~~ | **Retired 2026-05-17** — chose GitLab REST as the primary transport during Days 4-8. Eight endpoints cover the full loop; matrix preserved in `docs/mcp-endpoint-audit.md` as a future-migration reference. |
+| ~~Cloud Run + Agent Builder integration friction~~ | ~~Medium~~ | ~~Medium~~ | **Retired 2026-05-17** — direct Vertex AI SDK avoids Agent Builder entirely. Orchestration is plain Python; every step is visible in Cloud Logging and replayable from the persisted audit log. |
 | Solo bandwidth conflict with other Q2 commitments | High | Medium | Treat the leadership dashboard as the cut line — if days 15–19 slip, ship without it; the agent + comment + audit log is the minimum viable demo |
 | GCP credit ($100) insufficient | Low | Low | Free tier covers Cloud Run + Cloud SQL development workloads; budget alerts at $50/$75 to avoid surprise charges |
 | 3-min video runs long | Medium | Low | Lock the storyboard at day 20; record by day 24; edit aggressively; cut shot 8 dashboard if needed (story still works) |

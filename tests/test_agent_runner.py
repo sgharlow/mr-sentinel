@@ -10,10 +10,12 @@ import pytest
 from app.agent_runner import (
     AgentRunner,
     Evaluation,
+    RubricValidationError,
     RuleEvaluation,
     build_system_prompt,
     build_user_prompt,
     load_rubric,
+    parse_rubric,
     render_comment,
 )
 from app.gitlab_client import DiffEntry, MergeRequest
@@ -177,6 +179,61 @@ def test_render_comment_includes_followup_issue_url_and_pipeline() -> None:
     assert "https://gitlab.com/p/q/-/issues/9" in md
     assert "Follow-up issue" in md
     assert "pipeline `failed`" in md
+
+
+def test_parse_rubric_accepts_valid_bundled_rubric() -> None:
+    """The shipped rubric/v1.yaml is the canonical valid example."""
+    from pathlib import Path
+    text = (Path(__file__).resolve().parent.parent / "rubric" / "v1.yaml").read_text(encoding="utf-8")
+    result = parse_rubric(text)
+    assert result["version"] == "v1"
+    assert len(result["rules"]) == 15
+
+
+def test_parse_rubric_rejects_invalid_yaml() -> None:
+    with pytest.raises(RubricValidationError, match="invalid YAML"):
+        parse_rubric("version: v1\n  bad: indent:\n - this is broken")
+
+
+def test_parse_rubric_rejects_non_mapping_root() -> None:
+    with pytest.raises(RubricValidationError, match="mapping"):
+        parse_rubric("- just\n- a\n- list")
+
+
+def test_parse_rubric_rejects_schema_violation() -> None:
+    """Rubric must have exactly 15 rules — 14 is invalid per schema."""
+    text = "version: v1\nrules:\n"
+    # Build 14 minimal valid rules
+    for i in range(14):
+        text += (
+            f"  - rule_id: rule-{i:02d}\n"
+            f"    category: quality\n"
+            f"    control_mapping: [\"CTRL-{i}\"]\n"
+            f"    severity: info\n"
+            f"    evaluator_prompt: \"prompt long enough to pass schema\"\n"
+            f"    example_pass: \"yes\"\n"
+            f"    example_fail: \"no\"\n"
+            f"    suggested_remediation: \"fix it\"\n"
+        )
+    with pytest.raises(RubricValidationError, match="schema validation failed"):
+        parse_rubric(text)
+
+
+def test_agent_runner_accepts_override_rubric_dict() -> None:
+    """When a `rubric` arg is provided, AgentRunner uses it instead of loading from disk."""
+    custom = {
+        "version": "v1",
+        "rules": [
+            {"rule_id": f"custom-{i:02d}", "category": "quality",
+             "control_mapping": [f"CTRL-{i}"], "severity": "info",
+             "evaluator_prompt": "some prompt long enough", "example_pass": "y",
+             "example_fail": "n", "suggested_remediation": "fix"}
+            for i in range(15)
+        ],
+    }
+    runner = AgentRunner(project_id="test-project", rubric=custom, model_factory=fake_factory("{}"))
+    assert runner.rubric["rules"][0]["rule_id"] == "custom-00"
+    assert runner.rubric["version"] == "v1"
 
 
 def test_render_followup_issue_body_lists_failures_as_checklist() -> None:
