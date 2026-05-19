@@ -105,11 +105,11 @@ The rubric is the product's center of gravity. It ships with a v1 derived from t
 2. **As a reviewer**, I can trust that the rubric was applied consistently — when I see a 9/10 score from the agent, I can focus my human review on judgment calls, not checklist enforcement.
 3. **As an engineering leader**, I can open a dashboard and see this week's MR quality trend, which rules trip most often, which teams are drifting, and which MRs were blocked on a compliance gate.
 4. **As a compliance auditor**, I can pull the audit log for any MR and see exactly which controls were checked, when, by which agent version, with what outcome.
-5. **As a platform engineer**, I can edit a YAML file in my repo to add a rule, change a threshold, or disable a gate, and the next MR uses the updated rubric.
+5. **As a platform engineer**, I can drop a `.mr-sentinel.yaml` at the root of my repo — a full 15-rule rubric in the same shape as the bundled `rubric/v1.yaml` — and the next MR is evaluated against my project's rules instead of the defaults. Invalid overrides fail closed (fall back to bundled and audit the failure).
 
 ## 7. The rubric (v1)
 
-Fifteen rules, mapped to controls. Each rule is a Vertex retrieval document with: rule_id, control_mapping, severity, evaluator_prompt, example_pass, example_fail, suggested_remediation.
+Fifteen rules, mapped to controls. Each rule is a YAML object in `rubric/v1.yaml` with: `rule_id`, `category`, `control_mapping`, `severity`, `evaluator_prompt`, `example_pass`, `example_fail`, `suggested_remediation`. Schema-validated by `rubric/schema.json` (JSONSchema draft-07). The full rubric is rendered into the Gemini system prompt at evaluation time.
 
 Categories:
 - **Contract & spec gates** (5 rules) — derived from CDPD methodology. Does the change have a contract? Are acceptance criteria testable? Does the implementation match the spec? Are integration boundaries explicit? Is there a kill-switch path?
