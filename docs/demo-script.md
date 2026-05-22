@@ -34,6 +34,8 @@ This script is the verbatim narration plus shot-level camera direction. Total sp
 **Narration (8s):**
 > "Friday afternoon. An MR lands. The title says 'production env file.' The reviewer is tired."
 
+**Verified 2026-05-21:** MR `!10` exists, title and description match seeding script v1 line 232-234.
+
 ### Shot 2 — On-camera open (0:08–0:25, 17s)
 
 **Visual:** Picture-in-picture, lower right, on-camera. MR still visible on screen.
@@ -50,6 +52,8 @@ This script is the verbatim narration plus shot-level camera direction. Total sp
 **Narration (15s):**
 > "Inside the diff: a production env file. Database password. JWT secret. Live Stripe key. AWS access key. Every single thing the policy says should never enter the repo. And the reviewer has eight more MRs in the queue."
 
+**Verified 2026-05-21:** `.env.production` diff contains all 6 named secret types (`DATABASE_URL`, `JWT_SECRET`, `STRIPE_API_KEY`, `STRIPE_WEBHOOK_SECRET`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`). Per seeding script v1 lines 212-226. Live audit page `/audit/.../10` quotes all six verbatim.
+
 ### Shot 4 — Architecture orientation (0:40–0:55, 15s)
 
 **Visual:** Split screen. Left half: Cloud Run service page in GCP console showing `mr-sentinel-webhook` with traffic at 100% on the latest revision. Right half: the MR page from before. A small slide-in shows `rubric/v1.yaml` — top of file with the v1 version + 15 rule count visible.
@@ -58,6 +62,8 @@ This script is the verbatim narration plus shot-level camera direction. Total sp
 
 **Narration (15s):**
 > "MR Sentinel runs on Cloud Run. Vertex AI Gemini behind a webhook. Fifteen rules in a YAML file — every one mapped to a named compliance control. SOC 2. ISO 27001. OWASP. NIST. The rubric is the product."
+
+**Verified 2026-05-21:** Service `mr-sentinel-webhook` live on Cloud Run. `rubric/v1.yaml` has 15 rules. `control_mapping` covers CDPD, SOC2, ISO-27001, OWASP-ASVS, NIST (all four named families present). Vertex AI Gemini 2.5 Flash per `app/main.py`.
 
 ### Shot 5 — Agent loop trace (0:55–1:20, 25s)
 
@@ -74,12 +80,14 @@ This script is the verbatim narration plus shot-level camera direction. Total sp
 **Narration (25s):**
 > "When the webhook fires, the agent runs a deterministic plan. It pulls the merge request, the diff, the pipeline, the vulnerability scan. It checks for a project-specific rubric override — Medbill ships one. It hands the diff to Gemini. Gemini scores against all fifteen rules at once and returns a structured verdict. Eight tool calls. One Gemini call. Thirty seconds end to end."
 
+**STALE 2026-05-21:** Specific log lines (`received gitlab event kind=merge_request...`, `using project override rubric (v2)`, etc.) cannot be verified from this PC — Norton MITM blocks `gcloud logging read`. **Steve must verify exact log strings from WSL before record**: tail Cloud Logging for `mr-sentinel-webhook`, compare each bullet point in this shot to the actual log lines. If wording drifts, update the visual cues here. The "30 seconds end to end" claim originates from Days 4-8 baseline (~32s p50); re-measure via Cloud Logging before final cut. Latency check is a TODO in `live-fire-2026-05-21.md` § Deferred.
+
 ### Shot 6 — Verdict comment lands (1:20–1:50, 30s)
 
 **Visual:** Back to MR `!10`. The agent's structured Markdown comment renders. Viewer sees:
 - `🛑 MR Sentinel — verdict: block (score 0.0/10)`
-- "Applied rubric `v2` to 15 rules. Commit `5d2e7a14` · pipeline `failed`"
-- **Failures (4)** block with `no-secrets-in-diff` cited specifically — quote the evidence: *"DATABASE_URL, JWT_SECRET, STRIPE_API_KEY, STRIPE_WEBHOOK_SECRET, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY are all present in .env.production"*
+- "Applied rubric `v2` to 15 rules. Commit `1fb25ad2` · pipeline `failed`"
+- **Failures (2)** block with `no-secrets-in-diff` cited specifically — quote the evidence: *"DATABASE_URL, JWT_SECRET, STRIPE_API_KEY, STRIPE_WEBHOOK_SECRET, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY are all present in .env.production"*
 - Linked remediation issue
 - Label `blocked-compliance` visible on the right sidebar
 
@@ -88,19 +96,23 @@ This script is the verbatim narration plus shot-level camera direction. Total sp
 **Narration (30s):**
 > "Here's the comment. Verdict: block. Score: zero out of ten. The agent cites — by exact rule ID — `no-secrets-in-diff`, mapped to SOC 2 CC6.1, ISO 27001 A.9.4.3, and OWASP ASVS V2. It quotes the lines that tripped it. It auto-opens a remediation issue with a checklist. It labels the MR `blocked-compliance` so the merge button is one step further away. Every action ties back to a named control. Every action is logged to Postgres."
 
+**Verified + corrected 2026-05-21:** Live audit at `/audit/.../10` shows verdict=block, score=0.0/10, rubric=v2. Commit sha8 corrected from `5d2e7a14` → **`1fb25ad2`** (per live audit page). Failure count corrected: live shows **2 fails** (`contract-has-spec-link` warning + `no-secrets-in-diff` blocker), not 4. The hero quote on `no-secrets-in-diff` matches the live audit page verbatim — the demo's punchline still lands. Control mappings on `no-secrets-in-diff` verified as `SOC2-CC6.1, ISO-27001-A.9.4.3, OWASP-ASVS-V2` (matches narration). **After v2 archetypes seed, recapture sha8 (if the demo runs against the updated `!10`).** Narration "every action is logged to Postgres" — verified: Cloud SQL audit table per `app/main.py`.
+
 ### Shot 7 — Leadership dashboard (1:50–2:20, 30s)
 
 **Visual:** Navigate to `https://mr-sentinel-webhook-n6oitfxdra-uc.a.run.app/dashboard`. Full screen. Dark theme. Viewer sees:
 - "Leadership dashboard · last 30d"
 - "MRs scored: 8"
 - Verdict distribution bars: 6 block, 1 warn, 1 pass
-- Top-5 failing rules: `contract-has-spec-link (5)`, `auth-on-new-public-endpoints (3)`, `no-secrets-in-diff (3)`, `integration-boundaries-explicit (3)`, `changed-method-coverage (3)`
+- Top-5 failing rules: `contract-has-spec-link (5)`, `integration-boundaries-explicit (3)`, `auth-on-new-public-endpoints (3)`, `no-secrets-in-diff (3)`, `changed-method-coverage (3)`
 - Recent MRs table — cursor hovers MR `!10` row
 
 **Camera:** Voiceover only. Cursor moves down the list.
 
 **Narration (30s):**
-> "An engineering leader opens the dashboard. This week: eight MRs scored. Six blocked on compliance. The top-five failing rules — every one a control mapped to an audit framework. Drift, by rule, by week. Click any MR..."
+> "An engineering leader opens the dashboard. The last thirty days: eight MRs scored. Six blocked on compliance. The top-five failing rules — every one a control mapped to an audit framework. Drift, by rule, by window. Click any MR..."
+
+**Verified + corrected 2026-05-21:** Dashboard live, exact label is **"last 30d"** (corrected from "this week" → "the last thirty days" in narration). MRs scored = 8, distribution 6/1/1 verified. Top-5 rule **order** corrected: `integration-boundaries-explicit` is 2nd (not `auth-on-new-public-endpoints`). All five rule names match live data. **After v2 archetypes seed,** dashboard count will jump to 12 MRs, distribution + top-5 ordering will shift — record AFTER the seed has settled and re-verify these numbers.
 
 ### Shot 8 — Audit drill-down (2:20–2:40, 20s)
 
@@ -114,12 +126,16 @@ This script is the verbatim narration plus shot-level camera direction. Total sp
 **Narration (20s):**
 > "...and you're inside the audit log. Every rule outcome. Every control. The exact prompt the agent used to decide. The timeline of every action it took. This is what a compliance auditor asks for at year-end. With MR Sentinel, the audit is the byproduct of doing the work — not a separate exercise."
 
+**Verified 2026-05-21:** `/audit/sgharlow/governance-demo-app/10` renders verdict badge, score, sha8, rubric v2; rule-outcomes table with `control_mapping` column populated; audit log timeline with `evaluate` + `skip_duplicate` entries. All shot elements present.
+
 ### Shot 9 — On-camera close (2:40–2:55, 15s)
 
 **Visual:** Picture-in-picture full size, looking at camera. Background blurred.
 
 **Narration (15s):**
 > "Eight tool calls. One Gemini evaluation. One rubric. One paper trail. Built on Google Cloud Run, Cloud SQL, Secret Manager, and Vertex AI. The rubric ships open-source. MR Sentinel."
+
+**Verified 2026-05-21:** All four GCP services (Cloud Run, Cloud SQL, Secret Manager, Vertex AI) are deployed per README §"GCP resources live." Repo is MIT (`LICENSE` present, detectable from GitHub About).
 
 ### Shot 10 — End card (2:55–3:00, 5s)
 
@@ -190,3 +206,14 @@ MIT licensed · Google Cloud Rapid Agent Hackathon · GitLab track
 7. Record Shots 2 and 9 separately as on-camera segments
 8. Record Shot 10 end card as a still image — pulled into final cut
 9. Save raw take in case re-cuts needed
+
+---
+
+## 2026-05-21 reconciliation pass — summary
+
+Performed by `/daily-priority mr-sentinel hackathon` Story 5. Each shot annotated above with **Verified** or **STALE** + corrections. Highlights:
+
+- **Hard corrections applied to script:** Shot 6 commit sha8 `5d2e7a14` → `1fb25ad2`; "Failures (4)" → "Failures (2)". Shot 7 top-5 rule order corrected; narration "this week" → "the last thirty days."
+- **Soft TODO for Steve before record:** Shot 5 log strings need WSL Cloud Logging verification (Norton MITM blocks gcloud from the Windows PC). Latency claim "30 seconds end to end" needs re-measure.
+- **Post-v2-seed re-pass required:** When `seed-archetype-mrs-v2.sh` runs, the dashboard counts in Shot 7 (8 → 12 MRs, distribution shifts) and possibly the `!10` commit sha8 (Shot 6) will change. Record AFTER the seed has settled, and either accept the updated numbers or pin the narration to a stable window.
+- **No fundamental story drift.** The hero MR `!10` still has score 0.0, verdict block, and the `no-secrets-in-diff` evidence quote matches verbatim. The demo's punchline is intact.
