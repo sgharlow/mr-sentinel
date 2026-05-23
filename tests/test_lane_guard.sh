@@ -61,10 +61,12 @@ run_case "in-lane demo-data seed" "demo-data" "$(pwd)/scripts/seed-archetype-mrs
 run_case "LANE empty" "" "$(pwd)/app/main.py" "no"
 
 # Cross-lane edit but lock exists → no warning
-mkdir -p .agent-state/locks
-echo "backend" > .agent-state/locks/dashboard.lock
+# Locks live under .git/agent-state-locks/ (truly shared across worktrees).
+LOCK_DIR=$(cd "$(git rev-parse --git-common-dir)" && pwd)/agent-state-locks
+mkdir -p "$LOCK_DIR"
+echo "backend" > "$LOCK_DIR/dashboard.lock"
 run_case "cross-lane with lock" "backend" "$(pwd)/app/dashboard.py" "no"
-rm -f .agent-state/locks/dashboard.lock
+rm -f "$LOCK_DIR/dashboard.lock"
 
 # Unowned file: editing pyproject.toml from backend → warning
 run_case "unowned file" "backend" "$(pwd)/pyproject.toml" "yes"

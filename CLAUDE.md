@@ -15,7 +15,7 @@ If `$LANE` is unset, you are in Steve's main checkout. You have full ownership a
 If `$LANE` is set, you are in a worktree on branch `lane/$LANE`. Before any `Edit` or `Write`:
 
 1. Confirm the target file is owned by your lane in `.agent-state/OWNERSHIP.md`.
-2. If it is not, either (a) tell the user and stop — preferred — or (b) claim a lock by writing `$LANE` into `.agent-state/locks/<owning-lane>.lock`, make the edit, then delete the lock when done.
+2. If it is not, either (a) tell the user and stop — preferred — or (b) claim a lock by writing `$LANE` into `$(git rev-parse --git-common-dir)/agent-state-locks/<owning-lane>.lock`, make the edit, then delete the lock when done. The lock lives under the shared `.git/` directory so it is visible across worktrees.
 
 The `lane-guard.sh` PreToolUse hook will surface a warning in your response context when a cross-lane edit is attempted without a lock. The warning is not a block — it is information for you and the user.
 

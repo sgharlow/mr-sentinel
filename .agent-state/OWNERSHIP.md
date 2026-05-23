@@ -19,7 +19,7 @@ Steve's main checkout (no `LANE` env var set) has full ownership and is the merg
 If your lane needs to edit a file owned by another lane:
 
 1. **Preferred:** Stop, tell the user, let them decide whether to merge first or coordinate via the task list.
-2. **Alternative:** Claim a lock by writing your lane name into `.agent-state/locks/<owning-lane>.lock`. Make the edit. Delete the lock file when done.
+2. **Alternative:** Claim a lock by writing your lane name into `$(git rev-parse --git-common-dir)/agent-state-locks/<owning-lane>.lock`. The lock lives under the shared `.git/` directory so it is visible from every worktree. Make the edit. Delete the lock file when done.
 
 The lane-guard hook does not block — it warns. Cross-lane edits without a lock will surface a warning in the agent's response so the user can intervene.
 
