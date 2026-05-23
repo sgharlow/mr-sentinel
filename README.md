@@ -1,9 +1,11 @@
 # MR Sentinel
 
-> An AI-powered governance agent for merge requests — applies a configurable engineering rubric to every MR, posts actionable feedback, and surfaces drift trends to engineering leaders.
+> An AI governance agent for merge requests — applies a written compliance rubric in ~30 seconds, with a paper trail.
+
+**Try it now:** [live dashboard](https://mr-sentinel-webhook-n6oitfxdra-uc.a.run.app/dashboard) · [sample audit page](https://mr-sentinel-webhook-n6oitfxdra-uc.a.run.app/audit/sgharlow/governance-demo-app/10) · [demo MR](https://gitlab.com/sgharlow/governance-demo-app/-/merge_requests/10)
 
 **Hackathon:** Google Cloud Rapid Agent Hackathon — GitLab track
-**Submission deadline:** June 11, 2026 — 14:00 PT
+**Submission deadline:** June 11, 2026 — 14:00 PT (target submit by 12:00 PT for safety buffer)
 **License:** [MIT](LICENSE)
 **Author:** [sgharlow](https://github.com/sgharlow)
 
@@ -167,7 +169,7 @@ mr-sentinel/
 │   ├── agent_runner.py               # rubric load + Gemini call + parse + comment render
 │   ├── gitlab_client.py              # async GitLab REST client (8 endpoints)
 │   └── persistence.py                # asyncpg pool + mr_scores/rule_outcomes/audit_log writes
-├── tests/                            # pytest — 44 tests
+├── tests/                            # pytest — 51 tests
 │   ├── test_webhook.py               # /health + webhook auth + payload validation
 │   ├── test_agent_runner.py          # rubric load/parse + prompt assembly + comment render
 │   ├── test_gitlab_client.py         # 8 REST endpoints + override fetch + upsert pattern
@@ -190,7 +192,13 @@ mr-sentinel/
 │   ├── test-override-live.sh         # live-fire the `.mr-sentinel.yaml` override path
 │   └── cleanup-override-verification.sh   # teardown for the live-fire test
 ├── docs/
-│   └── mcp-endpoint-audit.md         # REST endpoint matrix + future-MCP migration reference
+│   ├── mcp-endpoint-audit.md         # REST endpoint matrix + future-MCP migration reference
+│   ├── devpost-submission.md         # paste-ready Devpost form text
+│   ├── demo-script.md                # 3-minute video script with shot-by-shot direction
+│   ├── days-20-23-demo-coverage.md   # rubric coverage gap analysis (11/15 → 14/15)
+│   ├── live-fire-2026-05-21.md       # latest end-to-end verification + dashboard scrape
+│   ├── share-copy.md                 # social/blog launch copy
+│   └── 2026-05-22-parallel-agent-workflow-design.md  # parallel-Claude-Code dev setup
 ├── .github/workflows/
 │   └── ci.yml                        # pytest + rubric schema validation on push/PR
 ├── Dockerfile                        # Python 3.11-slim → uvicorn → :8080

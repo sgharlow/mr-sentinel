@@ -157,13 +157,38 @@ QUALITY OF THE IDEA — The rubric-as-product framing is the moat. Most submissi
 
 ---
 
+## Asset checklist (gather before opening the Devpost form)
+
+Devpost's submission form for the Google Cloud Rapid Agent Hackathon typically requires the following. The repo does not currently ship any of these — they need to be produced or sourced before submission.
+
+| Asset | Spec | Source / status |
+|-------|------|-----------------|
+| **Thumbnail image** | 1280×720 PNG/JPG; appears on the gallery card | **MISSING** — needs a clean cover. Suggested: dark background + "MR Sentinel" wordmark + the verdict-badge motif (🛑 block) + GCP logos. Canva or Figma 5-minute job. |
+| **Demo video** | ≤3 min, YouTube unlisted URL | Script ready in `docs/demo-script.md`; recording target ~2026-06-08. |
+| **Gallery screenshots** | 3-6 PNGs, typically 1920×1080 | **MISSING** — need to capture: (1) hero MR `!10` agent comment, (2) `/dashboard` full view with verdict distribution + top-5 rules, (3) `/audit/sgharlow/governance-demo-app/10` with rule outcomes table, (4) optional architecture diagram from `README.md`. |
+| **Logo** | 256×256 typical | **Optional but recommended.** Can reuse the wordmark motif from the thumbnail. |
+| **Try-it links** | Live URLs reachable from the public internet | All four already live and verified (see Links table above). |
+| **GitHub repo** | Public URL | https://github.com/sgharlow/mr-sentinel — already public. |
+| **License visible in repo** | Standard OSS license | MIT, present at `LICENSE`. |
+| **Team list** | Solo or team members | Solo: sgharlow only. |
+
+**Screenshot capture sequence (do during the demo-video session — same browser state):**
+
+1. Open `/dashboard` full screen → screenshot (gallery image 1)
+2. Click into MR `!10` row → screenshot of `/audit/.../10` (gallery image 2)
+3. Switch to GitLab MR `!10` page, scroll to the agent comment → screenshot (gallery image 3)
+4. Open `rubric/v1.yaml` in GitHub web UI, show the first ~20 lines → optional screenshot
+5. Crop each to 1920×1080 or letterbox; PNG; commit to `docs/screenshots/` so they're cite-able from the README too
+
+---
+
 ## Submission-day sequence
 
-1. Final verification — run `bash scripts/smoke-test.sh` from WSL; expect all 4 checks pass.
-2. Verify the live dashboard at `/dashboard` still renders the 8+ MRs.
-3. Pick the hero MR (`!10`) and confirm its agent comment + label + linked issue are visible.
-4. Upload the YouTube video as **Unlisted**; copy the URL.
-5. Fill the Devpost form with the text in this doc.
-6. Add the `gitlab` and `google-cloud` tags.
-7. Choose track: **GitLab**.
-8. Click submit BEFORE 12:00 PM PT on 2026-06-11 (two-hour safety buffer per spec §9).
+1. **T-2 hours: assets ready.** Thumbnail PNG, 3+ gallery PNGs, demo video uploaded to YouTube as **Unlisted**, URL copied.
+2. **T-90 min: final verification.** Run `bash scripts/smoke-test.sh` from WSL; expect all 4 checks pass.
+3. **T-75 min: live state.** Verify the dashboard at `/dashboard` renders 8+ (or 12+ if v2 seed ran) MRs. Pick the hero MR (`!10`) and confirm its agent comment + label + linked issue are visible.
+4. **T-60 min: open form.** Fill the Devpost form with the text in this doc field-by-field. Tag list, links, judging-criteria mapping all paste from above.
+5. **T-30 min: assets uploaded.** Thumbnail + gallery PNGs + YouTube URL all attached.
+6. **T-15 min: track + tags.** Choose track: **GitLab**. Add tags from the Built-with section.
+7. **T-10 min: read-through.** One full read of the rendered preview. Fix anything that wraps badly or has a broken link.
+8. **Click submit BEFORE 12:00 PM PT on 2026-06-11.** (Hard deadline is 14:00 PT / 2:00 PM PT per the hackathon page; 12:00 PM PT is the personal safety buffer per spec §9.)
