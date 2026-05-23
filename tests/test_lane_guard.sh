@@ -57,8 +57,8 @@ run_case "in-lane docs README" "docs" "$(pwd)/README.md" "no"
 # In-lane edit: demo-data editing scripts/seed-archetype-mrs-v2.sh → no warning
 run_case "in-lane demo-data seed" "demo-data" "$(pwd)/scripts/seed-archetype-mrs-v2.sh" "no"
 
-# Unset LANE: Steve's main checkout → no warning
-run_case "no LANE set" "" "$(pwd)/app/main.py" "no"
+# LANE empty (treated identically to unset by the hook's -z check) → no warning
+run_case "LANE empty" "" "$(pwd)/app/main.py" "no"
 
 # Cross-lane edit but lock exists → no warning
 mkdir -p .agent-state/locks
