@@ -1,0 +1,31 @@
+{
+  "lanes": {
+    "backend": [
+      "app/main.py",
+      "app/gitlab_client.py",
+      "app/persistence.py",
+      "Dockerfile",
+      "Makefile",
+      "db/"
+    ],
+    "evaluator": [
+      "app/agent_runner.py",
+      "rubric/"
+    ],
+    "demo-data": [
+      "scripts/seed-",
+      "scripts/gitlab-bootstrap.sh",
+      "scripts/test-override-live.sh"
+    ],
+    "dashboard": [
+      "app/dashboard.py"
+    ],
+    "docs": [
+      "docs/",
+      "README.md",
+      "mr-sentinel-hackathon-spec.md"
+    ]
+  },
+  "shared_state": ".agent-state/",
+  "version": 1
+}
