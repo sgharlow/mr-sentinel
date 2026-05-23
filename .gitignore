@@ -48,3 +48,6 @@ desktop.ini
 # Project-local
 .local/
 scratch/
+
+# Parallel-agent transient locks (the locks/ directory itself is kept via .gitkeep)
+.agent-state/locks/*.lock
