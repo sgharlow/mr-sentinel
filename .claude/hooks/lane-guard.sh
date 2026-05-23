@@ -21,12 +21,16 @@ fi
 
 # Resolve the shared .git common dir (works in both main checkout and worktrees).
 common_dir=$(git rev-parse --git-common-dir 2>/dev/null) || exit 0
+# Normalize to absolute path — git may return a relative path (e.g., ".git").
+common_dir_abs=$(cd "$common_dir" 2>/dev/null && pwd) || exit 0
 repo_root=$(cd "$(dirname "$common_dir")" 2>/dev/null && pwd) || exit 0
+# Also capture the worktree's own top-level (may differ from repo_root in linked worktrees).
+wt_root=$(git rev-parse --show-toplevel 2>/dev/null) || wt_root="$repo_root"
 
 # Read stdin once; hand off to Python.
 payload=$(cat)
 
-LANE="$LANE" REPO_ROOT="$repo_root" PAYLOAD="$payload" python <<'PY'
+LANE="$LANE" REPO_ROOT="$repo_root" WT_ROOT="$wt_root" COMMON_DIR="$common_dir_abs" PAYLOAD="$payload" python <<'PY'
 import json, os, pathlib, re, sys
 
 def normalize(p: str) -> pathlib.Path:
@@ -53,14 +57,21 @@ if not file_path:
     sys.exit(0)
 
 repo_root = normalize(os.environ["REPO_ROOT"])
+wt_root = normalize(os.environ.get("WT_ROOT", os.environ["REPO_ROOT"]))
 lane = os.environ["LANE"]
 
 # Normalize file_path to repo-relative POSIX form.
+# Try against repo_root first (main checkout), then wt_root (linked worktree).
+# A worktree is a full checkout of the same tree; relative paths are identical.
 try:
     abs_path = normalize(file_path)
-    rel_path = abs_path.relative_to(repo_root).as_posix()
+    try:
+        rel_path = abs_path.relative_to(repo_root).as_posix()
+    except ValueError:
+        # File is under the worktree path rather than main checkout path.
+        rel_path = abs_path.relative_to(wt_root).as_posix()
 except (ValueError, OSError):
-    # File not under repo root (temp file, etc.) — silently allow.
+    # File not under any known root (temp file, etc.) — silently allow.
     sys.exit(0)
 
 ownership_path = repo_root / ".agent-state" / "ownership.json"
@@ -95,9 +106,10 @@ for ln, patterns in data["lanes"].items():
 if owning_lane == lane:
     sys.exit(0)
 
-# Lock check.
+# Lock check. Locks live under the shared .git/ (truly shared across worktrees),
+# NOT under .agent-state/locks/ (which is PWD-relative per worktree).
 if owning_lane:
-    lock_file = repo_root / ".agent-state" / "locks" / f"{owning_lane}.lock"
+    lock_file = pathlib.Path(os.environ["COMMON_DIR"]) / "agent-state-locks" / f"{owning_lane}.lock"
     if lock_file.exists():
         try:
             if lock_file.read_text().strip() == lane:
@@ -110,7 +122,8 @@ if owning_lane:
         f"Lane guard: file '{rel_path}' is owned by lane '{owning_lane}', "
         f"but you are in lane '{lane}'. Either stop and notify the user, "
         f"or claim a lock by writing '{lane}' into "
-        f".agent-state/locks/{owning_lane}.lock before editing."
+        f"$(git rev-parse --git-common-dir)/agent-state-locks/{owning_lane}.lock "
+        f"before editing."
     )
 else:
     msg = (

@@ -239,6 +239,8 @@ git commit -m "feat(agent-state): seed task list and contributor pointer"
 
 ## Task 4: Create lock directory placeholder
 
+> **Note:** Task 9 smoke test discovered that `.agent-state/locks/` does not work across worktrees (each worktree has its own copy). Locks were moved to `<common_dir>/agent-state-locks/` (under the shared `.git/`) in this commit. The `.agent-state/locks/` directory and the matching `.gitignore` rule were removed.
+
 **Files:**
 - Create: `.agent-state/locks/.gitkeep`
 - Modify: `.gitignore`

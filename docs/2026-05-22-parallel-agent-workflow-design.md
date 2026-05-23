@@ -40,7 +40,6 @@ WSL shell note: the `demo-data` lane runs from WSL because `gcloud` is blocked b
 .agent-state/
   OWNERSHIP.md            # Human-readable lane map (table above + cross-lane rules)
   tasks.json              # Shared task list
-  locks/                  # Soft-lock files; one per claimed cross-lane edit
 .claude/
   hooks/
     lane-guard.sh         # PreToolUse hook (warn mode)
@@ -70,7 +69,7 @@ CLAUDE.md                 # Addendum: lane awareness rules (see below)
 
 ### `lane-guard.sh` (PreToolUse hook, warn mode)
 
-Triggered on `Edit` and `Write` tool calls. Resolves the shared `.agent-state/OWNERSHIP.md` via `git rev-parse --git-common-dir` (NOT `--git-dir`, which returns the worktree-private dir and would miss the shared state). Reads the current lane from `$LANE` (set in `.claude/settings.local.json` per worktree). If the target file is outside the lane's ownership and no lock exists at `.agent-state/locks/<other-lane>.lock`, the hook prints a warning to stderr with the offending path, the agent's lane, the file's owning lane, and instructions for claiming a lock. **It does not block.** Exit code 0 so the edit proceeds.
+Triggered on `Edit` and `Write` tool calls. Resolves the shared `.agent-state/OWNERSHIP.md` via `git rev-parse --git-common-dir` (NOT `--git-dir`, which returns the worktree-private dir and would miss the shared state). Reads the current lane from `$LANE` (set in `.claude/settings.local.json` per worktree). If the target file is outside the lane's ownership and no lock exists at `<common_dir>/agent-state-locks/<other-lane>.lock`, the hook prints a warning to stderr with the offending path, the agent's lane, the file's owning lane, and instructions for claiming a lock. **It does not block.** Exit code 0 so the edit proceeds.
 
 The warning forces Claude to surface the cross-lane edit in its response text, which gives Steve a visible signal during review without halting work.
 
@@ -80,7 +79,7 @@ A new section (~10 lines) added at the top of mr-sentinel's CLAUDE.md:
 
 > **Lane awareness.** This repo is configured for parallel Claude Code sessions. Your lane is `$LANE` (set in `.claude/settings.local.json`). Before any `Edit` or `Write`, confirm the target file is owned by your lane in `.agent-state/OWNERSHIP.md`. If it is not, either:
 > 1. Tell the user and stop (preferred), or
-> 2. Claim a lock by writing `.agent-state/locks/<owning-lane>.lock` with your lane name, then make the edit. Release the lock by deleting the file when done.
+> 2. Claim a lock by writing `$(git rev-parse --git-common-dir)/agent-state-locks/<owning-lane>.lock` with your lane name, then make the edit. Release the lock by deleting the file when done. The lock lives under the shared `.git/` directory so it is visible across worktrees.
 > Read `.agent-state/tasks.json` at session start. Claim a task by setting its `owner` to your lane and `status` to `in_progress`. Mark `completed` when done.
 
 ### Per-worktree `.claude/settings.local.json`
@@ -147,6 +146,8 @@ Then the pattern is one command away on any of the other 32 portfolio repos.
 2. **Pre-commit hooks in mr-sentinel** — audit `.pre-commit-config.yaml` and any `husky`/`scripts/` hooks. Confirm none write to a shared `./tmp` or `./.cache` path that would collide across worktrees. mr-sentinel is FastAPI + minimal JS, so risk is low but worth a one-time check.
 3. **Norton TLS MITM on Git Bash** — confirmed already-documented constraint. Demo-data lane uses WSL. Other lanes do not invoke `gcloud` or other Norton-MITM-sensitive tools.
 4. **`.claude/settings.local.json` per worktree** — confirm Claude Code reads this file from the worktree directory (not a global), so each lane's `LANE` env var is isolated.
+
+**Locks live under `.git/`, not under `.agent-state/`.** Task 9 smoke testing revealed that `.agent-state/locks/` is PWD-relative: each worktree has its own copy, so a lock claimed in worktree A is invisible to an agent or hook running in worktree B. The fix is to write lock files to `<common_dir>/agent-state-locks/<lane>.lock`, where `<common_dir> = git rev-parse --git-common-dir` — the shared `.git/` directory that backs all worktrees of the same repo. That directory is genuinely shared (worktrees only have a private `.git/worktrees/<name>/` subdir), host-local, and never committed, which makes it the architecturally right place for transient cross-lane coordination state.
 
 ## Future work (post-pilot, not committed)
 
