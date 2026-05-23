@@ -22,19 +22,19 @@
       "id": "T-003",
       "lane": "docs",
       "title": "Devpost form text — copy refinement and final paste-ready version",
-      "status": "pending",
-      "owner": null,
+      "status": "completed",
+      "owner": "main",
       "blocks": [],
-      "notes": "Source: docs/devpost-submission.md. Cliff: 2026-06-11 12:00 PT."
+      "notes": "Source: docs/devpost-submission.md. Cliff: 2026-06-11 12:00 PT. Completed 2026-05-22: verified char counts on all fields against stated targets; tightened Elevator pitch (453→339), Challenges (1084→769), What it does (2075→1939), How we built it (1950→1553). Tagline char count corrected (claimed 99, actual 94). All factual claims re-verified against live state (51 tests pass, Cloud Run /health OK, 8 MRs on dashboard, sha8 1fb25ad2 on !10)."
     },
     {
       "id": "T-004",
       "lane": "docs",
       "title": "Demo-script reconciliation — apply pending Shot 6 + Shot 7 corrections",
-      "status": "pending",
-      "owner": null,
+      "status": "completed",
+      "owner": "main",
       "blocks": [],
-      "notes": "Source: docs/demo-script.md. Shot 6 sha8 5d2e7a14 → 1fb25ad2, failure count 4 → 2. Shot 7 rule-order + last 30d."
+      "notes": "Source: docs/demo-script.md. Shot 6 sha8 5d2e7a14 → 1fb25ad2, failure count 4 → 2. Shot 7 rule-order + last 30d. Completed 2026-05-22: confirmed Shot 6 + Shot 7 prose corrections were already applied in the 5-21 reconciliation pass. Fixed remaining stale line 5 (file header) — 'four security rules failing' → 'no-secrets-in-diff blocker mapped to SOC 2 + ISO 27001 + OWASP-ASVS'. Live audit reverified: 2 fail rows, sha 1fb25ad2."
     },
     {
       "id": "T-005",

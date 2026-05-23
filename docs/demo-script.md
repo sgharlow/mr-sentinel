@@ -2,7 +2,7 @@
 
 **Total runtime:** 3:00
 **Format:** 1080p screen capture with picture-in-picture for on-camera shots
-**Hero MR:** `gitlab.com/sgharlow/governance-demo-app/-/merge_requests/10` — the secret-in-diff archetype. Most visually striking verdict (0.0/10, block, four security rules failing, automated remediation issue).
+**Hero MR:** `gitlab.com/sgharlow/governance-demo-app/-/merge_requests/10` — the secret-in-diff archetype. Most visually striking verdict (0.0/10, block, `no-secrets-in-diff` blocker mapped to SOC 2 + ISO 27001 + OWASP-ASVS, automated remediation issue). Live audit confirms 2 fail rows (`contract-has-spec-link` warning + `no-secrets-in-diff` blocker), commit sha8 `1fb25ad2`.
 
 This script is the verbatim narration plus shot-level camera direction. Total spoken-word count budgets for ~150 wpm delivery, leaving breathing room for cuts.
 
@@ -213,7 +213,7 @@ MIT licensed · Google Cloud Rapid Agent Hackathon · GitLab track
 
 Performed by `/daily-priority mr-sentinel hackathon` Story 5. Each shot annotated above with **Verified** or **STALE** + corrections. Highlights:
 
-- **Hard corrections applied to script:** Shot 6 commit sha8 `5d2e7a14` → `1fb25ad2`; "Failures (4)" → "Failures (2)". Shot 7 top-5 rule order corrected; narration "this week" → "the last thirty days."
+- **Hard corrections applied to script:** Shot 6 commit sha8 `5d2e7a14` → `1fb25ad2`; "Failures (4)" → "Failures (2)". Shot 7 top-5 rule order corrected; narration "this week" → "the last thirty days." 2026-05-22 follow-up: file-header (line 5) "four security rules failing" → "secrets-in-diff blocker mapped to SOC 2 + ISO 27001 + OWASP-ASVS" — relive-audit verified 2 fail rows (warning + blocker), not 4 security rules. Header now matches Shot 6 prose.
 - **Soft TODO for Steve before record:** Shot 5 log strings need WSL Cloud Logging verification (Norton MITM blocks gcloud from the Windows PC). Latency claim "30 seconds end to end" needs re-measure.
 - **Post-v2-seed re-pass required:** When `seed-archetype-mrs-v2.sh` runs, the dashboard counts in Shot 7 (8 → 12 MRs, distribution shifts) and possibly the `!10` commit sha8 (Shot 6) will change. Record AFTER the seed has settled, and either accept the updated numbers or pin the narration to a stable window.
 - **No fundamental story drift.** The hero MR `!10` still has score 0.0, verdict block, and the `no-secrets-in-diff` evidence quote matches verbatim. The demo's punchline is intact.

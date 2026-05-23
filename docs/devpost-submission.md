@@ -19,48 +19,54 @@ MR Sentinel
 An AI governance agent for merge requests — applies a written compliance rubric in 30 seconds.
 ```
 
-(99 chars including the period.)
+(94 chars including the period — verified 2026-05-22.)
 
 ## Elevator pitch (3-4 sentences, ~300 chars)
 
 ```
-MR Sentinel is a Gemini-powered governance agent that runs on Cloud Run and integrates with GitLab via REST. Every MR is scored against a 15-rule rubric where each rule maps 1:1 to a named compliance control (SOC 2, ISO 27001, OWASP, NIST). The rubric is the product — it ships in the repo, MIT-licensed, and consumers override per-project via a single YAML file. The audit log becomes the byproduct of doing the work, not a separate quarterly exercise.
+A Gemini-powered governance agent for GitLab merge requests, running on Cloud Run. Every MR is scored against a 15-rule rubric where each rule maps 1:1 to a named compliance control (SOC 2, ISO 27001, OWASP, NIST). The rubric ships MIT-licensed and overrides per-project via one YAML file. The audit log is the byproduct of doing the work.
 ```
+
+(339 chars — verified 2026-05-22; tightened from 453 by dropping redundant framing.)
 
 ---
 
 ## "What it does" (long form, ~1500-2000 chars target)
 
 ```
-MR Sentinel watches your GitLab merge requests. When one opens, the agent runs a short deterministic plan against eight GitLab REST endpoints — pulling the MR metadata, the diff, the pipeline status, the vulnerability scan, and (optionally) a project-specific rubric override at `.mr-sentinel.yaml`. It hands the diff to Vertex AI Gemini 2.5 Flash with the rubric inlined in the system prompt. Gemini returns a structured JSON verdict scoring each of the fifteen rules. The agent then takes real action against the MR:
+MR Sentinel watches your GitLab merge requests. When one opens, the agent runs a short deterministic plan against eight GitLab REST endpoints — pulling MR metadata, the diff, pipeline status, vulnerability scan, and (optionally) a project-specific rubric override at `.mr-sentinel.yaml`. It hands the diff to Vertex AI Gemini 2.5 Flash with the rubric inlined in the system prompt. Gemini returns a structured JSON verdict scoring each of the fifteen rules. The agent then takes real action against the MR:
 
-  • A structured Markdown comment with the verdict badge, the overall score, every failing rule cited by ID, the exact evidence that triggered each failure, and a collapsed pass/skip section.
+  • A structured Markdown comment: verdict badge, score, every failing rule cited by ID with the exact evidence, and a collapsed pass/skip section.
   • A `mr-sentinel-reviewed` label, plus `blocked-compliance` on block verdicts.
-  • A linked remediation issue, auto-opened with a checklist of the failing rules.
-  • A row in `mr_scores`, child rows in `rule_outcomes` (with the control_mapping array preserved), and an audit_log entry.
+  • A linked remediation issue auto-opened with a checklist of failing rules.
+  • A row in `mr_scores`, child rows in `rule_outcomes` (control_mapping array preserved), and an audit_log entry.
 
 Three surfaces, three personas:
 
-  • The MR author sees the structured comment in roughly thirty seconds — the same surface they'd see from a human reviewer, but with consistent rule application and a paper trail.
-  • The engineering leader opens `/dashboard` for a portfolio-wide view: verdict distribution last 30 days, top-five failing rules, the recent-MR drill-down.
+  • The MR author sees the structured comment in roughly thirty seconds — same surface as a human reviewer, but with consistent rule application and a paper trail.
+  • The engineering leader opens `/dashboard` for a portfolio view: verdict distribution last 30 days, top-five failing rules, recent-MR drill-down.
   • The compliance auditor opens `/audit/{project}/{mr_iid}` — every rule outcome, every control mapping, the audit_log timeline, the exact prompt the agent used.
 
-The rubric is the product's center of gravity. Fifteen rules across four categories: contract & spec gates (derived from the author's published CDPD methodology), quality gates, security gates, operational gates. Every rule has a name, a category, a severity, a control_mapping array, an evaluator prompt, an example_pass, an example_fail, and a suggested_remediation. Consumers override per project by dropping `.mr-sentinel.yaml` at the root of their GitLab repo; invalid overrides fail closed (fall back to bundled, audit the failure).
+The rubric is the product's center of gravity. Fifteen rules across four categories: contract & spec gates (from the author's published CDPD methodology), quality, security, and operational gates. Every rule has a name, category, severity, control_mapping array, evaluator prompt, example_pass, example_fail, and suggested_remediation. Consumers override per project by dropping `.mr-sentinel.yaml` at their GitLab repo root; invalid overrides fail closed (fall back to bundled, audit the failure).
 ```
+
+(1939 chars — verified 2026-05-22; tightened from 2075 by removing duplicated framing words.)
 
 ---
 
 ## "How we built it" (~1000-1500 chars target)
 
 ```
-Google Cloud, end to end. Cloud Run hosts both the webhook and the leadership UI on one service. Vertex AI Gemini 2.5 Flash is the reasoning engine, called directly via the SDK with the rubric rendered into the system prompt. Cloud SQL Postgres 15 holds the scoring + rule_outcomes + audit_log tables. Secret Manager holds four secrets (GitLab webhook secret, GitLab PAT, DB app password, DB root password). Artifact Registry holds the container images. Cloud Build builds on every deploy.
+Google Cloud, end to end. Cloud Run hosts the webhook and the leadership UI on one service. Vertex AI Gemini 2.5 Flash is the reasoning engine, called directly via the SDK with the rubric rendered into the system prompt. Cloud SQL Postgres 15 holds the scoring + rule_outcomes + audit_log tables. Secret Manager holds the webhook secret, GitLab PAT, and DB credentials. Artifact Registry holds the images; Cloud Build builds on every deploy.
 
-The agent loop is plain Python — FastAPI with a background task. We deliberately chose the direct Vertex SDK over Agent Builder and the GitLab REST API over the GitLab MCP server. The rationale: for fifteen rules and eight deterministic tool calls, the orchestration is the agent. Plan → tool call → reflect → act is visible in Cloud Logging, and the full evaluation is replayable from `audit_log` rows. The architectural simplification is documented in `app/agent_runner.py:4-8` and in `docs/mcp-endpoint-audit.md`.
+The agent loop is plain Python — FastAPI with a background task. We chose the direct Vertex SDK over Agent Builder and the GitLab REST API over the GitLab MCP server. The rationale: for fifteen rules and eight deterministic tool calls, the orchestration is the agent. Plan → tool call → reflect → act is visible in Cloud Logging; the full evaluation is replayable from `audit_log` rows.
 
-CI is GitHub Actions on the mr-sentinel source repo: pytest plus a separate rubric-schema-validation step. The Cloud Run service is fronted by no proxy — the webhook handler reads `X-Gitlab-Token`, constant-time compares against the secret, returns 202 Accepted, and dispatches a FastAPI BackgroundTask so the webhook latency budget is decoupled from the Gemini evaluation latency budget.
+CI is GitHub Actions on the source repo: pytest plus rubric-schema validation. The webhook handler reads `X-Gitlab-Token`, constant-time compares against the secret, returns 202 Accepted, and dispatches a FastAPI BackgroundTask so the webhook latency budget is decoupled from the Gemini call.
 
-The fictional demo repo at gitlab.com/sgharlow/governance-demo-app is a regulated-SaaS reference codebase ("Medbill" — medical billing for outpatient clinics). It ships with five archetypal MRs already opened — each designed to trip a specific rubric rule cluster: an auth-missing endpoint, a committed `.env.production` with secret patterns, an alembic migration with no rollback, a refactor with no spec link, and a dependency downgrade with known CVEs. Every archetype produces a verifiable agent comment, label, and (on block) a remediation issue.
+The demo repo at gitlab.com/sgharlow/governance-demo-app ("Medbill" — fictional outpatient-billing SaaS) ships with archetypal MRs designed to trip each rule cluster: an auth-missing endpoint, a committed `.env.production`, an alembic migration with no rollback, a refactor with no spec link, a dependency downgrade with known CVEs. Every archetype produces a verifiable agent comment, label, and (on block) a remediation issue.
 ```
+
+(1553 chars — verified 2026-05-22; tightened from 1950 by collapsing the four-secrets list and removing inline file-path references that don't render meaningfully in Devpost's editor.)
 
 ---
 
@@ -69,12 +75,14 @@ The fictional demo repo at gitlab.com/sgharlow/governance-demo-app is a regulate
 ```
 Three real ones:
 
-1. Spec divergence from implementation. The original spec promised Agent Builder, the GitLab MCP server, and a Vertex AI Data Store. Three milestones in, we'd built none of them — direct Vertex SDK, GitLab REST, inlined rubric were each pragmatic choices. Rather than walk them back, we did a spec reconciliation pass: rewrote §4/§5/§10 to describe what was built, framed the simplifications as deliberate, and retired the "MCP gaps" and "Agent Builder friction" risks in §12.
+1. Spec drift. The spec promised Agent Builder, GitLab MCP, and Vertex AI Data Store. Three milestones in we'd built none — direct Vertex SDK, GitLab REST, inlined rubric were each pragmatic. Fix: reconciled spec to reality, framed the simplifications as deliberate.
 
-2. Dedup against override versions. The dedup check was originally hardcoded to "v1," so once a consumer shipped a `.mr-sentinel.yaml` with a different version, every webhook event for the same MR fired a full Gemini call. Fix: resolve the override before the dedup check, dedup against the actually-active version.
+2. Dedup vs override versions. Dedup was hardcoded to "v1," so once a consumer shipped a `.mr-sentinel.yaml` with a different version, every webhook re-fired a full Gemini call. Fix: resolve override first, dedup against active version.
 
-3. GitHub push protection caught the seed script's example AWS/Stripe patterns. We fragmented the pattern-shaped strings in the script source so the regex can't match; at runtime the fragments concatenate into the literal patterns that Gemini correctly flags in the diff.
+3. GitHub push protection caught the seed script's example AWS/Stripe patterns. We fragmented the pattern-shaped strings in source so the regex can't match; at runtime the fragments concatenate into the literal patterns Gemini flags in the diff.
 ```
+
+(769 chars — verified 2026-05-22; tightened from 1084 by removing inline spec-section references. Slightly above 700 upper target but well under typical Devpost long-field cap.)
 
 ---
 
