@@ -6,19 +6,29 @@
       "app/persistence.py",
       "Dockerfile",
       "Makefile",
-      "db/"
+      "db/",
+      "app/__init__.py",
+      "scripts/cloud-run-deploy.sh",
+      "scripts/db-migrate.sh",
+      "scripts/gcp-bootstrap.sh",
+      "tests/test_gitlab_client.py",
+      "tests/test_webhook.py"
     ],
     "evaluator": [
       "app/agent_runner.py",
-      "rubric/"
+      "rubric/",
+      "tests/test_agent_runner.py",
+      "tests/test_rubric.py"
     ],
     "demo-data": [
       "scripts/seed-",
       "scripts/gitlab-bootstrap.sh",
-      "scripts/test-override-live.sh"
+      "scripts/test-override-live.sh",
+      "scripts/cleanup-override-verification.sh"
     ],
     "dashboard": [
-      "app/dashboard.py"
+      "app/dashboard.py",
+      "tests/test_dashboard.py"
     ],
     "docs": [
       "docs/",
