@@ -39,7 +39,9 @@ gcp-credentials.json
 service-account*.json
 
 # Claude Code
-.claude/
+.claude/*
+!.claude/hooks/
+!.claude/settings.json
 
 # OS
 Thumbs.db

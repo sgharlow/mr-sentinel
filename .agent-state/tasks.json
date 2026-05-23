@@ -1,0 +1,50 @@
+{
+  "tasks": [
+    {
+      "id": "T-001",
+      "lane": "demo-data",
+      "title": "Run scripts/seed-archetype-mrs-v2.sh from WSL and capture per-rule coverage",
+      "status": "pending",
+      "owner": null,
+      "blocks": ["T-002"],
+      "notes": "Norton blocks gcloud on Git Bash — must run from WSL. Target coverage: 14/15 rubric rules tripped after seed."
+    },
+    {
+      "id": "T-002",
+      "lane": "demo-data",
+      "title": "Update docs/live-fire-2026-05-21.md with post-v2-seed dashboard scrape",
+      "status": "blocked",
+      "owner": null,
+      "blocks": [],
+      "notes": "Depends on T-001."
+    },
+    {
+      "id": "T-003",
+      "lane": "docs",
+      "title": "Devpost form text — copy refinement and final paste-ready version",
+      "status": "pending",
+      "owner": null,
+      "blocks": [],
+      "notes": "Source: docs/devpost-submission.md. Cliff: 2026-06-11 12:00 PT."
+    },
+    {
+      "id": "T-004",
+      "lane": "docs",
+      "title": "Demo-script reconciliation — apply pending Shot 6 + Shot 7 corrections",
+      "status": "pending",
+      "owner": null,
+      "blocks": [],
+      "notes": "Source: docs/demo-script.md. Shot 6 sha8 5d2e7a14 → 1fb25ad2, failure count 4 → 2. Shot 7 rule-order + last 30d."
+    },
+    {
+      "id": "T-005",
+      "lane": null,
+      "title": "Verify scaffolding on a real worktree before launching Phase 1",
+      "status": "pending",
+      "owner": null,
+      "blocks": [],
+      "notes": "Owner: Steve. Smoke test described in Task 9 of the implementation plan."
+    }
+  ],
+  "version": 1
+}

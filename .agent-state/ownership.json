@@ -1,0 +1,41 @@
+{
+  "lanes": {
+    "backend": [
+      "app/main.py",
+      "app/gitlab_client.py",
+      "app/persistence.py",
+      "Dockerfile",
+      "Makefile",
+      "db/",
+      "app/__init__.py",
+      "scripts/cloud-run-deploy.sh",
+      "scripts/db-migrate.sh",
+      "scripts/gcp-bootstrap.sh",
+      "tests/test_gitlab_client.py",
+      "tests/test_webhook.py"
+    ],
+    "evaluator": [
+      "app/agent_runner.py",
+      "rubric/",
+      "tests/test_agent_runner.py",
+      "tests/test_rubric.py"
+    ],
+    "demo-data": [
+      "scripts/seed-",
+      "scripts/gitlab-bootstrap.sh",
+      "scripts/test-override-live.sh",
+      "scripts/cleanup-override-verification.sh"
+    ],
+    "dashboard": [
+      "app/dashboard.py",
+      "tests/test_dashboard.py"
+    ],
+    "docs": [
+      "docs/",
+      "README.md",
+      "mr-sentinel-hackathon-spec.md"
+    ]
+  },
+  "shared_state": ".agent-state/",
+  "version": 1
+}
