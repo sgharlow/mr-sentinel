@@ -27,7 +27,7 @@ repo_root=$(cd "$(dirname "$common_dir")" 2>/dev/null && pwd) || exit 0
 payload=$(cat)
 
 LANE="$LANE" REPO_ROOT="$repo_root" PAYLOAD="$payload" python <<'PY'
-import json, os, sys, re, pathlib
+import json, os, pathlib, re, sys
 
 def normalize(p: str) -> pathlib.Path:
     """Convert Git Bash POSIX-style drive paths (/c/Users/...) to Windows form,
@@ -67,8 +67,11 @@ ownership_path = repo_root / ".agent-state" / "ownership.json"
 if not ownership_path.exists():
     sys.exit(0)
 
-with ownership_path.open() as f:
-    data = json.load(f)
+try:
+    with ownership_path.open() as f:
+        data = json.load(f)
+except (ValueError, OSError):
+    sys.exit(0)
 
 owning_lane = None
 for ln, patterns in data["lanes"].items():
@@ -78,8 +81,9 @@ for ln, patterns in data["lanes"].items():
             matched = rel_path.startswith(pat)
         elif pat == rel_path:
             matched = True
-        elif "/" in pat and rel_path.startswith(pat):
-            # Prefix-without-slash match (e.g., "scripts/seed-")
+        elif pat.endswith("-") and rel_path.startswith(pat):
+            # Stem-prefix match (e.g., "scripts/seed-" matches scripts/seed-foo.sh).
+            # Convention: patterns intended as prefixes end with '-'.
             matched = True
         if matched:
             owning_lane = ln
