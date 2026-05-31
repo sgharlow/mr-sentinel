@@ -1,0 +1,6 @@
+## whoami: sharlow
+## gcloud path: /home/sharlow/google-cloud-sdk/bin/gcloud
+## project (config): aicin-477004
+  [OK]   gcloud token refresh works
+## active account: sgharlow@gmail.com
+## project set to expected (aicin-477004)? yes

@@ -16,7 +16,7 @@ MR Sentinel
 ## Tagline (≤ 100 chars)
 
 ```
-An AI governance agent for merge requests — applies a written compliance rubric in 30 seconds.
+An AI governance agent for merge requests — applies a written compliance rubric in 20 seconds.
 ```
 
 (94 chars including the period — verified 2026-05-22.)
@@ -43,7 +43,7 @@ MR Sentinel watches your GitLab merge requests. When one opens, the agent runs a
 
 Three surfaces, three personas:
 
-  • The MR author sees the structured comment in roughly thirty seconds — same surface as a human reviewer, but with consistent rule application and a paper trail.
+  • The MR author sees the structured comment in roughly twenty seconds — same surface as a human reviewer, but with consistent rule application and a paper trail.
   • The engineering leader opens `/dashboard` for a portfolio view: verdict distribution last 30 days, top-five failing rules, recent-MR drill-down.
   • The compliance auditor opens `/audit/{project}/{mr_iid}` — every rule outcome, every control mapping, the audit_log timeline, the exact prompt the agent used.
 
@@ -89,7 +89,7 @@ Three real ones:
 ## "Accomplishments that we're proud of" (~400-500 chars)
 
 ```
-The control-mapping framing turns this from "AI code reviewer" into "compliance-grade governance." Every comment ties back to a named control auditors recognize. The audit log is replayable end-to-end — same prompt, same diff, same response, persisted forever. The whole loop runs in roughly thirty seconds on Cloud Run scale-to-zero. The rubric ships as MIT-licensed reusable IP — any engineering organization can fork, customize the YAML, and run their own instance. 51 tests in CI, all green, no flakes.
+The control-mapping framing turns this from "AI code reviewer" into "compliance-grade governance." Every comment ties back to a named control auditors recognize. The audit log is replayable end-to-end — same prompt, same diff, same response, persisted forever. The whole loop runs in about twenty seconds median (p95 under thirty) on Cloud Run scale-to-zero. The rubric ships as MIT-licensed reusable IP — any engineering organization can fork, customize the YAML, and run their own instance. 51 tests in CI, all green, no flakes.
 ```
 
 ---

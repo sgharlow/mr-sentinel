@@ -1,0 +1,71 @@
+MR Sentinel closeout — 2026-05-31T23:15:02Z — output dir: docs/closeout-20260531
+Phase toggles: SEED=0  SQL=0
+
+========== PHASE 0: preflight ==========
+## whoami: sharlow
+## gcloud path: /home/sharlow/google-cloud-sdk/bin/gcloud
+## project (config): aicin-477004
+  [OK]   gcloud token refresh works
+## active account: sgharlow@gmail.com
+## project set to expected (aicin-477004)? yes
+  [OK]   /health -> {"status":"ok"}
+
+========== PHASE 1: smoke test ==========
+[1;34m[smoke][0m service URL: https://mr-sentinel-webhook-n6oitfxdra-uc.a.run.app
+[1;34m[smoke][0m test 1: /health returns 200
+  body: {"status":"ok"}
+  code: 200
+[1;34m[smoke][0m test 2: webhook rejects missing token with 401
+  no-token response: 401
+[1;34m[smoke][0m test 3: webhook rejects wrong token with 401
+  bad-token response: 401
+[1;34m[smoke][0m test 4: webhook accepts correct token with 202
+  good-token response: 202
+[1;34m[smoke][0m all 4 checks passed.
+
+[1;34m[smoke][0m service URL for GitLab webhook config: https://mr-sentinel-webhook-n6oitfxdra-uc.a.run.app/gitlab/webhook
+  [OK]   smoke-test.sh ran (review docs/closeout-20260531/01-smoke.txt for the 4 checks)
+
+========== PHASE 2: v2 archetype seed (SEED=0) ==========
+  [WARN] skipped (SEED!=1). To seed v2 archetypes: SEED=1 bash docs/closeout-runbook.sh
+
+========== PHASE 3: latency capture (last 30 days) ==========
+log entries pulled: 445
+sample size -- gemini-call legs: 142
+sample size -- full-loop legs:   17
+gemini-eval latency (sec):  p50=10.6  p95=1751.4  p99=84517.6  max=84587.3
+full-loop latency (sec):    p50=19.5  p95=30.0  p99=33.4  max=33.4
+  [OK]   latency results -> docs/closeout-20260531/03-latency-results.txt (paste p50 into demo-script Shot 5 + README Status)
+
+========== PHASE 4: Shot 5 log-string verification (MR !10) ==========
+captured 194 candidate log lines -> docs/closeout-20260531/04-shot5-logstrings.txt
+  [OK]   Compare these EXACT strings against demo-script.md Shot 5 visual cues; update wording if drifted.
+
+========== PHASE 5: linked-issue audit (GitLab REST) ==========
+remediation issues found: 0
+  [OK]   review docs/closeout-20260531/05-linked-issues.txt — expect 1 issue per block verdict (!6,!7,!9,!10,!11,!13)
+
+========== PHASE 6: Cloud SQL audit row count (SQL=0) ==========
+  [WARN] skipped (SQL!=1). The dashboard already reflects DB state, so this is optional verification.
+
+========== SUMMARY ==========
+# MR Sentinel closeout summary — 2026-05-31T23:15:37Z
+
+| Phase | Artifact | Status |
+|---|---|---|
+| 0 preflight | 00-preflight.txt / 00-health.txt | health OK |
+| 1 smoke | 01-smoke.txt | ran |
+| 2 seed | 02-seed.txt | skipped (SEED=0) |
+| 3 latency | 03-latency-results.txt | captured |
+| 4 shot5 logs | 04-shot5-logstrings.txt | captured |
+| 5 issue audit | 05-linked-issues.txt | CHECK |
+| 6 cloud sql | 06-sql-rowcount.txt | skipped (SQL=0) |
+
+## Next actions for Claude (Windows session)
+1. Read 03-latency-results.txt -> patch demo-script.md Shot 5 + README Status with the full-loop p50.
+2. Read 04-shot5-logstrings.txt -> reconcile Shot 5 visual cues against the real log wording.
+3. Read 05-linked-issues.txt -> confirm one issue per block verdict; flag any missing.
+4. If SEED ran: re-run the dashboard scrape and update demo-script Shot 7 + live-fire doc counts.
+
+  [OK]   DONE. All artifacts in: docs/closeout-20260531/
+Tell your Claude session: "read docs/closeout-20260531/CLOSEOUT-SUMMARY.md and process the closeout results"

@@ -4,7 +4,7 @@
 
 <h1 align="center">MR Sentinel</h1>
 
-> An AI governance agent for merge requests — applies a written compliance rubric in ~30 seconds, with a paper trail.
+> An AI governance agent for merge requests — applies a written compliance rubric in ~20 seconds (p95 under 30), with a paper trail.
 
 **Try it now:** [live dashboard](https://mr-sentinel-webhook-n6oitfxdra-uc.a.run.app/dashboard) · [sample audit page](https://mr-sentinel-webhook-n6oitfxdra-uc.a.run.app/audit/sgharlow/governance-demo-app/10) · [demo MR](https://gitlab.com/sgharlow/governance-demo-app/-/merge_requests/10)
 
@@ -17,7 +17,7 @@
 
 ## Status
 
-**Days 1-3, 4-8, 9-14, 15-19 milestones closed (4 of 6).** Day 6 of 26 — running ~12 days ahead of the spec schedule. End-to-end loop verified live on Cloud Run: GitLab MR webhook → fetch MR + diffs + pipeline + vulnerabilities → fetch optional `.mr-sentinel.yaml` per-project rubric override → Vertex AI Gemini 2.5 Flash evaluation against 15 rubric rules → upsert structured comment + labels on the MR → open linked remediation issue on block verdicts → persist score + child rule outcomes + audit row to Cloud SQL. Leadership dashboard live at `/dashboard` + `/audit/{project}/{mr_iid}` (server-rendered, dark theme — Days 15-19 MVP shipped 2026-05-18). Latency ~30s p50. 51/51 tests green, CI green. GCP infrastructure on shared `aicin-477004`. See [`mr-sentinel-hackathon-spec.md`](mr-sentinel-hackathon-spec.md) for the full spec and 26-day build plan.
+**Days 1-3, 4-8, 9-14, 15-19 milestones closed (4 of 6).** Day 6 of 26 — running ~12 days ahead of the spec schedule. End-to-end loop verified live on Cloud Run: GitLab MR webhook → fetch MR + diffs + pipeline + vulnerabilities → fetch optional `.mr-sentinel.yaml` per-project rubric override → Vertex AI Gemini 2.5 Flash evaluation against 15 rubric rules → upsert structured comment + labels on the MR → open linked remediation issue on block verdicts → persist score + child rule outcomes + audit row to Cloud SQL. Leadership dashboard live at `/dashboard` + `/audit/{project}/{mr_iid}` (server-rendered, dark theme — Days 15-19 MVP shipped 2026-05-18). End-to-end latency (measured 2026-05-31 over 30 days of Cloud Logging, n=17 full webhook→comment legs): **p50 19.5s, p95 30.0s, p99 33.4s**. 51/51 tests green, CI green. GCP infrastructure on shared `aicin-477004`. See [`mr-sentinel-hackathon-spec.md`](mr-sentinel-hackathon-spec.md) for the full spec and 26-day build plan.
 
 ### GCP resources live
 

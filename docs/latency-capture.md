@@ -128,16 +128,20 @@ After capture, edit the table in **Results** below with the actual values, then 
 
 ## Results
 
-**Captured:** _YYYY-MM-DD by Steve in WSL_
-**Window:** last 30 days ending _YYYY-MM-DD_
-**Sample size:** _N_ full-loop legs / _M_ Gemini-call legs
+**Captured:** 2026-05-31 in WSL (`docs/closeout-20260531/03-latency-results.txt`)
+**Window:** last 30 days ending 2026-05-31
+**Sample size:** 17 full-loop legs / 142 Gemini-call legs
 
 | Metric | p50 | p95 | p99 | max |
 |--------|-----|-----|-----|-----|
-| Gemini eval (start → "evaluation: score=" log) | _s_ | _s_ | _s_ | _s_ |
-| Full agent loop (start → comment posted) | _s_ | _s_ | _s_ | _s_ |
+| Gemini eval (start → "evaluation: score=" log) | 10.6s | ⚠️ artifact | ⚠️ artifact | ⚠️ artifact |
+| **Full agent loop (start → comment posted)** | **19.5s** | **30.0s** | **33.4s** | **33.4s** |
 
-**Demo-script narration update:** _full-loop p50 rounded to whole seconds_.
+**Use the full-loop row.** The "~30s" figure that lived in the README/demo for weeks turns out to be the **p95**, not the p50 — the real median is ~20s.
+
+**⚠️ The Gemini-leg tail is a measurement artifact, not real latency.** The `evaluation: score=...` log line carries **no `mr_iid`**, so the aggregator pairs each Gemini-done event FIFO against the oldest unmatched start across the whole 30-day window. With 142 dones vs only 17 cleanly-matched starts, that pairs dones with stale starts → p95 1751s, p99 84517s (~23h). The p50 (10.6s) survives because most pairs are still adjacent. **Fix for a clean future capture:** add `mr_iid=` to the `evaluation: score=` log line in `app/agent_runner.py`, then pair the Gemini leg by iid the way the full loop already does. Not required for submission — the full-loop numbers are the citable ones.
+
+**Demo-script narration update:** done — Shot 5 now says "about twenty seconds end to end." README Status + tagline updated to the measured p50/p95/p99.
 
 ### Notes
 

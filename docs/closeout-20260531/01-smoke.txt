@@ -1,0 +1,13 @@
+[1;34m[smoke][0m service URL: https://mr-sentinel-webhook-n6oitfxdra-uc.a.run.app
+[1;34m[smoke][0m test 1: /health returns 200
+  body: {"status":"ok"}
+  code: 200
+[1;34m[smoke][0m test 2: webhook rejects missing token with 401
+  no-token response: 401
+[1;34m[smoke][0m test 3: webhook rejects wrong token with 401
+  bad-token response: 401
+[1;34m[smoke][0m test 4: webhook accepts correct token with 202
+  good-token response: 202
+[1;34m[smoke][0m all 4 checks passed.
+
+[1;34m[smoke][0m service URL for GitLab webhook config: https://mr-sentinel-webhook-n6oitfxdra-uc.a.run.app/gitlab/webhook

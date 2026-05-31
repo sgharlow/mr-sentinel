@@ -1,0 +1,4 @@
+sample size -- gemini-call legs: 142
+sample size -- full-loop legs:   17
+gemini-eval latency (sec):  p50=10.6  p95=1751.4  p99=84517.6  max=84587.3
+full-loop latency (sec):    p50=19.5  p95=30.0  p99=33.4  max=33.4

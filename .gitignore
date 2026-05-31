@@ -50,3 +50,6 @@ desktop.ini
 # Project-local
 .local/
 scratch/
+
+# Closeout raw captures (large; keep summary + results .txt, not raw log dumps)
+docs/closeout-*/*-raw.json

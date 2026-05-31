@@ -1,0 +1,194 @@
+2026-05-31T23:15:13.651742Z	2026-05-31 23:15:13,652 INFO mr_sentinel using project override rubric (v2)
+2026-05-31T23:15:12.544715Z	2026-05-31 23:15:12,545 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=1 action=open
+2026-05-19T05:11:49.326149Z	2026-05-19 05:11:49,326 INFO mr_sentinel using project override rubric (v2)
+2026-05-19T05:11:48.810958Z	2026-05-19 05:11:48,811 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=11 action=update
+2026-05-19T05:11:48.364502Z	2026-05-19 05:11:48,364 INFO mr_sentinel posted comment note_id=3361770671 on MR !11 (score_id=141)
+2026-05-19T05:11:47.819492Z	2026-05-19 05:11:47,819 INFO mr_sentinel created followup issue !5 — https://gitlab.com/sgharlow/governance-demo-app/-/work_items/5
+2026-05-19T05:11:47.090877Z	2026-05-19 05:11:47,090 INFO mr_sentinel evaluation: score=3.0 verdict=block rules=15
+2026-05-19T05:11:44.613695Z	2026-05-19 05:11:44,614 INFO mr_sentinel using project override rubric (v2)
+2026-05-19T05:11:44.128787Z	2026-05-19 05:11:44,129 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=13 action=update
+2026-05-19T05:11:43.601229Z	2026-05-19 05:11:43,601 INFO mr_sentinel posted comment note_id=3361770539 on MR !13 (score_id=140)
+2026-05-19T05:11:43.505036Z	2026-05-19 05:11:43,505 INFO mr_sentinel using project override rubric (v2)
+2026-05-19T05:11:43.011665Z	2026-05-19 05:11:43,012 INFO mr_sentinel created followup issue !4 — https://gitlab.com/sgharlow/governance-demo-app/-/work_items/4
+2026-05-19T05:11:42.931726Z	2026-05-19 05:11:42,932 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=9 action=update
+2026-05-19T05:11:42.592093Z	2026-05-19 05:11:42,592 INFO mr_sentinel using project override rubric (v2)
+2026-05-19T05:11:42.300936Z	2026-05-19 05:11:42,301 INFO mr_sentinel evaluation: score=1.0 verdict=block rules=15
+2026-05-19T05:11:42.300069Z	2026-05-19 05:11:42,300 INFO mr_sentinel using project override rubric (v2)
+2026-05-19T05:11:42.218598Z	2026-05-19 05:11:42,219 INFO mr_sentinel posted comment note_id=3361770499 on MR !9 (score_id=139)
+2026-05-19T05:11:42.058817Z	2026-05-19 05:11:42,059 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=10 action=update
+2026-05-19T05:11:41.682176Z	2026-05-19 05:11:41,682 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=12 action=update
+2026-05-19T05:11:41.611403Z	2026-05-19 05:11:41,611 INFO mr_sentinel posted comment note_id=3361770482 on MR !10 (score_id=138)
+2026-05-19T05:11:41.609397Z	2026-05-19 05:11:41,609 INFO mr_sentinel created followup issue !3 — https://gitlab.com/sgharlow/governance-demo-app/-/work_items/3
+2026-05-19T05:11:41.102265Z	2026-05-19 05:11:41,102 INFO mr_sentinel created followup issue !2 — https://gitlab.com/sgharlow/governance-demo-app/-/work_items/2
+2026-05-19T05:11:40.855797Z	2026-05-19 05:11:40,856 INFO mr_sentinel posted comment note_id=3361770461 on MR !12 (score_id=137)
+2026-05-19T05:11:40.662238Z	2026-05-19 05:11:40,662 INFO mr_sentinel evaluation: score=2.0 verdict=block rules=15
+2026-05-19T05:11:40.293213Z	2026-05-19 05:11:40,293 INFO mr_sentinel evaluation: score=0.0 verdict=block rules=15
+2026-05-19T05:11:40.083967Z	2026-05-19 05:11:40,084 INFO mr_sentinel evaluation: score=7.0 verdict=warn rules=15
+2026-05-19T05:11:24.809483Z	2026-05-19 05:11:24,809 INFO mr_sentinel using project override rubric (v2)
+2026-05-19T05:11:24.724706Z	2026-05-19 05:11:24,724 INFO mr_sentinel using project override rubric (v2)
+2026-05-19T05:11:24.414709Z	2026-05-19 05:11:24,414 INFO mr_sentinel using project override rubric (v2)
+2026-05-19T05:11:24.388122Z	2026-05-19 05:11:24,388 INFO mr_sentinel using project override rubric (v2)
+2026-05-19T05:11:23.875533Z	2026-05-19 05:11:23,876 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=13 action=open
+2026-05-19T05:11:23.845580Z	2026-05-19 05:11:23,846 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=12 action=open
+2026-05-19T05:11:23.825330Z	2026-05-19 05:11:23,826 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=11 action=open
+2026-05-19T05:11:23.809737Z	2026-05-19 05:11:23,810 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=10 action=open
+2026-05-19T05:11:13.055145Z	2026-05-19 05:11:13,055 INFO mr_sentinel using project override rubric (v2)
+2026-05-19T05:11:12.208050Z	2026-05-19 05:11:12,208 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=9 action=open
+2026-05-19T04:43:47.999327Z	2026-05-19 04:43:48,000 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=8 action=close
+2026-05-19T04:43:47.238477Z	2026-05-19 04:43:47,238 INFO mr_sentinel using project override rubric (v2)
+2026-05-19T04:43:46.736538Z	2026-05-19 04:43:46,737 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=8 action=update
+2026-05-19T04:42:29.975643Z	2026-05-19 04:42:29,976 INFO mr_sentinel using project override rubric (v2)
+2026-05-19T04:42:28.729015Z	2026-05-19 04:42:28,729 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=8 action=update
+2026-05-19T04:42:28.304170Z	2026-05-19 04:42:28,304 INFO mr_sentinel updated comment note_id=3361718824 on MR !8 (score_id=61)
+2026-05-19T04:42:27.632405Z	2026-05-19 04:42:27,632 INFO mr_sentinel evaluation: score=10.0 verdict=pass rules=15
+2026-05-19T04:42:20.752800Z	2026-05-19 04:42:20,753 INFO mr_sentinel using project override rubric (vv2)
+2026-05-19T04:42:19.667285Z	2026-05-19 04:42:19,667 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=8 action=update
+2026-05-19T04:42:19.144517Z	2026-05-19 04:42:19,144 INFO mr_sentinel updated comment note_id=3361718824 on MR !8 (score_id=61)
+2026-05-19T04:42:18.434978Z	2026-05-19 04:42:18,435 INFO mr_sentinel evaluation: score=10.0 verdict=pass rules=15
+2026-05-19T04:42:10.238151Z	2026-05-19 04:42:10,238 INFO mr_sentinel using project override rubric (vv2)
+2026-05-19T04:42:09.107864Z	2026-05-19 04:42:09,108 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=8 action=update
+2026-05-19T04:42:08.589319Z	2026-05-19 04:42:08,589 INFO mr_sentinel updated comment note_id=3361718824 on MR !8 (score_id=61)
+2026-05-19T04:42:07.939268Z	2026-05-19 04:42:07,939 INFO mr_sentinel evaluation: score=9.0 verdict=pass rules=15
+2026-05-19T04:42:00.501122Z	2026-05-19 04:42:00,500 INFO mr_sentinel using project override rubric (vv2)
+2026-05-19T04:41:59.632562Z	2026-05-19 04:41:59,633 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=8 action=update
+2026-05-19T04:41:59.242373Z	2026-05-19 04:41:59,243 INFO mr_sentinel updated comment note_id=3361718824 on MR !8 (score_id=61)
+2026-05-19T04:41:58.476995Z	2026-05-19 04:41:58,477 INFO mr_sentinel evaluation: score=9.0 verdict=pass rules=15
+2026-05-19T04:41:51.501367Z	2026-05-19 04:41:51,501 INFO mr_sentinel using project override rubric (vv2)
+2026-05-19T04:41:50.483839Z	2026-05-19 04:41:50,484 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=8 action=update
+2026-05-19T04:41:50.015508Z	2026-05-19 04:41:50,015 INFO mr_sentinel updated comment note_id=3361718824 on MR !8 (score_id=61)
+2026-05-19T04:41:49.261434Z	2026-05-19 04:41:49,261 INFO mr_sentinel evaluation: score=10.0 verdict=pass rules=15
+2026-05-19T04:41:41.358638Z	2026-05-19 04:41:41,359 INFO mr_sentinel using project override rubric (vv2)
+2026-05-19T04:41:40.252418Z	2026-05-19 04:41:40,252 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=8 action=update
+2026-05-19T04:41:39.198970Z	2026-05-19 04:41:39,199 INFO mr_sentinel updated comment note_id=3361718824 on MR !8 (score_id=61)
+2026-05-19T04:41:38.446454Z	2026-05-19 04:41:38,446 INFO mr_sentinel evaluation: score=10.0 verdict=pass rules=15
+2026-05-19T04:41:30.497948Z	2026-05-19 04:41:30,498 INFO mr_sentinel using project override rubric (vv2)
+2026-05-19T04:41:29.606827Z	2026-05-19 04:41:29,607 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=8 action=update
+2026-05-19T04:41:28.851363Z	2026-05-19 04:41:28,851 INFO mr_sentinel updated comment note_id=3361718824 on MR !8 (score_id=61)
+2026-05-19T04:41:28.160865Z	2026-05-19 04:41:28,160 INFO mr_sentinel evaluation: score=10.0 verdict=pass rules=15
+2026-05-19T04:41:20.993624Z	2026-05-19 04:41:20,994 INFO mr_sentinel using project override rubric (vv2)
+2026-05-19T04:41:19.943139Z	2026-05-19 04:41:19,943 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=8 action=update
+2026-05-19T04:41:19.570404Z	2026-05-19 04:41:19,570 INFO mr_sentinel updated comment note_id=3361718824 on MR !8 (score_id=61)
+2026-05-19T04:41:18.922581Z	2026-05-19 04:41:18,923 INFO mr_sentinel evaluation: score=9.0 verdict=pass rules=15
+2026-05-19T04:41:11.234467Z	2026-05-19 04:41:11,235 INFO mr_sentinel using project override rubric (vv2)
+2026-05-19T04:41:10.283150Z	2026-05-19 04:41:10,284 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=8 action=update
+2026-05-19T04:41:09.487196Z	2026-05-19 04:41:09,488 INFO mr_sentinel updated comment note_id=3361718824 on MR !8 (score_id=61)
+2026-05-19T04:41:08.570373Z	2026-05-19 04:41:08,566 INFO mr_sentinel evaluation: score=9.0 verdict=pass rules=15
+2026-05-19T04:40:59.558618Z	2026-05-19 04:40:59,560 INFO mr_sentinel using project override rubric (vv2)
+2026-05-19T04:40:58.579148Z	2026-05-19 04:40:58,580 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=8 action=update
+2026-05-19T04:40:58.045108Z	2026-05-19 04:40:58,046 INFO mr_sentinel updated comment note_id=3361718824 on MR !8 (score_id=61)
+2026-05-19T04:40:57.198785Z	2026-05-19 04:40:57,199 INFO mr_sentinel evaluation: score=9.0 verdict=pass rules=15
+2026-05-19T04:40:47.857289Z	2026-05-19 04:40:47,858 INFO mr_sentinel using project override rubric (vv2)
+2026-05-19T04:40:46.914157Z	2026-05-19 04:40:46,915 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=8 action=update
+2026-05-19T04:40:46.444116Z	2026-05-19 04:40:46,445 INFO mr_sentinel updated comment note_id=3361718824 on MR !8 (score_id=61)
+2026-05-19T04:40:45.755004Z	2026-05-19 04:40:45,756 INFO mr_sentinel evaluation: score=8.0 verdict=pass rules=15
+2026-05-19T04:40:38.484819Z	2026-05-19 04:40:38,486 INFO mr_sentinel using project override rubric (vv2)
+2026-05-19T04:40:37.545739Z	2026-05-19 04:40:37,547 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=8 action=update
+2026-05-19T04:40:36.972567Z	2026-05-19 04:40:36,973 INFO mr_sentinel updated comment note_id=3361718824 on MR !8 (score_id=61)
+2026-05-19T04:40:36.230504Z	2026-05-19 04:40:36,231 INFO mr_sentinel evaluation: score=10.0 verdict=pass rules=15
+2026-05-19T04:40:29.164145Z	2026-05-19 04:40:29,165 INFO mr_sentinel using project override rubric (vv2)
+2026-05-19T04:40:28.289572Z	2026-05-19 04:40:28,290 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=8 action=update
+2026-05-19T04:40:27.738520Z	2026-05-19 04:40:27,739 INFO mr_sentinel updated comment note_id=3361718824 on MR !8 (score_id=61)
+2026-05-19T04:40:27.001873Z	2026-05-19 04:40:27,002 INFO mr_sentinel evaluation: score=10.0 verdict=pass rules=15
+2026-05-19T04:40:19.840120Z	2026-05-19 04:40:19,840 INFO mr_sentinel using project override rubric (vv2)
+2026-05-19T04:40:18.794073Z	2026-05-19 04:40:18,795 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=8 action=update
+2026-05-19T04:40:18.235850Z	2026-05-19 04:40:18,237 INFO mr_sentinel updated comment note_id=3361718824 on MR !8 (score_id=61)
+2026-05-19T04:40:17.496747Z	2026-05-19 04:40:17,498 INFO mr_sentinel evaluation: score=9.0 verdict=pass rules=15
+2026-05-19T04:40:10.244962Z	2026-05-19 04:40:10,246 INFO mr_sentinel using project override rubric (vv2)
+2026-05-19T04:40:04.020975Z	2026-05-19 04:40:04,022 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=8 action=update
+2026-05-19T04:40:03.462931Z	2026-05-19 04:40:03,464 INFO mr_sentinel updated comment note_id=3361718824 on MR !8 (score_id=61)
+2026-05-19T04:40:02.718374Z	2026-05-19 04:40:02,720 INFO mr_sentinel evaluation: score=10.0 verdict=pass rules=15
+2026-05-19T04:39:55.355340Z	2026-05-19 04:39:55,356 INFO mr_sentinel using project override rubric (vv2)
+2026-05-19T04:39:54.340835Z	2026-05-19 04:39:54,341 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=8 action=update
+2026-05-19T04:39:53.839544Z	2026-05-19 04:39:53,840 INFO mr_sentinel updated comment note_id=3361718824 on MR !8 (score_id=61)
+2026-05-19T04:39:53.067001Z	2026-05-19 04:39:53,068 INFO mr_sentinel evaluation: score=10.0 verdict=pass rules=15
+2026-05-19T04:39:45.418714Z	2026-05-19 04:39:45,419 INFO mr_sentinel using project override rubric (vv2)
+2026-05-19T04:39:44.380117Z	2026-05-19 04:39:44,381 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=8 action=update
+2026-05-19T04:39:43.641703Z	2026-05-19 04:39:43,643 INFO mr_sentinel updated comment note_id=3361718824 on MR !8 (score_id=61)
+2026-05-19T04:39:42.912141Z	2026-05-19 04:39:42,913 INFO mr_sentinel evaluation: score=9.0 verdict=pass rules=15
+2026-05-19T04:39:31.096874Z	2026-05-19 04:39:31,098 INFO mr_sentinel using project override rubric (vv2)
+2026-05-19T04:39:30.080640Z	2026-05-19 04:39:30,082 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=8 action=update
+2026-05-19T04:39:29.547338Z	2026-05-19 04:39:29,548 INFO mr_sentinel updated comment note_id=3361718824 on MR !8 (score_id=61)
+2026-05-19T04:39:28.887172Z	2026-05-19 04:39:28,887 INFO mr_sentinel evaluation: score=10.0 verdict=pass rules=15
+2026-05-19T04:39:17.592389Z	2026-05-19 04:39:17,593 INFO mr_sentinel using project override rubric (vv2)
+2026-05-19T04:39:16.688783Z	2026-05-19 04:39:16,690 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=8 action=update
+2026-05-19T04:39:16.003405Z	2026-05-19 04:39:16,004 INFO mr_sentinel updated comment note_id=3361718824 on MR !8 (score_id=61)
+2026-05-19T04:39:15.298954Z	2026-05-19 04:39:15,299 INFO mr_sentinel evaluation: score=9.0 verdict=pass rules=15
+2026-05-19T04:39:06.544854Z	2026-05-19 04:39:06,545 INFO mr_sentinel using project override rubric (vv2)
+2026-05-19T04:39:05.447831Z	2026-05-19 04:39:05,448 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=8 action=update
+2026-05-19T04:39:04.450035Z	2026-05-19 04:39:04,451 INFO mr_sentinel updated comment note_id=3361718824 on MR !8 (score_id=61)
+2026-05-19T04:39:03.731570Z	2026-05-19 04:39:03,732 INFO mr_sentinel evaluation: score=10.0 verdict=pass rules=15
+2026-05-19T04:38:56.107239Z	2026-05-19 04:38:56,108 INFO mr_sentinel using project override rubric (vv2)
+2026-05-19T04:38:55.068184Z	2026-05-19 04:38:55,069 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=8 action=update
+2026-05-19T04:38:54.324776Z	2026-05-19 04:38:54,325 INFO mr_sentinel updated comment note_id=3361718824 on MR !8 (score_id=61)
+2026-05-19T04:38:53.459635Z	2026-05-19 04:38:53,460 INFO mr_sentinel evaluation: score=10.0 verdict=pass rules=15
+2026-05-19T04:38:46.058837Z	2026-05-19 04:38:46,060 INFO mr_sentinel using project override rubric (vv2)
+2026-05-19T04:38:44.983266Z	2026-05-19 04:38:44,984 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=8 action=update
+2026-05-19T04:38:44.539453Z	2026-05-19 04:38:44,540 INFO mr_sentinel updated comment note_id=3361718824 on MR !8 (score_id=61)
+2026-05-19T04:38:43.840291Z	2026-05-19 04:38:43,841 INFO mr_sentinel evaluation: score=9.0 verdict=pass rules=15
+2026-05-19T04:38:35.497057Z	2026-05-19 04:38:35,498 INFO mr_sentinel using project override rubric (vv2)
+2026-05-19T04:38:34.506831Z	2026-05-19 04:38:34,507 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=8 action=update
+2026-05-19T04:38:34.034867Z	2026-05-19 04:38:34,035 INFO mr_sentinel updated comment note_id=3361718824 on MR !8 (score_id=61)
+2026-05-19T04:38:33.390871Z	2026-05-19 04:38:33,392 INFO mr_sentinel evaluation: score=10.0 verdict=pass rules=15
+2026-05-19T04:38:25.818551Z	2026-05-19 04:38:25,819 INFO mr_sentinel using project override rubric (vv2)
+2026-05-19T04:38:24.765355Z	2026-05-19 04:38:24,766 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=8 action=update
+2026-05-19T04:38:24.357932Z	2026-05-19 04:38:24,359 INFO mr_sentinel updated comment note_id=3361718824 on MR !8 (score_id=61)
+2026-05-19T04:38:23.575467Z	2026-05-19 04:38:23,576 INFO mr_sentinel evaluation: score=10.0 verdict=pass rules=15
+2026-05-19T04:38:15.965247Z	2026-05-19 04:38:15,966 INFO mr_sentinel using project override rubric (vv2)
+2026-05-19T04:38:15.021354Z	2026-05-19 04:38:15,022 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=8 action=update
+2026-05-19T04:38:14.437825Z	2026-05-19 04:38:14,439 INFO mr_sentinel updated comment note_id=3361718824 on MR !8 (score_id=61)
+2026-05-19T04:38:13.744626Z	2026-05-19 04:38:13,746 INFO mr_sentinel evaluation: score=10.0 verdict=pass rules=15
+2026-05-19T04:38:05.656339Z	2026-05-19 04:38:05,657 INFO mr_sentinel using project override rubric (vv2)
+2026-05-19T04:38:04.419772Z	2026-05-19 04:38:04,420 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=8 action=update
+2026-05-19T04:38:03.946626Z	2026-05-19 04:38:03,947 INFO mr_sentinel updated comment note_id=3361718824 on MR !8 (score_id=61)
+2026-05-19T04:38:03.064975Z	2026-05-19 04:38:03,065 INFO mr_sentinel evaluation: score=10.0 verdict=pass rules=15
+2026-05-19T04:37:56.716218Z	2026-05-19 04:37:56,717 INFO mr_sentinel using project override rubric (vv2)
+2026-05-19T04:37:55.748053Z	2026-05-19 04:37:55,748 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=8 action=update
+2026-05-19T04:37:53.918910Z	2026-05-19 04:37:53,919 INFO mr_sentinel updated comment note_id=3361718824 on MR !8 (score_id=61)
+2026-05-19T04:37:53.171421Z	2026-05-19 04:37:53,172 INFO mr_sentinel evaluation: score=10.0 verdict=pass rules=15
+2026-05-19T04:37:46.260112Z	2026-05-19 04:37:46,261 INFO mr_sentinel using project override rubric (vv2)
+2026-05-19T04:37:45.367629Z	2026-05-19 04:37:45,368 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=8 action=update
+2026-05-19T04:37:44.914370Z	2026-05-19 04:37:44,915 INFO mr_sentinel updated comment note_id=3361718824 on MR !8 (score_id=61)
+2026-05-19T04:37:44.208907Z	2026-05-19 04:37:44,210 INFO mr_sentinel evaluation: score=10.0 verdict=pass rules=15
+2026-05-19T04:37:37.259077Z	2026-05-19 04:37:37,260 INFO mr_sentinel using project override rubric (vv2)
+2026-05-19T04:37:36.274447Z	2026-05-19 04:37:36,275 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=8 action=update
+2026-05-19T04:37:35.709809Z	2026-05-19 04:37:35,710 INFO mr_sentinel updated comment note_id=3361718824 on MR !8 (score_id=61)
+2026-05-19T04:37:35.062157Z	2026-05-19 04:37:35,063 INFO mr_sentinel evaluation: score=9.0 verdict=pass rules=15
+2026-05-19T04:37:28.076462Z	2026-05-19 04:37:28,077 INFO mr_sentinel using project override rubric (vv2)
+2026-05-19T04:37:26.871911Z	2026-05-19 04:37:26,872 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=8 action=update
+2026-05-19T04:37:25.852611Z	2026-05-19 04:37:25,853 INFO mr_sentinel updated comment note_id=3361718824 on MR !8 (score_id=61)
+2026-05-19T04:37:25.043626Z	2026-05-19 04:37:25,044 INFO mr_sentinel evaluation: score=10.0 verdict=pass rules=15
+2026-05-19T04:37:17.296940Z	2026-05-19 04:37:17,298 INFO mr_sentinel using project override rubric (vv2)
+2026-05-19T04:37:16.323746Z	2026-05-19 04:37:16,325 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=8 action=update
+2026-05-19T04:37:15.844907Z	2026-05-19 04:37:15,846 INFO mr_sentinel updated comment note_id=3361718824 on MR !8 (score_id=61)
+2026-05-19T04:37:15.054416Z	2026-05-19 04:37:15,055 INFO mr_sentinel evaluation: score=9.0 verdict=pass rules=15
+2026-05-19T04:37:08.462760Z	2026-05-19 04:37:08,464 INFO mr_sentinel using project override rubric (vv2)
+2026-05-19T04:37:07.441574Z	2026-05-19 04:37:07,443 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=8 action=update
+2026-05-19T04:37:06.925598Z	2026-05-19 04:37:06,927 INFO mr_sentinel updated comment note_id=3361718824 on MR !8 (score_id=61)
+2026-05-19T04:37:06.149274Z	2026-05-19 04:37:06,150 INFO mr_sentinel evaluation: score=10.0 verdict=pass rules=15
+2026-05-19T04:36:59.042640Z	2026-05-19 04:36:59,043 INFO mr_sentinel using project override rubric (vv2)
+2026-05-19T04:36:57.962230Z	2026-05-19 04:36:57,962 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=8 action=update
+2026-05-19T04:36:57.640963Z	2026-05-19 04:36:57,642 INFO mr_sentinel updated comment note_id=3361718824 on MR !8 (score_id=61)
+2026-05-19T04:36:56.915538Z	2026-05-19 04:36:56,916 INFO mr_sentinel evaluation: score=9.0 verdict=pass rules=15
+2026-05-19T04:36:48.906858Z	2026-05-19 04:36:48,908 INFO mr_sentinel using project override rubric (vv2)
+2026-05-19T04:36:47.945354Z	2026-05-19 04:36:47,946 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=8 action=update
+2026-05-19T04:36:47.373453Z	2026-05-19 04:36:47,374 INFO mr_sentinel updated comment note_id=3361718824 on MR !8 (score_id=61)
+2026-05-19T04:36:46.674032Z	2026-05-19 04:36:46,674 INFO mr_sentinel evaluation: score=9.0 verdict=pass rules=15
+2026-05-19T04:36:39.617905Z	2026-05-19 04:36:39,619 INFO mr_sentinel using project override rubric (vv2)
+2026-05-19T04:36:38.605132Z	2026-05-19 04:36:38,606 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=8 action=update
+2026-05-19T04:36:38.115708Z	2026-05-19 04:36:38,116 INFO mr_sentinel updated comment note_id=3361718824 on MR !8 (score_id=61)
+2026-05-19T04:36:37.461010Z	2026-05-19 04:36:37,461 INFO mr_sentinel evaluation: score=10.0 verdict=pass rules=15
+2026-05-19T04:36:29.691169Z	2026-05-19 04:36:29,691 INFO mr_sentinel using project override rubric (vv2)
+2026-05-19T04:36:28.613792Z	2026-05-19 04:36:28,615 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=8 action=update
+2026-05-19T04:36:27.796794Z	2026-05-19 04:36:27,797 INFO mr_sentinel updated comment note_id=3361718824 on MR !8 (score_id=61)
+2026-05-19T04:36:27.087972Z	2026-05-19 04:36:27,088 INFO mr_sentinel evaluation: score=10.0 verdict=pass rules=15
+2026-05-19T04:36:20.665760Z	2026-05-19 04:36:20,666 INFO mr_sentinel using project override rubric (vv2)
+2026-05-19T04:36:19.620393Z	2026-05-19 04:36:19,621 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=8 action=update
+2026-05-19T04:36:19.059552Z	2026-05-19 04:36:19,060 INFO mr_sentinel updated comment note_id=3361718824 on MR !8 (score_id=61)
+2026-05-19T04:36:18.256076Z	2026-05-19 04:36:18,256 INFO mr_sentinel evaluation: score=9.0 verdict=pass rules=15
+2026-05-19T04:36:10.637713Z	2026-05-19 04:36:10,638 INFO mr_sentinel using project override rubric (vv2)
+2026-05-19T04:36:09.590341Z	2026-05-19 04:36:09,591 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=8 action=update
+2026-05-19T04:36:08.286501Z	2026-05-19 04:36:08,287 INFO mr_sentinel updated comment note_id=3361718824 on MR !8 (score_id=61)
+2026-05-19T04:36:07.457195Z	2026-05-19 04:36:07,458 INFO mr_sentinel evaluation: score=10.0 verdict=pass rules=15
+2026-05-19T04:36:00.224499Z	2026-05-19 04:36:00,225 INFO mr_sentinel using project override rubric (vv2)
+2026-05-19T04:35:59.251945Z	2026-05-19 04:35:59,253 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=8 action=update
+2026-05-19T04:35:58.511924Z	2026-05-19 04:35:58,512 INFO mr_sentinel updated comment note_id=3361718824 on MR !8 (score_id=61)
