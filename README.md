@@ -15,9 +15,24 @@
 
 ---
 
+## 👋 Judges — start here
+
+A 60-second guided tour. Every link is live and needs no auth:
+
+1. **Watch a verdict land** → [demo MR `!10`](https://gitlab.com/sgharlow/governance-demo-app/-/merge_requests/10) — a `chore: add .env.production` MR carrying live-looking secrets. The agent's comment scores it **0.0/10 · block**, cites `no-secrets-in-diff` mapped to **SOC 2 CC6.1 / ISO 27001 A.9.4.3 / OWASP-ASVS V2**, applies a `blocked-compliance` label, and auto-opens a remediation issue.
+2. **The leadership view** → [`/dashboard`](https://mr-sentinel-webhook-n6oitfxdra-uc.a.run.app/dashboard) — verdict distribution (last 30 days), top-5 failing rules, recent-MR drill-down.
+3. **The auditor view** → [`/audit/sgharlow/governance-demo-app/10`](https://mr-sentinel-webhook-n6oitfxdra-uc.a.run.app/audit/sgharlow/governance-demo-app/10) — every rule outcome, its control mapping, and the audit-log timeline. The audit *is* the byproduct of doing the work, not a separate exercise.
+4. **The product's center of gravity** → [`rubric/v1.yaml`](rubric/v1.yaml) — 15 rules, each mapped 1:1 to a named compliance control. MIT-licensed; consumers override per-project by dropping a `.mr-sentinel.yaml` at their repo root.
+
+**What to notice:** every action ties back to a control an auditor recognizes — that's what makes this *compliance-grade governance* rather than "AI reviews a PR." The whole loop runs in ~20s on Cloud Run scale-to-zero and is fully replayable from the `audit_log`.
+
+**Judging-criteria map** — *Technological implementation:* 8 deterministic GitLab REST tool-calls + Gemini 2.5 Flash structured output, full GCP-native stack (Cloud Run, Cloud SQL, Secret Manager, Artifact Registry, Vertex AI, Cloud Build, Cloud Logging), replayable audit log. *Design:* three surfaces / three personas (above). *Potential impact:* every regulated-industry engineering org has this exact pain. *Quality of idea:* the rubric-as-product moat. Full write-up in [`docs/devpost-submission.md`](docs/devpost-submission.md).
+
+---
+
 ## Status
 
-**Days 1-3, 4-8, 9-14, 15-19 milestones closed (4 of 6).** Day 6 of 26 — running ~12 days ahead of the spec schedule. End-to-end loop verified live on Cloud Run: GitLab MR webhook → fetch MR + diffs + pipeline + vulnerabilities → fetch optional `.mr-sentinel.yaml` per-project rubric override → Vertex AI Gemini 2.5 Flash evaluation against 15 rubric rules → upsert structured comment + labels on the MR → open linked remediation issue on block verdicts → persist score + child rule outcomes + audit row to Cloud SQL. Leadership dashboard live at `/dashboard` + `/audit/{project}/{mr_iid}` (server-rendered, dark theme — Days 15-19 MVP shipped 2026-05-18). End-to-end latency (measured 2026-05-31 over 30 days of Cloud Logging, n=17 full webhook→comment legs): **p50 19.5s, p95 30.0s, p99 33.4s**. 51/51 tests green, CI green. GCP infrastructure on shared `aicin-477004`. See [`mr-sentinel-hackathon-spec.md`](mr-sentinel-hackathon-spec.md) for the full spec and 26-day build plan.
+**Days 1-3, 4-8, 9-14, 15-19 milestones closed (4 of 6).** Day 16 of 26 — running ahead of the spec schedule (the Days 15-19 dashboard milestone shipped 2026-05-18). End-to-end loop verified live on Cloud Run: GitLab MR webhook → fetch MR + diffs + pipeline + vulnerabilities → fetch optional `.mr-sentinel.yaml` per-project rubric override → Vertex AI Gemini 2.5 Flash evaluation against 15 rubric rules → upsert structured comment + labels on the MR → open linked remediation issue on block verdicts → persist score + child rule outcomes + audit row to Cloud SQL. Leadership dashboard live at `/dashboard` + `/audit/{project}/{mr_iid}` (server-rendered, dark theme — Days 15-19 MVP shipped 2026-05-18). End-to-end latency (measured 2026-05-31 over 30 days of Cloud Logging, n=17 full webhook→comment legs): **p50 19.5s, p95 30.0s, p99 33.4s**. 52/52 tests green, CI green. GCP infrastructure on shared `aicin-477004`. See [`mr-sentinel-hackathon-spec.md`](mr-sentinel-hackathon-spec.md) for the full spec and 26-day build plan.
 
 ### GCP resources live
 

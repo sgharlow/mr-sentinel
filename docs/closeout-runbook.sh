@@ -200,7 +200,7 @@ GL_PAT="$(tr -d '\r\n' < /tmp/gl-pat.txt)"
 if [ -n "$GL_PAT" ]; then
   # Issues opened by the agent carry the mr-sentinel label (per spec §5 / app/main.py).
   curl -fsS -m 30 -H "PRIVATE-TOKEN: $GL_PAT" \
-    "https://gitlab.com/api/v4/projects/$GL_PROJECT_ENC/issues?labels=mr-sentinel&per_page=50" \
+    "https://gitlab.com/api/v4/projects/$GL_PROJECT_ENC/issues?labels=mr-sentinel-followup&per_page=50" \
     | jq -r '.[] | "issue #\(.iid)  \(.title)  state=\(.state)  url=\(.web_url)"' \
     > "$OUT/05-linked-issues.txt" 2>>"$OUT/05-issue.err" || true
   echo "remediation issues found: $(wc -l < "$OUT/05-linked-issues.txt" 2>/dev/null || echo 0)"

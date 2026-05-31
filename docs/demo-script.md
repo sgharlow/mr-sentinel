@@ -8,8 +8,16 @@ This script is the verbatim narration plus shot-level camera direction. Total sp
 
 ---
 
+## Scriptable runner — `scripts/demo-capture.sh`
+
+This script is the executable companion to the storyboard below. Run both from WSL:
+
+- **`bash scripts/demo-capture.sh`** — read-only recording-readiness check: pings `/health`, `/dashboard`, and the hero audit page, then prints every tab to open in shot order. Run it right before recording; all three must pass.
+- **`bash scripts/demo-capture.sh fire`** — the live **Shot 5** moment: pushes a fresh commit to a non-hero MR (`!7` by default, so hero `!10`'s sha8 `1fb25ad2` stays pinned), waits for the agent loop, and prints the full ordered trace (`received → using override (v2) → tool= ×8 → evaluation: score=… mr_iid=7 → created issue → posted comment`) — film that block. Pass `fire 9` to use the `/admin/dump-patients` block instead; pass `fire 10` ONLY after you've decided to recapture the hero sha (e.g. post-`SEED=1`).
+
 ## Pre-recording checklist (15 min before record)
 
+0. **Run `bash scripts/demo-capture.sh`** — green on all three surfaces before doing anything else.
 1. **Demo repo state.** Verify on `gitlab.com/sgharlow/governance-demo-app`:
    - `.mr-sentinel.yaml` exists on `main` (the v2 override, identical content to bundled v1 — fine for the demo)
    - MR `!10` is OPEN with verdict `block`, score `0.0/10`, posted comment, label `blocked-compliance`, linked follow-up issue
