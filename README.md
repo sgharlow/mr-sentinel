@@ -1,4 +1,8 @@
-# MR Sentinel
+<p align="center">
+  <img src="docs/assets/logo-256.png" alt="MR Sentinel logo" width="160" height="160">
+</p>
+
+<h1 align="center">MR Sentinel</h1>
 
 > An AI governance agent for merge requests — applies a written compliance rubric in ~30 seconds, with a paper trail.
 
