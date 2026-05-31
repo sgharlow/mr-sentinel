@@ -167,14 +167,14 @@ QUALITY OF THE IDEA — The rubric-as-product framing is the moat. Most submissi
 
 ## Asset checklist (gather before opening the Devpost form)
 
-Devpost's submission form for the Google Cloud Rapid Agent Hackathon typically requires the following. The repo does not currently ship any of these — they need to be produced or sourced before submission.
+Devpost's submission form for the Google Cloud Rapid Agent Hackathon typically requires the following. As of 2026-05-30 the thumbnail and logo are produced and committed under `docs/assets/`; the demo video and gallery screenshots remain (both gated on the recording session, ~June 8).
 
 | Asset | Spec | Source / status |
 |-------|------|-----------------|
-| **Thumbnail image** | 1280×720 PNG/JPG; appears on the gallery card | **MISSING** — needs a clean cover. Suggested: dark background + "MR Sentinel" wordmark + the verdict-badge motif (🛑 block) + GCP logos. Canva or Figma 5-minute job. |
-| **Demo video** | ≤3 min, YouTube unlisted URL | Script ready in `docs/demo-script.md`; recording target ~2026-06-08. |
-| **Gallery screenshots** | 3-6 PNGs, typically 1920×1080 | **MISSING** — need to capture: (1) hero MR `!10` agent comment, (2) `/dashboard` full view with verdict distribution + top-5 rules, (3) `/audit/sgharlow/governance-demo-app/10` with rule outcomes table, (4) optional architecture diagram from `README.md`. |
-| **Logo** | 256×256 typical | **Optional but recommended.** Can reuse the wordmark motif from the thumbnail. |
+| **Thumbnail image** | 1280×720 PNG/JPG; appears on the gallery card | **DONE 2026-05-30** — `docs/assets/devpost-thumbnail.png` (1280×720). Verdict-badge concept: 🛑 BLOCK card (score 0.0/10, `no-secrets-in-diff`, SOC2/ISO/OWASP control line) on dark teal-accent theme + "Built on Google Cloud" mark. Vector source `devpost-thumbnail.svg`; re-render via `_thumb-render.html` (headless Chrome). |
+| **Demo video** | ≤3 min, YouTube unlisted URL | **STILL OPEN** — script ready in `docs/demo-script.md`; recording target ~2026-06-08, then paste the unlisted URL into the Links table above. |
+| **Gallery screenshots** | 3-6 PNGs, typically 1920×1080 | **STILL OPEN** — capture during the video session: (1) hero MR `!10` agent comment, (2) `/dashboard` full view with verdict distribution + top-5 rules, (3) `/audit/sgharlow/governance-demo-app/10` with rule outcomes table, (4) optional architecture diagram from `README.md`. |
+| **Logo** | 256×256 typical | **DONE 2026-05-30** — `docs/assets/logo-256.png` (256×256). Octagon "MR" monogram matching the thumbnail palette (red stop-sign + teal accent ring on dark rounded tile). Vector source `logo-256.svg`; re-render via `_logo-render.html`. |
 | **Try-it links** | Live URLs reachable from the public internet | All four already live and verified (see Links table above). |
 | **GitHub repo** | Public URL | https://github.com/sgharlow/mr-sentinel — already public. |
 | **License visible in repo** | Standard OSS license | MIT, present at `LICENSE`. |
