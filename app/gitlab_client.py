@@ -85,14 +85,25 @@ class GitLabClient:
     def _encode_project(project_path: str) -> str:
         return quote(project_path, safe="")
 
-    async def _request(self, method: str, path: str, **kwargs: Any) -> httpx.Response:
+    async def _request(
+        self, method: str, path: str, *, action: str | None = None, **kwargs: Any
+    ) -> httpx.Response:
         response = await self._client.request(method, path, **kwargs)
-        logger.info("gitlab %s %s -> %d", method, path, response.status_code)
+        # One INFO line per tool call. Passing `action=<name>` makes each GitLab
+        # REST call legible in Cloud Logging (and on screen in the demo's Shot 5
+        # agent-loop trace) as `tool=<name> ...` instead of only the URL-encoded
+        # path. Falls back to the bare form when no action is supplied.
+        if action:
+            logger.info("tool=%s %s %s -> %d", action, method, path, response.status_code)
+        else:
+            logger.info("gitlab %s %s -> %d", method, path, response.status_code)
         return response
 
     async def get_merge_request(self, project_path: str, mr_iid: int) -> MergeRequest:
         encoded = self._encode_project(project_path)
-        response = await self._request("GET", f"/projects/{encoded}/merge_requests/{mr_iid}")
+        response = await self._request(
+            "GET", f"/projects/{encoded}/merge_requests/{mr_iid}", action="get_merge_request"
+        )
         if response.status_code != 200:
             raise GitLabError(response.status_code, response.text, action="get_merge_request")
         data = response.json()
@@ -112,7 +123,10 @@ class GitLabClient:
 
     async def get_merge_request_diffs(self, project_path: str, mr_iid: int) -> list[DiffEntry]:
         encoded = self._encode_project(project_path)
-        response = await self._request("GET", f"/projects/{encoded}/merge_requests/{mr_iid}/diffs")
+        response = await self._request(
+            "GET", f"/projects/{encoded}/merge_requests/{mr_iid}/diffs",
+            action="get_merge_request_diffs",
+        )
         if response.status_code != 200:
             raise GitLabError(response.status_code, response.text, action="get_merge_request_diffs")
         diffs = response.json()
@@ -138,6 +152,7 @@ class GitLabClient:
         response = await self._request(
             "POST",
             f"/projects/{encoded}/merge_requests/{mr_iid}/notes",
+            action="post_merge_request_comment",
             data={"body": body},
         )
         if response.status_code not in (200, 201):
@@ -152,6 +167,7 @@ class GitLabClient:
         response = await self._request(
             "PUT",
             f"/projects/{encoded}/merge_requests/{mr_iid}",
+            action="add_merge_request_labels",
             data={"add_labels": ",".join(labels)},
         )
         if response.status_code != 200:
@@ -166,7 +182,9 @@ class GitLabClient:
         payload: dict[str, Any] = {"title": title, "description": description}
         if labels:
             payload["labels"] = ",".join(labels)
-        response = await self._request("POST", f"/projects/{encoded}/issues", data=payload)
+        response = await self._request(
+            "POST", f"/projects/{encoded}/issues", action="create_issue", data=payload
+        )
         if response.status_code not in (200, 201):
             raise GitLabError(response.status_code, response.text, action="create_issue")
         return response.json()
@@ -175,6 +193,7 @@ class GitLabClient:
         """List all notes/comments on the MR. Used to find the agent's prior comment."""
         encoded = self._encode_project(project_path)
         response = await self._request("GET", f"/projects/{encoded}/merge_requests/{mr_iid}/notes",
+                                       action="list_merge_request_notes",
                                        params={"per_page": 100})
         if response.status_code != 200:
             raise GitLabError(response.status_code, response.text, action="list_merge_request_notes")
@@ -199,6 +218,7 @@ class GitLabClient:
         response = await self._request(
             "PUT",
             f"/projects/{encoded}/merge_requests/{mr_iid}/notes/{note_id}",
+            action="update_merge_request_note",
             data={"body": body},
         )
         if response.status_code not in (200, 201):
@@ -226,6 +246,7 @@ class GitLabClient:
         response = await self._request(
             "GET",
             f"/projects/{encoded}/pipelines",
+            action="get_latest_pipeline_for_sha",
             params={"sha": sha, "order_by": "updated_at", "sort": "desc", "per_page": 1},
         )
         if response.status_code != 200:
@@ -240,6 +261,7 @@ class GitLabClient:
         encoded = self._encode_project(project_path)
         response = await self._request(
             "GET", f"/projects/{encoded}/pipelines/{pipeline_id}/jobs",
+            action="list_pipeline_jobs",
             params={"per_page": 100},
         )
         if response.status_code != 200:
@@ -261,6 +283,7 @@ class GitLabClient:
         response = await self._request(
             "GET",
             f"/projects/{encoded_project}/repository/files/{encoded_path}/raw",
+            action="get_file_content",
             params={"ref": ref},
         )
         if response.status_code == 200:
@@ -281,6 +304,7 @@ class GitLabClient:
         response = await self._request(
             "GET",
             f"/projects/{encoded}/vulnerability_findings",
+            action="list_vulnerability_findings",
             params={"per_page": 50},
         )
         if response.status_code == 200:

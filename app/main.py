@@ -147,8 +147,12 @@ async def _process_mr_event(event: dict[str, Any]) -> None:
 
             runner = AgentRunner(rubric=override_rubric)
             evaluation = await runner.evaluate(mr, diffs)
-            logger.info("evaluation: score=%.1f verdict=%s rules=%d",
-                        evaluation.overall_score, evaluation.verdict, len(evaluation.rule_evaluations))
+            # mr_iid is appended so latency aggregation can pair this finish event
+            # with its start event by MR (see docs/latency-capture.md — the prior
+            # absence of mr_iid here forced FIFO pairing and corrupted the p95/p99).
+            logger.info("evaluation: score=%.1f verdict=%s rules=%d mr_iid=%s",
+                        evaluation.overall_score, evaluation.verdict,
+                        len(evaluation.rule_evaluations), mr_iid)
 
             score_id = await persist_evaluation(mr, evaluation)
 

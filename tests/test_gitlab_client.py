@@ -50,6 +50,24 @@ async def test_get_merge_request_parses_payload(token: str, project_path: str, e
     assert mr.sha == "deadbeef"
 
 
+async def test_tool_calls_emit_named_log_line(
+    token: str, project_path: str, encoded_project: str, caplog: pytest.LogCaptureFixture
+) -> None:
+    """Each REST call logs a `tool=<action>` INFO line — the demo's Shot 5 agent-loop
+    trace depends on these being legible (not just the URL-encoded path)."""
+    payload = {
+        "iid": 42, "title": "x", "description": "", "author": {"username": "a"},
+        "source_branch": "b", "target_branch": "main", "state": "opened",
+        "web_url": "https://gitlab.com/x/-/merge_requests/42", "sha": "abc", "labels": [],
+    }
+    with caplog.at_level("INFO", logger="mr_sentinel.gitlab"):
+        async with respx.mock(base_url="https://gitlab.com/api/v4") as router:
+            router.get(f"/projects/{encoded_project}/merge_requests/42").respond(200, json=payload)
+            async with GitLabClient() as client:
+                await client.get_merge_request(project_path, 42)
+    assert any("tool=get_merge_request" in r.getMessage() for r in caplog.records)
+
+
 async def test_get_merge_request_raises_on_404(token: str, project_path: str, encoded_project: str) -> None:
     async with respx.mock(base_url="https://gitlab.com/api/v4") as router:
         router.get(f"/projects/{encoded_project}/merge_requests/99").respond(404, json={"message": "Not Found"})
