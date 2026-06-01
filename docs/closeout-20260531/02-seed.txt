@@ -1,0 +1,29 @@
+[1;34m[v2-archetype][0m 1/4 — feat(refunds): admin refund-all per #220 (out-of-scope + auth-missing)
+[1;34m[v2-archetype][0m   branch http=201
+[1;34m[v2-archetype][0m   commit http=201
+
+[1;34m[v2-archetype][0m   MR:
+  http=201
+  !14  https://gitlab.com/sgharlow/governance-demo-app/-/merge_requests/14
+[1;34m[v2-archetype][0m 2/4 — fix(billing): skip flaky Stripe retry tests
+[1;34m[v2-archetype][0m   branch http=201
+201
+[1;34m[v2-archetype][0m   MR:
+  http=201
+  !15  https://gitlab.com/sgharlow/governance-demo-app/-/merge_requests/15
+[1;34m[v2-archetype][0m 3/4 — refactor(auth): simplify token validation
+[1;34m[v2-archetype][0m   branch http=201
+201
+[1;34m[v2-archetype][0m   MR:
+  http=201
+  !16  https://gitlab.com/sgharlow/governance-demo-app/-/merge_requests/16
+[1;34m[v2-archetype][0m preamble — commit slo.yaml directly to main (no MR)
+201
+[1;34m[v2-archetype][0m 4/4 — feat(slo): rewrite invoice hot path
+[1;34m[v2-archetype][0m   branch http=201
+201
+[1;34m[v2-archetype][0m   MR:
+  http=201
+  !17  https://gitlab.com/sgharlow/governance-demo-app/-/merge_requests/17
+[1;34m[v2-archetype][0m v2 done — 4 new archetypes opened. webhook → agent eval should start within seconds.
+[1;34m[v2-archetype][0m expected coverage uplift: 10/15 rules → 14/15 rules. See docs/days-20-23-demo-coverage.md.

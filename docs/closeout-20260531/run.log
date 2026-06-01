@@ -69,3 +69,105 @@ remediation issues found: 0
 
   [OK]   DONE. All artifacts in: docs/closeout-20260531/
 Tell your Claude session: "read docs/closeout-20260531/CLOSEOUT-SUMMARY.md and process the closeout results"
+MR Sentinel closeout — 2026-06-01T00:09:50Z — output dir: docs/closeout-20260531
+Phase toggles: SEED=1  SQL=0
+
+========== PHASE 0: preflight ==========
+## whoami: sharlow
+## gcloud path: /home/sharlow/google-cloud-sdk/bin/gcloud
+## project (config): aicin-477004
+  [OK]   gcloud token refresh works
+## active account: sgharlow@gmail.com
+## project set to expected (aicin-477004)? yes
+  [OK]   /health -> {"status":"ok"}
+
+========== PHASE 1: smoke test ==========
+[1;34m[smoke][0m service URL: https://mr-sentinel-webhook-n6oitfxdra-uc.a.run.app
+[1;34m[smoke][0m test 1: /health returns 200
+  body: {"status":"ok"}
+  code: 200
+[1;34m[smoke][0m test 2: webhook rejects missing token with 401
+  no-token response: 401
+[1;34m[smoke][0m test 3: webhook rejects wrong token with 401
+  bad-token response: 401
+[1;34m[smoke][0m test 4: webhook accepts correct token with 202
+  good-token response: 202
+[1;34m[smoke][0m all 4 checks passed.
+
+[1;34m[smoke][0m service URL for GitLab webhook config: https://mr-sentinel-webhook-n6oitfxdra-uc.a.run.app/gitlab/webhook
+  [OK]   smoke-test.sh ran (review docs/closeout-20260531/01-smoke.txt for the 4 checks)
+
+========== PHASE 2: v2 archetype seed (SEED=1) ==========
+Running scripts/seed-archetype-mrs-v2.sh — this opens new MRs on sgharlow/governance-demo-app and pushes to GitLab.
+[1;34m[v2-archetype][0m 1/4 — feat(refunds): admin refund-all per #220 (out-of-scope + auth-missing)
+[1;34m[v2-archetype][0m   branch http=201
+[1;34m[v2-archetype][0m   commit http=201
+
+[1;34m[v2-archetype][0m   MR:
+  http=201
+  !14  https://gitlab.com/sgharlow/governance-demo-app/-/merge_requests/14
+[1;34m[v2-archetype][0m 2/4 — fix(billing): skip flaky Stripe retry tests
+[1;34m[v2-archetype][0m   branch http=201
+201
+[1;34m[v2-archetype][0m   MR:
+  http=201
+  !15  https://gitlab.com/sgharlow/governance-demo-app/-/merge_requests/15
+[1;34m[v2-archetype][0m 3/4 — refactor(auth): simplify token validation
+[1;34m[v2-archetype][0m   branch http=201
+201
+[1;34m[v2-archetype][0m   MR:
+  http=201
+  !16  https://gitlab.com/sgharlow/governance-demo-app/-/merge_requests/16
+[1;34m[v2-archetype][0m preamble — commit slo.yaml directly to main (no MR)
+201
+[1;34m[v2-archetype][0m 4/4 — feat(slo): rewrite invoice hot path
+[1;34m[v2-archetype][0m   branch http=201
+201
+[1;34m[v2-archetype][0m   MR:
+  http=201
+  !17  https://gitlab.com/sgharlow/governance-demo-app/-/merge_requests/17
+[1;34m[v2-archetype][0m v2 done — 4 new archetypes opened. webhook → agent eval should start within seconds.
+[1;34m[v2-archetype][0m expected coverage uplift: 10/15 rules → 14/15 rules. See docs/days-20-23-demo-coverage.md.
+  [OK]   seed ran — let webhooks settle ~60s, then the dashboard count will climb toward 12-14.
+NOTE: re-record demo numbers AFTER this; hero MR !10 sha8 may change.
+
+========== PHASE 3: latency capture (last 30 days) ==========
+log entries pulled: 454
+sample size -- gemini-call legs: 144
+sample size -- full-loop legs:   19
+gemini-eval latency (sec):  p50=12.8  p95=3825.2  p99=1101838.7  max=1103493.8
+full-loop latency (sec):    p50=19.7  p95=30.0  p99=33.4  max=33.4
+  [OK]   latency results -> docs/closeout-20260531/03-latency-results.txt (paste p50 into demo-script Shot 5 + README Status)
+
+========== PHASE 4: Shot 5 log-string verification (MR !10) ==========
+captured 219 candidate log lines -> docs/closeout-20260531/04-shot5-logstrings.txt
+  [OK]   Compare these EXACT strings against demo-script.md Shot 5 visual cues; update wording if drifted.
+
+========== PHASE 5: linked-issue audit (GitLab REST) ==========
+remediation issues found: 7
+  [OK]   review docs/closeout-20260531/05-linked-issues.txt — expect 1 issue per block verdict (!6,!7,!9,!10,!11,!13)
+
+========== PHASE 6: Cloud SQL audit row count (SQL=0) ==========
+  [WARN] skipped (SQL!=1). The dashboard already reflects DB state, so this is optional verification.
+
+========== SUMMARY ==========
+# MR Sentinel closeout summary — 2026-06-01T00:10:33Z
+
+| Phase | Artifact | Status |
+|---|---|---|
+| 0 preflight | 00-preflight.txt / 00-health.txt | health OK |
+| 1 smoke | 01-smoke.txt | ran |
+| 2 seed | 02-seed.txt | ran |
+| 3 latency | 03-latency-results.txt | captured |
+| 4 shot5 logs | 04-shot5-logstrings.txt | captured |
+| 5 issue audit | 05-linked-issues.txt | captured |
+| 6 cloud sql | 06-sql-rowcount.txt | skipped (SQL=0) |
+
+## Next actions for Claude (Windows session)
+1. Read 03-latency-results.txt -> patch demo-script.md Shot 5 + README Status with the full-loop p50.
+2. Read 04-shot5-logstrings.txt -> reconcile Shot 5 visual cues against the real log wording.
+3. Read 05-linked-issues.txt -> confirm one issue per block verdict; flag any missing.
+4. If SEED ran: re-run the dashboard scrape and update demo-script Shot 7 + live-fire doc counts.
+
+  [OK]   DONE. All artifacts in: docs/closeout-20260531/
+Tell your Claude session: "read docs/closeout-20260531/CLOSEOUT-SUMMARY.md and process the closeout results"

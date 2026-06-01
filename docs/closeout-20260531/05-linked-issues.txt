@@ -1,0 +1,7 @@
+issue #7  Compliance follow-up for !14: feat(refunds): admin refund-all per #220  state=opened  url=https://gitlab.com/sgharlow/governance-demo-app/-/work_items/7
+issue #6  Compliance follow-up for !7: Day 9-14 features check  state=opened  url=https://gitlab.com/sgharlow/governance-demo-app/-/work_items/6
+issue #5  Compliance follow-up for !11: feat(encounters): add encounter + ICD-10 tracking tables  state=opened  url=https://gitlab.com/sgharlow/governance-demo-app/-/work_items/5
+issue #4  Compliance follow-up for !13: deps: pin pyyaml 5.1 and requests 2.20 for compat  state=opened  url=https://gitlab.com/sgharlow/governance-demo-app/-/work_items/4
+issue #3  Compliance follow-up for !9: feat(admin): add /admin/dump-patients endpoint for ops dashb  state=opened  url=https://gitlab.com/sgharlow/governance-demo-app/-/work_items/3
+issue #2  Compliance follow-up for !10: chore: add .env.production for prod deploy  state=opened  url=https://gitlab.com/sgharlow/governance-demo-app/-/work_items/2
+issue #1  Compliance follow-up for !7: Day 9-14 features check  state=opened  url=https://gitlab.com/sgharlow/governance-demo-app/-/work_items/1

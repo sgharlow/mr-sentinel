@@ -1,3 +1,56 @@
+2026-06-01T00:10:15.862964Z	2026-06-01 00:10:15,864 INFO mr_sentinel.gitlab tool=get_file_content GET /projects/sgharlow%2Fgovernance-demo-app/repository/files/.mr-sentinel.yaml/raw -> 200
+2026-06-01T00:10:15.651169Z	2026-06-01 00:10:15,652 INFO mr_sentinel.gitlab tool=get_merge_request GET /projects/sgharlow%2Fgovernance-demo-app/merge_requests/17 -> 200
+2026-06-01T00:10:15.321620Z	2026-06-01 00:10:15,322 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=17 action=open
+2026-06-01T00:10:13.142273Z	2026-06-01 00:10:13,143 INFO mr_sentinel.gitlab tool=list_vulnerability_findings GET /projects/sgharlow%2Fgovernance-demo-app/vulnerability_findings -> 403
+2026-06-01T00:10:12.849852Z	2026-06-01 00:10:12,850 INFO mr_sentinel.gitlab tool=get_latest_pipeline_for_sha GET /projects/sgharlow%2Fgovernance-demo-app/pipelines -> 200
+2026-06-01T00:10:12.591594Z	2026-06-01 00:10:12,592 INFO mr_sentinel.gitlab tool=get_merge_request_diffs GET /projects/sgharlow%2Fgovernance-demo-app/merge_requests/16/diffs -> 200
+2026-06-01T00:10:12.386672Z	2026-06-01 00:10:12,387 INFO mr_sentinel using project override rubric (v2)
+2026-06-01T00:10:12.363242Z	2026-06-01 00:10:12,364 INFO mr_sentinel.gitlab tool=get_file_content GET /projects/sgharlow%2Fgovernance-demo-app/repository/files/.mr-sentinel.yaml/raw -> 200
+2026-06-01T00:10:12.036760Z	2026-06-01 00:10:12,037 INFO mr_sentinel.gitlab tool=get_merge_request GET /projects/sgharlow%2Fgovernance-demo-app/merge_requests/16 -> 200
+2026-06-01T00:10:11.736644Z	2026-06-01 00:10:11,737 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=16 action=open
+2026-06-01T00:10:10.037682Z	2026-06-01 00:10:10,038 INFO mr_sentinel.gitlab tool=list_vulnerability_findings GET /projects/sgharlow%2Fgovernance-demo-app/vulnerability_findings -> 403
+2026-06-01T00:10:09.711689Z	2026-06-01 00:10:09,712 INFO mr_sentinel.gitlab tool=list_vulnerability_findings GET /projects/sgharlow%2Fgovernance-demo-app/vulnerability_findings -> 403
+2026-06-01T00:10:09.672857Z	2026-06-01 00:10:09,674 INFO mr_sentinel.gitlab tool=get_latest_pipeline_for_sha GET /projects/sgharlow%2Fgovernance-demo-app/pipelines -> 200
+2026-06-01T00:10:09.512443Z	2026-06-01 00:10:09,513 INFO mr_sentinel.gitlab tool=get_merge_request_diffs GET /projects/sgharlow%2Fgovernance-demo-app/merge_requests/15/diffs -> 200
+2026-06-01T00:10:09.341042Z	2026-06-01 00:10:09,342 INFO mr_sentinel.gitlab tool=get_latest_pipeline_for_sha GET /projects/sgharlow%2Fgovernance-demo-app/pipelines -> 200
+2026-06-01T00:10:09.168692Z	2026-06-01 00:10:09,170 INFO mr_sentinel.gitlab tool=get_merge_request_diffs GET /projects/sgharlow%2Fgovernance-demo-app/merge_requests/15/diffs -> 200
+2026-06-01T00:10:09.160819Z	2026-06-01 00:10:09,162 INFO mr_sentinel.gitlab tool=list_vulnerability_findings GET /projects/sgharlow%2Fgovernance-demo-app/vulnerability_findings -> 403
+2026-06-01T00:10:09.159403Z	2026-06-01 00:10:09,160 INFO mr_sentinel using project override rubric (v2)
+2026-06-01T00:10:09.133162Z	2026-06-01 00:10:09,134 INFO mr_sentinel.gitlab tool=get_file_content GET /projects/sgharlow%2Fgovernance-demo-app/repository/files/.mr-sentinel.yaml/raw -> 200
+2026-06-01T00:10:08.934006Z	2026-06-01 00:10:08,935 INFO mr_sentinel.gitlab tool=get_merge_request GET /projects/sgharlow%2Fgovernance-demo-app/merge_requests/15 -> 200
+2026-06-01T00:10:08.932615Z	2026-06-01 00:10:08,933 INFO mr_sentinel using project override rubric (v2)
+2026-06-01T00:10:08.910478Z	2026-06-01 00:10:08,911 INFO mr_sentinel.gitlab tool=get_file_content GET /projects/sgharlow%2Fgovernance-demo-app/repository/files/.mr-sentinel.yaml/raw -> 200
+2026-06-01T00:10:08.861325Z	2026-06-01 00:10:08,862 INFO mr_sentinel.gitlab tool=get_latest_pipeline_for_sha GET /projects/sgharlow%2Fgovernance-demo-app/pipelines -> 200
+2026-06-01T00:10:08.725598Z	2026-06-01 00:10:08,726 INFO mr_sentinel.gitlab tool=get_merge_request GET /projects/sgharlow%2Fgovernance-demo-app/merge_requests/15 -> 200
+2026-06-01T00:10:08.713776Z	2026-06-01 00:10:08,714 INFO mr_sentinel.gitlab tool=get_merge_request_diffs GET /projects/sgharlow%2Fgovernance-demo-app/merge_requests/14/diffs -> 200
+2026-06-01T00:10:08.441297Z	2026-06-01 00:10:08,442 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=15 action=update
+2026-06-01T00:10:08.418054Z	2026-06-01 00:10:08,418 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=15 action=open
+2026-06-01T00:10:08.400267Z	2026-06-01 00:10:08,401 INFO mr_sentinel using project override rubric (v2)
+2026-06-01T00:10:08.377585Z	2026-06-01 00:10:08,378 INFO mr_sentinel.gitlab tool=get_file_content GET /projects/sgharlow%2Fgovernance-demo-app/repository/files/.mr-sentinel.yaml/raw -> 200
+2026-06-01T00:10:08.149969Z	2026-06-01 00:10:08,150 INFO mr_sentinel.gitlab tool=get_merge_request GET /projects/sgharlow%2Fgovernance-demo-app/merge_requests/14 -> 200
+2026-06-01T00:10:07.877377Z	2026-06-01 00:10:07,878 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=14 action=open
+2026-06-01T00:09:59.940095Z	2026-06-01 00:09:59,940 INFO mr_sentinel using project override rubric (v2)
+2026-06-01T00:09:59.915446Z	2026-06-01 00:09:59,916 INFO mr_sentinel.gitlab tool=get_file_content GET /projects/sgharlow%2Fgovernance-demo-app/repository/files/.mr-sentinel.yaml/raw -> 200
+2026-06-01T00:09:59.725495Z	2026-06-01 00:09:59,726 INFO mr_sentinel.gitlab tool=get_merge_request GET /projects/sgharlow%2Fgovernance-demo-app/merge_requests/1 -> 200
+2026-06-01T00:09:59.307351Z	2026-06-01 00:09:59,307 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=1 action=open
+2026-05-31T23:43:20.638795Z	2026-05-31 23:43:20,639 INFO mr_sentinel using project override rubric (v2)
+2026-05-31T23:43:20.613865Z	2026-05-31 23:43:20,614 INFO mr_sentinel.gitlab tool=get_file_content GET /projects/sgharlow%2Fgovernance-demo-app/repository/files/.mr-sentinel.yaml/raw -> 200
+2026-05-31T23:43:20.417558Z	2026-05-31 23:43:20,418 INFO mr_sentinel.gitlab tool=get_merge_request GET /projects/sgharlow%2Fgovernance-demo-app/merge_requests/7 -> 200
+2026-05-31T23:43:20.063672Z	2026-05-31 23:43:20,064 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=7 action=update
+2026-05-31T23:43:19.562887Z	2026-05-31 23:43:19,563 INFO mr_sentinel updated comment note_id=3357062097 on MR !7 (score_id=143)
+2026-05-31T23:43:18.632280Z	2026-05-31 23:43:18,633 INFO mr_sentinel created followup issue !6 — https://gitlab.com/sgharlow/governance-demo-app/-/work_items/6
+2026-05-31T23:43:17.919808Z	2026-05-31 23:43:17,920 INFO mr_sentinel evaluation: score=0.0 verdict=block rules=15 mr_iid=7
+2026-05-31T23:42:53.988421Z	2026-05-31 23:42:53,988 INFO mr_sentinel.gitlab tool=list_vulnerability_findings GET /projects/sgharlow%2Fgovernance-demo-app/vulnerability_findings -> 403
+2026-05-31T23:42:53.847973Z	2026-05-31 23:42:53,848 INFO mr_sentinel.gitlab tool=get_latest_pipeline_for_sha GET /projects/sgharlow%2Fgovernance-demo-app/pipelines -> 200
+2026-05-31T23:42:53.706872Z	2026-05-31 23:42:53,707 INFO mr_sentinel.gitlab tool=get_merge_request_diffs GET /projects/sgharlow%2Fgovernance-demo-app/merge_requests/7/diffs -> 200
+2026-05-31T23:42:53.193208Z	2026-05-31 23:42:53,194 INFO mr_sentinel using project override rubric (v2)
+2026-05-31T23:42:52.898744Z	2026-05-31 23:42:52,899 INFO mr_sentinel.gitlab tool=get_file_content GET /projects/sgharlow%2Fgovernance-demo-app/repository/files/.mr-sentinel.yaml/raw -> 200
+2026-05-31T23:42:52.701567Z	2026-05-31 23:42:52,702 INFO mr_sentinel.gitlab tool=get_merge_request GET /projects/sgharlow%2Fgovernance-demo-app/merge_requests/7 -> 200
+2026-05-31T23:42:51.670387Z	2026-05-31 23:42:51,670 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=7 action=update
+2026-05-31T23:15:43.916667Z	2026-05-31 23:15:43,917 INFO mr_sentinel using project override rubric (v2)
+2026-05-31T23:15:43.352671Z	2026-05-31 23:15:43,353 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=1 action=update
+2026-05-31T23:15:42.339784Z	2026-05-31 23:15:42,340 INFO mr_sentinel posted comment note_id=3403828717 on MR !1 (score_id=142)
+2026-05-31T23:15:41.634879Z	2026-05-31 23:15:41,635 INFO mr_sentinel evaluation: score=10.0 verdict=pass rules=15
 2026-05-31T23:15:13.651742Z	2026-05-31 23:15:13,652 INFO mr_sentinel using project override rubric (v2)
 2026-05-31T23:15:12.544715Z	2026-05-31 23:15:12,545 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=1 action=open
 2026-05-19T05:11:49.326149Z	2026-05-19 05:11:49,326 INFO mr_sentinel using project override rubric (v2)
@@ -164,31 +217,3 @@
 2026-05-19T04:37:08.462760Z	2026-05-19 04:37:08,464 INFO mr_sentinel using project override rubric (vv2)
 2026-05-19T04:37:07.441574Z	2026-05-19 04:37:07,443 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=8 action=update
 2026-05-19T04:37:06.925598Z	2026-05-19 04:37:06,927 INFO mr_sentinel updated comment note_id=3361718824 on MR !8 (score_id=61)
-2026-05-19T04:37:06.149274Z	2026-05-19 04:37:06,150 INFO mr_sentinel evaluation: score=10.0 verdict=pass rules=15
-2026-05-19T04:36:59.042640Z	2026-05-19 04:36:59,043 INFO mr_sentinel using project override rubric (vv2)
-2026-05-19T04:36:57.962230Z	2026-05-19 04:36:57,962 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=8 action=update
-2026-05-19T04:36:57.640963Z	2026-05-19 04:36:57,642 INFO mr_sentinel updated comment note_id=3361718824 on MR !8 (score_id=61)
-2026-05-19T04:36:56.915538Z	2026-05-19 04:36:56,916 INFO mr_sentinel evaluation: score=9.0 verdict=pass rules=15
-2026-05-19T04:36:48.906858Z	2026-05-19 04:36:48,908 INFO mr_sentinel using project override rubric (vv2)
-2026-05-19T04:36:47.945354Z	2026-05-19 04:36:47,946 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=8 action=update
-2026-05-19T04:36:47.373453Z	2026-05-19 04:36:47,374 INFO mr_sentinel updated comment note_id=3361718824 on MR !8 (score_id=61)
-2026-05-19T04:36:46.674032Z	2026-05-19 04:36:46,674 INFO mr_sentinel evaluation: score=9.0 verdict=pass rules=15
-2026-05-19T04:36:39.617905Z	2026-05-19 04:36:39,619 INFO mr_sentinel using project override rubric (vv2)
-2026-05-19T04:36:38.605132Z	2026-05-19 04:36:38,606 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=8 action=update
-2026-05-19T04:36:38.115708Z	2026-05-19 04:36:38,116 INFO mr_sentinel updated comment note_id=3361718824 on MR !8 (score_id=61)
-2026-05-19T04:36:37.461010Z	2026-05-19 04:36:37,461 INFO mr_sentinel evaluation: score=10.0 verdict=pass rules=15
-2026-05-19T04:36:29.691169Z	2026-05-19 04:36:29,691 INFO mr_sentinel using project override rubric (vv2)
-2026-05-19T04:36:28.613792Z	2026-05-19 04:36:28,615 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=8 action=update
-2026-05-19T04:36:27.796794Z	2026-05-19 04:36:27,797 INFO mr_sentinel updated comment note_id=3361718824 on MR !8 (score_id=61)
-2026-05-19T04:36:27.087972Z	2026-05-19 04:36:27,088 INFO mr_sentinel evaluation: score=10.0 verdict=pass rules=15
-2026-05-19T04:36:20.665760Z	2026-05-19 04:36:20,666 INFO mr_sentinel using project override rubric (vv2)
-2026-05-19T04:36:19.620393Z	2026-05-19 04:36:19,621 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=8 action=update
-2026-05-19T04:36:19.059552Z	2026-05-19 04:36:19,060 INFO mr_sentinel updated comment note_id=3361718824 on MR !8 (score_id=61)
-2026-05-19T04:36:18.256076Z	2026-05-19 04:36:18,256 INFO mr_sentinel evaluation: score=9.0 verdict=pass rules=15
-2026-05-19T04:36:10.637713Z	2026-05-19 04:36:10,638 INFO mr_sentinel using project override rubric (vv2)
-2026-05-19T04:36:09.590341Z	2026-05-19 04:36:09,591 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=8 action=update
-2026-05-19T04:36:08.286501Z	2026-05-19 04:36:08,287 INFO mr_sentinel updated comment note_id=3361718824 on MR !8 (score_id=61)
-2026-05-19T04:36:07.457195Z	2026-05-19 04:36:07,458 INFO mr_sentinel evaluation: score=10.0 verdict=pass rules=15
-2026-05-19T04:36:00.224499Z	2026-05-19 04:36:00,225 INFO mr_sentinel using project override rubric (vv2)
-2026-05-19T04:35:59.251945Z	2026-05-19 04:35:59,253 INFO mr_sentinel received gitlab event kind=merge_request project=sgharlow/governance-demo-app mr_iid=8 action=update
-2026-05-19T04:35:58.511924Z	2026-05-19 04:35:58,512 INFO mr_sentinel updated comment note_id=3361718824 on MR !8 (score_id=61)
