@@ -66,9 +66,10 @@ bash scripts/demo-capture.sh
 - **Shots 6–10** — back to `!10` for the verdict comment, then `/dashboard`,
   `/audit/.../10`, on-camera close, end card.
 
-- **Screenshots (same browser session, for the Devpost gallery)** — capture:
-  1. `/dashboard` full view  2. `/audit/.../10`  3. the `!10` agent comment on GitLab
-  4. `rubric/v1.yaml` top. Crop to 1920×1080, PNG, save to `docs/screenshots/`.
+- **Screenshots (same browser session, for the Devpost gallery)** — capture the
+  five images per [`screenshots/CAPTURE-GUIDE.md`](screenshots/CAPTURE-GUIDE.md)
+  (dashboard, MR comment, audit page, rubric, agent-loop trace). It lists the exact
+  proof elements that must be in each frame. 1920×1080 PNG → `docs/screenshots/`.
 
 ---
 
