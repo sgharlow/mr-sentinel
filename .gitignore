@@ -53,3 +53,8 @@ scratch/
 
 # Closeout raw captures (large; keep summary + results .txt, not raw log dumps)
 docs/closeout-*/*-raw.json
+
+# Raw demo-recording media (large; the published cut lives on YouTube)
+video/
+*.mp4
+*.m4a

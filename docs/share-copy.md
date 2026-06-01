@@ -4,7 +4,7 @@ Ready-to-paste social and outreach text. Voice mirrors the foreign-mind.com book
 
 **Author profile:** sgharlow personal (NOT the business page).
 **One link per post.** Default: `github.com/sgharlow/mr-sentinel`.
-**Demo video URL:** _[fill in after recording]_
+**Demo video URL:** https://youtu.be/0IlB2KJsJ4A
 
 ---
 
@@ -135,7 +135,7 @@ MR Sentinel is an AI governance agent that watches GitLab merge requests and app
 
 Live: github.com/sgharlow/mr-sentinel
 Demo MRs: gitlab.com/sgharlow/governance-demo-app/merge_requests
-Architecture: a 3-min walkthrough on YouTube — [link after upload]
+Architecture: a 3-min walkthrough on YouTube — https://youtu.be/0IlB2KJsJ4A
 
 The differentiator from AI code reviewers (CodeRabbit, Greptile, etc.) is the control-mapping framing. When you ship this in a regulated environment, every blocking comment cites a control number an auditor recognizes, and the full evaluation is persisted to Postgres for the audit trail.
 

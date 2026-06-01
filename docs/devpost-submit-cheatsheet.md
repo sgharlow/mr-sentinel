@@ -5,9 +5,9 @@ this is the index + the bits that are easy to fumble. **Deadline: June 11, 2026 
 14:00 PT hard / target 12:00 PT.**
 
 ## Before you open the form
-- [ ] Final video uploaded to **YouTube → Unlisted**, URL copied
-- [ ] URL pasted into the `devpost-submission.md` Links table (Demo video row)
-- [ ] 5 gallery screenshots ready in `docs/screenshots/` (1920×1080 PNG)
+- [x] Final video uploaded to **YouTube** — https://youtu.be/0IlB2KJsJ4A
+- [x] URL pasted into the `devpost-submission.md` Links table (Demo video row)
+- [x] Gallery screenshots in `docs/screenshots/` (7 captured; JPG ~1900×960)
 - [ ] `bash scripts/demo-capture.sh` → all green (live demo still up)
 
 ## Fill the form in this order

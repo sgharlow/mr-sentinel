@@ -77,7 +77,7 @@ Legend: **[SCREEN]** what's visible · **[DO]** the click/scroll · **[SAY]** na
 - **Edit:** trim the first/last second; burn in captions; loudness ~-16 LUFS. Keep it under 3:00.
 - **Screenshots:** grab the 5 in [`screenshots/CAPTURE-GUIDE.md`](screenshots/CAPTURE-GUIDE.md) from the same tabs while they're open.
 - **Cleanup:** `DRY=1 bash scripts/cleanup-demo-artifacts.sh` then run it for real (closes the `fire`/retest dup issues, deletes marker files).
-- **Upload:** YouTube → Unlisted → paste the URL into `devpost-submission.md` Links table → then `devpost-submit-cheatsheet.md`.
+- **Upload:** DONE — published at https://youtu.be/0IlB2KJsJ4A (in `devpost-submission.md` Links table + `devpost-submit-cheatsheet.md`).
 
 ## Optional on-camera (only if you want a talking head)
 Record two short webcam clips separately and splice: the **0:10–0:24 stakes** line and

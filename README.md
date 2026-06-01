@@ -6,6 +6,8 @@
 
 > An AI governance agent for merge requests — applies a written compliance rubric in ~20 seconds (p95 under 30), with a paper trail.
 
+**▶ Watch the 3-minute demo:** [youtu.be/0IlB2KJsJ4A](https://youtu.be/0IlB2KJsJ4A)
+
 **Try it now:** [live dashboard](https://mr-sentinel-webhook-n6oitfxdra-uc.a.run.app/dashboard) · [sample audit page](https://mr-sentinel-webhook-n6oitfxdra-uc.a.run.app/audit/sgharlow/governance-demo-app/10) · [demo MR](https://gitlab.com/sgharlow/governance-demo-app/-/merge_requests/10)
 
 **Hackathon:** Google Cloud Rapid Agent Hackathon — GitLab track
@@ -188,7 +190,7 @@ mr-sentinel/
 │   ├── agent_runner.py               # rubric load + Gemini call + parse + comment render
 │   ├── gitlab_client.py              # async GitLab REST client (8 endpoints)
 │   └── persistence.py                # asyncpg pool + mr_scores/rule_outcomes/audit_log writes
-├── tests/                            # pytest — 51 tests
+├── tests/                            # pytest — 52 tests
 │   ├── test_webhook.py               # /health + webhook auth + payload validation
 │   ├── test_agent_runner.py          # rubric load/parse + prompt assembly + comment render
 │   ├── test_gitlab_client.py         # 8 REST endpoints + override fetch + upsert pattern
