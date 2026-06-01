@@ -140,14 +140,18 @@ mit-license
 
 ## Links
 
-| Field | URL |
-|---|---|
-| GitHub repo | `https://github.com/sgharlow/mr-sentinel` |
-| Demo GitLab repo | `https://gitlab.com/sgharlow/governance-demo-app` |
-| Live Cloud Run webhook | `https://mr-sentinel-webhook-n6oitfxdra-uc.a.run.app` |
-| Live dashboard | `https://mr-sentinel-webhook-n6oitfxdra-uc.a.run.app/dashboard` |
-| Sample audit page | `https://mr-sentinel-webhook-n6oitfxdra-uc.a.run.app/audit/sgharlow/governance-demo-app/10` |
-| Demo video | _[fill in YouTube unlisted URL after recording]_ |
+All five resource links below are **final and verified live 2026-06-01**. The ONLY
+field still to fill is the **Demo video** row — paste the YouTube unlisted URL after
+recording and this table is submission-ready.
+
+| Field | URL | Status |
+|---|---|---|
+| GitHub repo | `https://github.com/sgharlow/mr-sentinel` | ✅ public |
+| Demo GitLab repo | `https://gitlab.com/sgharlow/governance-demo-app` | ✅ public |
+| Live Cloud Run webhook | `https://mr-sentinel-webhook-n6oitfxdra-uc.a.run.app` | ✅ /health 200 |
+| Live dashboard | `https://mr-sentinel-webhook-n6oitfxdra-uc.a.run.app/dashboard` | ✅ 13 MRs |
+| Sample audit page | `https://mr-sentinel-webhook-n6oitfxdra-uc.a.run.app/audit/sgharlow/governance-demo-app/10` | ✅ block 0.0 |
+| **Demo video** | **❗ PASTE YOUTUBE UNLISTED URL HERE ❗** | ⬜ pending record |
 
 ---
 
