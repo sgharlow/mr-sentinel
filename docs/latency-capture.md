@@ -128,14 +128,14 @@ After capture, edit the table in **Results** below with the actual values, then 
 
 ## Results
 
-**Captured:** 2026-05-31 in WSL (`docs/closeout-20260531/03-latency-results.txt`)
-**Window:** last 30 days ending 2026-05-31
-**Sample size:** 17 full-loop legs / 142 Gemini-call legs
+**Captured:** 2026-06-01 in WSL (post-SEED, `docs/closeout-20260531/03-latency-results.txt`)
+**Window:** last 30 days ending 2026-06-01
+**Sample size:** 19 full-loop legs / 144 Gemini-call legs
 
 | Metric | p50 | p95 | p99 | max |
 |--------|-----|-----|-----|-----|
-| Gemini eval (start → "evaluation: score=" log) | 10.6s | ⚠️ artifact | ⚠️ artifact | ⚠️ artifact |
-| **Full agent loop (start → comment posted)** | **19.5s** | **30.0s** | **33.4s** | **33.4s** |
+| Gemini eval (start → "evaluation: score=" log) | 12.8s | ⚠️ artifact | ⚠️ artifact | ⚠️ artifact |
+| **Full agent loop (start → comment posted)** | **19.7s** | **30.0s** | **33.4s** | **33.4s** |
 
 **Use the full-loop row.** The "~30s" figure that lived in the README/demo for weeks turns out to be the **p95**, not the p50 — the real median is ~20s.
 

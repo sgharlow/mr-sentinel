@@ -114,17 +114,17 @@ This script is the executable companion to the storyboard below. Run both from W
 
 **Visual:** Navigate to `https://mr-sentinel-webhook-n6oitfxdra-uc.a.run.app/dashboard`. Full screen. Dark theme. Viewer sees:
 - "Leadership dashboard · last 30d"
-- "MRs scored: 8"
-- Verdict distribution bars: 6 block, 1 warn, 1 pass
-- Top-5 failing rules: `contract-has-spec-link (5)`, `integration-boundaries-explicit (3)`, `auth-on-new-public-endpoints (3)`, `no-secrets-in-diff (3)`, `changed-method-coverage (3)`
+- "MRs scored: 13"
+- Verdict distribution bars: 8 block, 3 warn, 2 pass
+- Top-5 failing rules: `contract-has-spec-link (6)`, `kill-switch-path (6)`, `integration-boundaries-explicit (5)`, `changed-method-coverage (5)`, `observability-on-new-endpoints (5)`
 - Recent MRs table — cursor hovers MR `!10` row
 
 **Camera:** Voiceover only. Cursor moves down the list.
 
 **Narration (30s):**
-> "An engineering leader opens the dashboard. The last thirty days: eight MRs scored. Six blocked on compliance. The top-five failing rules — every one a control mapped to an audit framework. Drift, by rule, by window. Click any MR..."
+> "An engineering leader opens the dashboard. The last thirty days: thirteen MRs scored. Eight blocked on compliance. The top-five failing rules — every one a control mapped to an audit framework. Drift, by rule, by window. Click any MR..."
 
-**Verified + corrected 2026-05-21:** Dashboard live, exact label is **"last 30d"** (corrected from "this week" → "the last thirty days" in narration). MRs scored = 8, distribution 6/1/1 verified. Top-5 rule **order** corrected: `integration-boundaries-explicit` is 2nd (not `auth-on-new-public-endpoints`). All five rule names match live data. **After v2 archetypes seed,** dashboard count will jump to 12 MRs, distribution + top-5 ordering will shift — record AFTER the seed has settled and re-verify these numbers.
+**Re-verified live 2026-06-01 (post-SEED):** dashboard shows **13 MRs scored, 8 block / 3 warn / 2 pass**; top-5 = `contract-has-spec-link (6)`, `kill-switch-path (6)`, `integration-boundaries-explicit (5)`, `changed-method-coverage (5)`, `observability-on-new-endpoints (5)`. Numbers + narration above updated to match. **Record Shot 7 against this 13-MR state** — the v2 seed (MRs !14–!17) is what fattens this view; a take made before the seed settled shows the old 8-MR dashboard and undersells it. Hero `!10` sha8 confirmed still `1fb25ad2` (seed added new MRs, didn't touch !10), so Shot 6 is unchanged.
 
 ### Shot 8 — Audit drill-down (2:20–2:40, 20s)
 
