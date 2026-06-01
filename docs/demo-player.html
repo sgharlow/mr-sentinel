@@ -21,7 +21,7 @@
 
   /* slide image / placeholder */
   .slide{position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-    opacity:0; transition:opacity .45s ease; padding:2.2vmin 2.2vmin 16vh}
+    opacity:0; transition:opacity .45s ease; padding:2.2vmin 2.2vmin 8vh}
   .slide.show{opacity:1}
   .slide img{max-width:100%; max-height:100%; object-fit:contain;
     border-radius:10px; box-shadow:0 24px 80px rgba(0,0,0,.6), 0 0 0 1px rgba(45,212,191,.12)}
@@ -48,11 +48,11 @@
   #cc{position:fixed; left:50%; bottom:max(28px,4.5vh); transform:translateX(-50%); z-index:7;
     width:min(1180px,92vw); text-align:center;
     background:var(--cc-bg); border-top:3px solid var(--accent); border-radius:14px;
-    padding:clamp(14px,2.2vh,26px) clamp(20px,3vw,40px);
+    padding:clamp(7px,1.1vh,13px) clamp(20px,3vw,40px);
     box-shadow:0 18px 60px rgba(0,0,0,.55); backdrop-filter:blur(8px);
     opacity:0; transition:opacity .35s ease}
   #cc.show{opacity:1}
-  #cc p{font-weight:600; font-size:clamp(19px,2.5vw,34px); line-height:1.32; letter-spacing:.01em}
+  #cc p{font-weight:600; font-size:clamp(9.5px,1.25vw,17px); line-height:1.32; letter-spacing:.01em}
 
   /* start + help overlays */
   #start{position:fixed; inset:0; z-index:20; display:flex; flex-direction:column;
@@ -97,24 +97,24 @@
 /* ── EDIT HERE ── durations in seconds; images relative to this file (docs/). ──
    Capture these 7 into docs/screenshots/ (5 match CAPTURE-GUIDE.md; +mr-header, +mr-diff): */
 const SLIDES = [
-  {label:"MR Sentinel", dur:3,  title:true, cc:""},
-  {label:"Shot 1 · Cold open",            img:"screenshots/mr-header.jpg",   dur:10,
+  {label:"MR Sentinel", dur:2.5,  title:true, cc:""},
+  {label:"Shot 1 · Cold open",            img:"screenshots/mr-header.jpg",   dur:8.3,
    cc:"Friday afternoon. An MR lands — “add the production env file.” The reviewer is tired, with eight more in the queue."},
-  {label:"Shot 2 · The stakes",           img:"screenshots/mr-header.jpg",   dur:15,
+  {label:"Shot 2 · The stakes",           img:"screenshots/mr-header.jpg",   dur:12.5,
    cc:"Two decades in regulated industries taught me the pattern that ends careers isn’t malice — it’s a tired senior engineer rubber-stamping an MR at 4:50 on a Friday. MR Sentinel is the agent I wish I’d had — built on Google Cloud."},
-  {label:"Shot 3 · The diff",             img:"screenshots/mr-diff.jpg",     dur:17,
+  {label:"Shot 3 · The diff",             img:"screenshots/mr-diff.jpg",     dur:14.2,
    cc:"Inside the diff: a database password, a JWT secret, a live Stripe key, an AWS access key — everything the policy says must never enter the repo."},
-  {label:"Shot 4 · The rubric",           img:"screenshots/04-rubric.jpg",   dur:16,
+  {label:"Shot 4 · The rubric",           img:"screenshots/04-rubric.jpg",   dur:13.3,
    cc:"MR Sentinel runs on Cloud Run with Vertex AI Gemini behind a webhook. Fifteen rules in one YAML file — every rule mapped to a named compliance control: SOC 2, ISO 27001, OWASP, NIST. The rubric is the product."},
-  {label:"Shot 5 · The agent loop",       img:"screenshots/05-agent-loop.jpg", dur:24,
+  {label:"Shot 5 · The agent loop",       img:"screenshots/05-agent-loop.jpg", dur:20,
    cc:"When the webhook fires, the agent runs a deterministic plan: pull the MR, the diff, the pipeline, the vulnerability scan, check for a project rubric override, then hand it to Gemini. Eight tool calls, one Gemini evaluation — about twenty seconds end to end. Every call logged and replayable."},
-  {label:"Shot 6 · The verdict",          img:"screenshots/02-mr-comment.jpg", dur:29,
+  {label:"Shot 6 · The verdict",          img:"screenshots/02-mr-comment.jpg", dur:24.2,
    cc:"The comment. Verdict: block. Score: zero out of ten. It cites no-secrets-in-diff by rule ID — mapped to SOC 2 CC6.1, ISO 27001 A.9.4.3, OWASP-ASVS V2 — quotes the lines that tripped it, opens a remediation issue, and labels the MR blocked-compliance. Every action ties back to a named control."},
-  {label:"Shot 7 · Leadership dashboard", img:"screenshots/01-dashboard.jpg", dur:26,
+  {label:"Shot 7 · Leadership dashboard", img:"screenshots/01-dashboard.jpg", dur:21.7,
    cc:"An engineering leader opens the dashboard. The last thirty days: thirteen MRs scored, eight blocked on compliance. The top failing rules — every one a control mapped to an audit framework. Drift, by rule, by window."},
-  {label:"Shot 8 · Audit drill-down",     img:"screenshots/03-audit.jpg",    dur:18,
+  {label:"Shot 8 · Audit drill-down",     img:"screenshots/03-audit.jpg",    dur:15,
    cc:"Click any MR and you’re in the audit log. Every rule outcome, every control mapping, the exact prompt the agent used, the full timeline. What a compliance auditor asks for at year-end — here it’s the byproduct of doing the work."},
-  {label:"Close",                         img:"screenshots/03-audit.jpg",    dur:12, end:true,
+  {label:"Close",                         img:"screenshots/03-audit.jpg",    dur:10, end:true,
    cc:"Eight tool calls. One Gemini evaluation. One rubric. One paper trail — on Cloud Run, Cloud SQL, Secret Manager, and Vertex AI. The rubric ships open-source. MR Sentinel."},
 ];
 
