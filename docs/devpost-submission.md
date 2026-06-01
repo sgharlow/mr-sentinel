@@ -1,5 +1,7 @@
 # MR Sentinel — Devpost submission text
 
+> ✅ **SUBMITTED to Devpost (GitLab track) 2026-05-31.** Project edits remain open until June 11, 2026 — 17:00 EDT (14:00 PT).
+
 Field-by-field copy ready to paste into the Devpost submission form for the
 **Google Cloud Rapid Agent Hackathon** — **GitLab track**. Title and tagline
 optimized for the judges' first-pass scan; body sections written to map
@@ -202,4 +204,4 @@ Devpost's submission form for the Google Cloud Rapid Agent Hackathon typically r
 5. **T-30 min: assets uploaded.** Thumbnail + gallery PNGs + YouTube URL all attached.
 6. **T-15 min: track + tags.** Choose track: **GitLab**. Add tags from the Built-with section.
 7. **T-10 min: read-through.** One full read of the rendered preview. Fix anything that wraps badly or has a broken link.
-8. **Click submit BEFORE 12:00 PM PT on 2026-06-11.** (Hard deadline is 14:00 PT / 2:00 PM PT per the hackathon page; 12:00 PM PT is the personal safety buffer per spec §9.)
+8. ✅ **SUBMITTED to Devpost (GitLab track) 2026-05-31** — well ahead of the 2026-06-11 14:00 PT / 17:00 EDT deadline. Edits remain open until then.

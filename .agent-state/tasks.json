@@ -44,6 +44,15 @@
       "owner": null,
       "blocks": [],
       "notes": "Owner: Steve. Smoke test described in Task 9 of the implementation plan."
+    },
+    {
+      "id": "T-006",
+      "lane": "docs",
+      "title": "Submit to Devpost (GitLab track)",
+      "status": "completed",
+      "owner": "main",
+      "blocks": [],
+      "notes": "SUBMITTED 2026-05-31, ahead of the 2026-06-11 17:00 EDT deadline. Demo video https://youtu.be/0IlB2KJsJ4A (2:49). Repo public; all 6 links, gallery screenshots, thumbnail attached. Devpost edits remain open until the deadline."
     }
   ],
   "version": 1

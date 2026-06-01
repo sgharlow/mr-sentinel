@@ -4,6 +4,9 @@ One-screen reference. Long-form field text lives in [`devpost-submission.md`](de
 this is the index + the bits that are easy to fumble. **Deadline: June 11, 2026 —
 14:00 PT hard / target 12:00 PT.**
 
+> ✅ **SUBMITTED to Devpost (GitLab track) 2026-05-31.** Devpost allows edits until the
+> deadline, so the checklist below stays useful for any pre-deadline updates.
+
 ## Before you open the form
 - [x] Final video uploaded to **YouTube** — https://youtu.be/0IlB2KJsJ4A
 - [x] URL pasted into the `devpost-submission.md` Links table (Demo video row)
@@ -30,7 +33,7 @@ this is the index + the bits that are easy to fumble. **Deadline: June 11, 2026 
 7. **Media:** YouTube URL in the video field; upload the 5 screenshots; thumbnail
    = `docs/assets/devpost-thumbnail.png` (1280×720) if a thumbnail field exists.
 8. **Read-through** the rendered preview once — fix anything that wraps badly or any broken link.
-9. **Submit** before 12:00 PT.
+9. ✅ **SUBMITTED** — GitLab track. Edits remain open until June 11, 2026 — 17:00 EDT (14:00 PT).
 
 ## Don't forget (the fumble list)
 - Track = **GitLab** (not the generic track).

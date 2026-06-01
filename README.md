@@ -34,6 +34,8 @@ A 60-second guided tour. Every link is live and needs no auth:
 
 ## Status
 
+> ✅ **SUBMITTED to the Google Cloud Rapid Agent Hackathon (GitLab track) on 2026-05-31.** Demo video: https://youtu.be/0IlB2KJsJ4A. Project edits remain open until the June 11, 2026 — 17:00 EDT deadline.
+
 **Days 1-3, 4-8, 9-14, 15-19 milestones closed (4 of 6).** Day 16 of 26 — running ahead of the spec schedule (the Days 15-19 dashboard milestone shipped 2026-05-18). End-to-end loop verified live on Cloud Run: GitLab MR webhook → fetch MR + diffs + pipeline + vulnerabilities → fetch optional `.mr-sentinel.yaml` per-project rubric override → Vertex AI Gemini 2.5 Flash evaluation against 15 rubric rules → upsert structured comment + labels on the MR → open linked remediation issue on block verdicts → persist score + child rule outcomes + audit row to Cloud SQL. Leadership dashboard live at `/dashboard` + `/audit/{project}/{mr_iid}` (server-rendered, dark theme — Days 15-19 MVP shipped 2026-05-18). End-to-end latency (measured 2026-06-01 over 30 days of Cloud Logging, n=19 full webhook→comment legs): **p50 19.7s, p95 30.0s, p99 33.4s**. 52/52 tests green, CI green. GCP infrastructure on shared `aicin-477004`. See [`mr-sentinel-hackathon-spec.md`](mr-sentinel-hackathon-spec.md) for the full spec and 26-day build plan.
 
 ### GCP resources live
