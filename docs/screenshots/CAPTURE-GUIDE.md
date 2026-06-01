@@ -66,10 +66,16 @@ The Devpost *thumbnail* (1280×720) is separate and already done (`../assets/dev
 
 ---
 
+## Two extra frames for the demo player (`../demo-player.html`)
+- `mr-header.png` — MR `!10` top: title "chore: add .env.production…", Changes tab visible (Shots 1–2).
+- `mr-diff.png` — the expanded `.env.production` diff with the secret lines visible (Shot 3).
+
 ## Quick checklist
+- [ ] mr-header.png      (MR !10 header / changes tab)
+- [ ] mr-diff.png        (.env.production secrets in the diff)
 - [ ] 01-dashboard.png   (1920×1080, distribution + top-5 + count visible)
 - [ ] 02-mr-comment.png  (badge + no-secrets-in-diff + control mappings + label)
 - [ ] 03-audit.png       (rule table + control_mapping column + timeline)
 - [ ] 04-rubric.png      (a rule with control_mapping; prefer no-secrets-in-diff)
 - [ ] 05-agent-loop.png  (received → tool= ×8 → evaluation mr_iid → issue → comment)
-- [ ] all resized to exactly 1920×1080, committed to `docs/screenshots/`
+- [ ] all 1920×1080 PNG in `docs/screenshots/` (these feed both the Devpost gallery AND `demo-player.html`)
