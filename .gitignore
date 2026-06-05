@@ -38,10 +38,8 @@ ENV/
 gcp-credentials.json
 service-account*.json
 
-# Claude Code
-.claude/*
-!.claude/hooks/
-!.claude/settings.json
+# local dev-assistant/editor config — never committed
+.claude/
 
 # OS
 Thumbs.db

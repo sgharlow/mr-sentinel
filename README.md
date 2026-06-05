@@ -220,8 +220,7 @@ mr-sentinel/
 │   ├── demo-script.md                # 3-minute video script with shot-by-shot direction
 │   ├── days-20-23-demo-coverage.md   # rubric coverage gap analysis (11/15 → 14/15)
 │   ├── live-fire-2026-05-21.md       # latest end-to-end verification + dashboard scrape
-│   ├── share-copy.md                 # social/blog launch copy
-│   └── 2026-05-22-parallel-agent-workflow-design.md  # parallel-Claude-Code dev setup
+│   └── share-copy.md                 # social/blog launch copy
 ├── .github/workflows/
 │   └── ci.yml                        # pytest + rubric schema validation on push/PR
 ├── Dockerfile                        # Python 3.11-slim → uvicorn → :8080

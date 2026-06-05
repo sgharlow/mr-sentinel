@@ -3,13 +3,13 @@
 # MR Sentinel — WSL CLOSEOUT RUNBOOK
 # =============================================================================
 # Batches every gcloud-gated closeout task into ONE interactive run, writing all
-# results to files under docs/closeout-<date>/ so a Claude Code session on Windows
+# results to files under docs/closeout-<date>/ so a Windows-side session
 # can read them back (the repo is the same bytes at /mnt/c/... and C:\...).
 #
-# WHY THIS MUST RUN INTERACTIVELY IN WSL — NOT VIA CLAUDE/wsl.exe:
+# WHY THIS MUST RUN INTERACTIVELY IN WSL — NOT VIA wsl.exe:
 #   1. Norton's TLS MITM blocks gcloud's network calls from Windows Git Bash.
 #      WSL traffic is not intercepted, so gcloud works here.
-#   2. When Claude drives gcloud through `wsl.exe -e bash -c`, command
+#   2. When gcloud is driven non-interactively through `wsl.exe -e bash -c`, command
 #      substitution `TOKEN=$(gcloud ...)` captures ZERO bytes (TTY/fork quirk in
 #      gcloud's bundled Python). The seed scripts use that pattern → empty token
 #      → silent 401s. In a real interactive WSL terminal this works fine.
@@ -18,8 +18,8 @@
 #         cd /mnt/c/Users/$USER/CascadeProjects/mr-sentinel   # adjust if needed
 #         bash docs/closeout-runbook.sh
 #
-# MONITORING FROM CLAUDE (Windows side): point the Read tool at
-#   docs/closeout-<date>/run.log  (tail it) and the individual *.txt result files.
+# MONITORING (Windows side): tail
+#   docs/closeout-<date>/run.log  and the individual *.txt result files.
 #
 # PHASE TOGGLES (default: read-only/safe phases ON; mutating/heavy phases OFF).
 #   Override by exporting before running, e.g.:  SEED=1 SQL=1 bash docs/closeout-runbook.sh
@@ -49,7 +49,7 @@ DATE="$(date +%Y%m%d)"
 OUT="docs/closeout-${DATE}"
 mkdir -p "$OUT"
 LOG="$OUT/run.log"
-# Tee everything (stdout+stderr) to the log AND the terminal, so Claude can tail $LOG.
+# Tee everything (stdout+stderr) to the log AND the terminal, so $LOG can be tailed.
 exec > >(tee -a "$LOG") 2>&1
 
 hr()   { printf '\n========== %s ==========\n' "$1"; }
@@ -226,7 +226,7 @@ else
 fi
 
 # =============================================================================
-# SUMMARY — single file for Claude to read first
+# SUMMARY — single file to read first
 # =============================================================================
 hr "SUMMARY"
 SUMMARY="$OUT/CLOSEOUT-SUMMARY.md"
@@ -243,7 +243,7 @@ SUMMARY="$OUT/CLOSEOUT-SUMMARY.md"
   echo "| 5 issue audit | 05-linked-issues.txt | $([ -s "$OUT/05-linked-issues.txt" ] && echo 'captured' || echo 'CHECK') |"
   echo "| 6 cloud sql | 06-sql-rowcount.txt | $([ "$SQL" = 1 ] && echo 'manual' || echo 'skipped (SQL=0)') |"
   echo
-  echo "## Next actions for Claude (Windows session)"
+  echo "## Next actions (Windows session)"
   echo "1. Read 03-latency-results.txt -> patch demo-script.md Shot 5 + README Status with the full-loop p50."
   echo "2. Read 04-shot5-logstrings.txt -> reconcile Shot 5 visual cues against the real log wording."
   echo "3. Read 05-linked-issues.txt -> confirm one issue per block verdict; flag any missing."
@@ -252,4 +252,4 @@ SUMMARY="$OUT/CLOSEOUT-SUMMARY.md"
 
 echo
 ok "DONE. All artifacts in: $OUT/"
-echo "Tell your Claude session: \"read $OUT/CLOSEOUT-SUMMARY.md and process the closeout results\""
+echo "Next: read $OUT/CLOSEOUT-SUMMARY.md and process the closeout results."

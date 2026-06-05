@@ -22,11 +22,11 @@ gcloud auth print-access-token >/dev/null && echo "auth OK"
 SEED=1 bash docs/closeout-runbook.sh
 ```
 
-- **A3.** Paste the new `docs/closeout-<today>/03-latency-results.txt` to Claude →
-  Claude updates the latency numbers in README + demo-script + devpost, re-checks
-  whether hero `!10`'s sha8 changed (it shouldn't — seed adds new MRs), and commits.
+- **A3.** Using the new `docs/closeout-<today>/03-latency-results.txt`, update the
+  latency numbers in README + demo-script + devpost, re-check
+  whether hero `!10`'s sha8 changed (it shouldn't — seed adds new MRs), and commit.
 - **A4.** Note the new dashboard MR count + top-5 rules (you'll narrate them in Shot 7);
-  paste them to Claude to refresh demo-script Shot 7 if they shifted.
+  refresh demo-script Shot 7 if they shifted.
 
 > If SEED created new block MRs, they get their own legit follow-up issues. Note their
 > issue iids — you'll add them to `KEEP` in Phase D.
@@ -86,8 +86,8 @@ bash scripts/cleanup-demo-artifacts.sh
 bash scripts/demo-capture.sh
 ```
 
-- **D2.** Give Claude the YouTube URL → it pastes into `docs/devpost-submission.md`
-  Links table + commits. Commit the screenshots too.
+- **D2.** Paste the YouTube URL into the `docs/devpost-submission.md`
+  Links table + commit. Commit the screenshots too.
 
 ---
 

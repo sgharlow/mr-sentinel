@@ -47,5 +47,5 @@ printf '\n############################################################\n'
 printf '# closeout-all complete\n'
 printf '############################################################\n'
 echo "Artifacts: docs/closeout-<today>/  (CLOSEOUT-SUMMARY.md, 03-latency-results.txt, ...)"
-echo "Next: paste 03-latency-results.txt + the dashboard MR count to Claude for the doc refresh,"
+echo "Next: use 03-latency-results.txt + the dashboard MR count for the doc refresh,"
 echo "then continue with Phase B/C in docs/recording-runbook.md."
