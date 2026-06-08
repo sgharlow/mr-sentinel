@@ -47,3 +47,47 @@ def test_record_verdict_stores_payload_and_acks():
 
 def test_collector_starts_empty():
     assert VerdictCollector().payload is None
+
+
+import app.adk_agent as adk
+
+
+def test_build_gitlab_mcp_toolset_wires_env(monkeypatch):
+    captured = {}
+
+    class FakeMCPToolset:
+        def __init__(self, *, connection_params, tool_filter=None):
+            captured["connection_params"] = connection_params
+            captured["tool_filter"] = tool_filter
+
+    class FakeStdioServerParameters:
+        def __init__(self, *, command, args=None, env=None):
+            captured["command"] = command
+            captured["args"] = args
+            captured["env"] = env
+
+    class FakeStdioConnectionParams:
+        def __init__(self, *, server_params, timeout=5.0):
+            captured["server_params"] = server_params
+            captured["timeout"] = timeout
+
+    monkeypatch.setattr(adk, "MCPToolset", FakeMCPToolset)
+    monkeypatch.setattr(adk, "StdioServerParameters", FakeStdioServerParameters)
+    monkeypatch.setattr(adk, "StdioConnectionParams", FakeStdioConnectionParams)
+    monkeypatch.setenv("GITLAB_TOKEN", "glpat-test")
+    monkeypatch.setenv("GITLAB_BASE_URL", "https://gitlab.com")
+
+    ts = adk.build_gitlab_mcp_toolset()
+    assert isinstance(ts, FakeMCPToolset)
+    assert captured["command"] == adk.GITLAB_MCP_COMMAND
+    assert captured["env"]["GITLAB_PERSONAL_ACCESS_TOKEN"] == "glpat-test"
+    assert captured["env"]["GITLAB_API_URL"] == "https://gitlab.com/api/v4"
+    assert captured["tool_filter"] == adk.GITLAB_MCP_TOOL_FILTER
+
+
+def test_build_gitlab_mcp_toolset_requires_token(monkeypatch):
+    monkeypatch.delenv("GITLAB_TOKEN", raising=False)
+    monkeypatch.setattr(adk, "MCPToolset", object)
+    import pytest
+    with pytest.raises(RuntimeError, match="GITLAB_TOKEN"):
+        adk.build_gitlab_mcp_toolset()

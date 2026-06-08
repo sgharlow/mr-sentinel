@@ -14,8 +14,14 @@ from __future__ import annotations
 
 import logging
 import os
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any
+
+# Imported at module top so tests can monkeypatch these names on the module.
+# (verified google-adk 2.2.0): MCPToolset + StdioConnectionParams come from
+# google.adk.tools.mcp_tool; StdioServerParameters comes from `mcp`.
+from google.adk.tools.mcp_tool import MCPToolset, StdioConnectionParams
+from mcp import StdioServerParameters
 
 logger = logging.getLogger("mr_sentinel.adk")
 
@@ -25,6 +31,9 @@ GITLAB_MCP_TOOL_FILTER = [
     "get_merge_request_diffs",
     "list_merge_request_pipelines",
 ]
+
+# `npm install -g @zereight/mcp-gitlab` installs this binary on PATH (see Dockerfile).
+GITLAB_MCP_COMMAND = os.environ.get("GITLAB_MCP_COMMAND", "mcp-gitlab")
 
 
 @dataclass
@@ -65,3 +74,30 @@ def make_record_verdict(collector: VerdictCollector):
         return {"status": "recorded"}
 
     return record_verdict
+
+
+def build_gitlab_mcp_toolset() -> "MCPToolset":
+    """Construct an ADK MCPToolset backed by the zereight GitLab MCP server (stdio).
+
+    Reuses the same PAT the REST client uses (GITLAB_TOKEN) and the same base URL
+    (GITLAB_BASE_URL), translated to the env names the zereight server expects.
+    """
+    token = (os.environ.get("GITLAB_TOKEN") or "").strip()
+    if not token:
+        raise RuntimeError("GITLAB_TOKEN is required to launch the GitLab MCP server")
+    base_url = (os.environ.get("GITLAB_BASE_URL") or "https://gitlab.com").rstrip("/")
+    server_params = StdioServerParameters(
+        command=GITLAB_MCP_COMMAND,
+        args=[],
+        env={
+            "GITLAB_PERSONAL_ACCESS_TOKEN": token,
+            "GITLAB_API_URL": f"{base_url}/api/v4",
+            # Read-only posture for the evaluation agent; write tools stay on REST.
+            "GITLAB_READ_ONLY_MODE": "true",
+            "PATH": os.environ.get("PATH", ""),
+        },
+    )
+    return MCPToolset(
+        connection_params=StdioConnectionParams(server_params=server_params, timeout=30.0),
+        tool_filter=GITLAB_MCP_TOOL_FILTER,
+    )
