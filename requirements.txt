@@ -8,3 +8,5 @@ asyncpg==0.30.0
 google-cloud-logging==3.11.2
 google-cloud-secret-manager==2.20.2
 google-cloud-aiplatform==1.71.1
+google-adk==2.2.0
+mcp==1.27.2

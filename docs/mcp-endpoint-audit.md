@@ -44,3 +44,15 @@ Reopen this matrix if any of the following becomes true:
 3. A consumer of MR Sentinel asks for MCP transport because their security model requires it (e.g., centralized tool-policy enforcement).
 
 Until then, REST.
+
+## Addendum — 2026-06-08: hackathon-required MCP integration (Path B)
+
+The Google Cloud Rapid Agent Hackathon requires the partner's MCP server be imported
+and called at runtime. The OFFICIAL GitLab Duo MCP server (`gitlab.com/api/v4/mcp`)
+is Premium/Ultimate-only, beta, OAuth-DCR-only, and exposes no tool to post/update an
+MR note or set MR labels — so it cannot run MR Sentinel's write-backs and is unusable
+on this Free-tier account. Decision: use a community GitLab MCP server
+(`@zereight/mcp-gitlab`, stdio) via ADK `MCPToolset` for the agent's evaluation READS
+(`get_merge_request`, `get_merge_request_diffs`, `list_merge_request_pipelines`).
+Write-backs stay on REST (`app/gitlab_client.py`) to keep comment formatting + upsert +
+dedup deterministic. See `docs/superpowers/plans/2026-06-08-adk-gitlab-mcp.md`.
