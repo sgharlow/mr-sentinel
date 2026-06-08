@@ -1,4 +1,5 @@
 from app.agent_runner import evaluation_from_payload, Evaluation
+from app.adk_agent import VerdictCollector, make_record_verdict
 
 
 def test_evaluation_from_payload_maps_all_fields():
@@ -29,3 +30,20 @@ def test_evaluation_from_payload_derives_missing_verdict_and_summary():
     ev = evaluation_from_payload(payload, rubric_version="v2")
     assert ev.verdict == "block"          # fail + score<=3 -> block
     assert "r1" in ev.summary
+
+
+def test_record_verdict_stores_payload_and_acks():
+    collector = VerdictCollector()
+    record = make_record_verdict(collector)
+    out = record(
+        overall_score=0.0, verdict="block", summary="secrets",
+        rule_evaluations=[{"rule_id": "no-secrets-in-diff", "outcome": "fail", "evidence": "x"}],
+    )
+    assert out["status"] == "recorded"
+    assert collector.payload is not None
+    assert collector.payload["verdict"] == "block"
+    assert collector.payload["rule_evaluations"][0]["rule_id"] == "no-secrets-in-diff"
+
+
+def test_collector_starts_empty():
+    assert VerdictCollector().payload is None
