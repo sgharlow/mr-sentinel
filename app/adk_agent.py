@@ -101,3 +101,85 @@ def build_gitlab_mcp_toolset() -> MCPToolset:
         connection_params=StdioConnectionParams(server_params=server_params, timeout=30.0),
         tool_filter=GITLAB_MCP_TOOL_FILTER,
     )
+
+
+# ---------------------------------------------------------------------------
+# Agent runner — builds an LlmAgent (Gemini + GitLab MCP + record_verdict) and
+# drives it to completion. Imported here at module level (no cycle: agent_runner
+# does not import adk_agent).
+# ---------------------------------------------------------------------------
+
+from app.agent_runner import build_system_prompt, evaluation_from_payload  # noqa: E402
+
+EVAL_USER_PROMPT = (
+    "Evaluate merge request {project}!{iid}.\n"
+    "1. Call get_merge_request, get_merge_request_diffs, and list_merge_request_pipelines "
+    "to gather the MR title, description, diff, and pipeline status.\n"
+    "2. Apply EVERY rule in the rubric (in your system instruction) to the diff.\n"
+    "3. Then call record_verdict exactly once with your structured scoring. "
+    "Do not write any prose response — record_verdict is your only output."
+)
+
+
+class _AdkRunner:
+    """Real runner: assembles the LlmAgent (Gemini + GitLab MCP + record_verdict) and runs it."""
+
+    def __init__(self, record_verdict, *, rubric: dict[str, Any]):
+        from google.adk.agents import LlmAgent
+        from google.adk.tools import FunctionTool
+        from google.adk.runners import InMemoryRunner
+
+        self._InMemoryRunner = InMemoryRunner
+        toolset = build_gitlab_mcp_toolset()
+        self._agent = LlmAgent(
+            name="mr_sentinel_evaluator",
+            model=os.environ.get("GEMINI_MODEL", "gemini-2.5-flash"),
+            instruction=build_system_prompt(rubric),
+            tools=[toolset, FunctionTool(record_verdict)],
+        )
+
+    async def run_and_collect(self, *, project_path: str, mr_iid: int) -> None:
+        from google.genai import types
+
+        runner = self._InMemoryRunner(self._agent, app_name="mr-sentinel")
+        session = await runner.session_service.create_session(
+            app_name="mr-sentinel", user_id="mr-sentinel"
+        )
+        message = types.Content(
+            role="user",
+            parts=[types.Part(text=EVAL_USER_PROMPT.format(project=project_path, iid=mr_iid))],
+        )
+        async for _event in runner.run_async(
+            user_id="mr-sentinel", session_id=session.id, new_message=message
+        ):
+            pass  # record_verdict side-effects into the collector; we just drain events.
+
+
+class AdkAgentRunner:
+    """Evaluate an MR via an ADK agent that reads context through the GitLab MCP server."""
+
+    def __init__(
+        self,
+        *,
+        rubric: dict[str, Any] | None = None,
+        runner_factory: Any = None,
+    ) -> None:
+        if rubric is None:
+            from app.agent_runner import load_rubric
+            rubric = load_rubric()
+        self.rubric = rubric
+        self._runner_factory = runner_factory or _AdkRunner
+
+    async def evaluate(self, project_path: str, mr_iid: int) -> "Evaluation":
+        from app.agent_runner import Evaluation  # noqa: F401  (return type)
+
+        collector = VerdictCollector()
+        record_verdict = make_record_verdict(collector)
+        runner = self._runner_factory(record_verdict, rubric=self.rubric)
+        logger.info("ADK evaluate %s!%s via GitLab MCP", project_path, mr_iid)
+        await runner.run_and_collect(project_path=project_path, mr_iid=mr_iid)
+        if collector.payload is None:
+            raise RuntimeError(f"agent did not record a verdict for {project_path}!{mr_iid}")
+        return evaluation_from_payload(
+            collector.payload, rubric_version=self.rubric.get("version", "")
+        )
