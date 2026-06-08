@@ -76,7 +76,7 @@ def make_record_verdict(collector: VerdictCollector):
     return record_verdict
 
 
-def build_gitlab_mcp_toolset() -> "MCPToolset":
+def build_gitlab_mcp_toolset() -> MCPToolset:
     """Construct an ADK MCPToolset backed by the zereight GitLab MCP server (stdio).
 
     Reuses the same PAT the REST client uses (GITLAB_TOKEN) and the same base URL
