@@ -56,7 +56,8 @@ async def _process_mr_event(event: dict[str, Any]) -> None:
     - sha-based dedup (skip if commit_sha already scored)
     - upsert comment (edit existing instead of posting new)
     - linked remediation issue on verdict=block
-    - pipeline + vulnerability tool calls (6+ tools per run)
+    - pipeline + vulnerability tool calls
+    - ADK agent (Gemini + GitLab MCP) for evaluation (Task 6)
     """
     object_kind = event.get("object_kind", "<unknown>")
     object_attrs = event.get("object_attributes", {}) or {}
@@ -78,13 +79,13 @@ async def _process_mr_event(event: dict[str, Any]) -> None:
         return
 
     from app.agent_runner import (
-        AgentRunner,
         PROJECT_OVERRIDE_PATH,
         RubricValidationError,
         parse_rubric,
         render_comment,
         render_followup_issue_body,
     )
+    from app.adk_agent import AdkAgentRunner
     from app.gitlab_client import GitLabClient
     from app.persistence import already_evaluated, audit, persist_evaluation
 
@@ -125,28 +126,25 @@ async def _process_mr_event(event: dict[str, Any]) -> None:
                                      "rubric_version": active_rubric_version})
                 return
 
-            # Tool 3: fetch diffs
-            diffs = await gl.get_merge_request_diffs(project_path, mr_iid)
-
-            # Tool 4: latest pipeline for this commit
+            # Tool 3: latest pipeline for this commit
             pipeline = await gl.get_latest_pipeline_for_sha(project_path, mr.sha)
             pipeline_status = pipeline["status"] if pipeline else None
 
-            # Tool 5: pipeline jobs (only when pipeline exists; saves a noop call otherwise)
+            # Tool 4: pipeline jobs (only when pipeline exists; saves a noop call otherwise)
             pipeline_jobs = []
             if pipeline:
                 pipeline_jobs = await gl.list_pipeline_jobs(project_path, pipeline["id"])
 
-            # Tool 6: vulnerability findings (gracefully empty on Free tier)
+            # Tool 5: vulnerability findings (gracefully empty on Free tier)
             advisories = await gl.list_vulnerability_findings(project_path)
 
             logger.info(
-                "fetched MR + %d diffs, pipeline=%s, jobs=%d, advisories=%d, rubric=%s",
-                len(diffs), pipeline_status, len(pipeline_jobs), len(advisories), override_source,
+                "fetched MR, pipeline=%s, jobs=%d, advisories=%d, rubric=%s",
+                pipeline_status, len(pipeline_jobs), len(advisories), override_source,
             )
 
-            runner = AgentRunner(rubric=override_rubric)
-            evaluation = await runner.evaluate(mr, diffs)
+            runner = AdkAgentRunner(rubric=override_rubric)
+            evaluation = await runner.evaluate(project_path, mr_iid)
             # mr_iid is appended so latency aggregation can pair this finish event
             # with its start event by MR (see docs/latency-capture.md — the prior
             # absence of mr_iid here forced FIFO pairing and corrupted the p95/p99).
@@ -156,7 +154,7 @@ async def _process_mr_event(event: dict[str, Any]) -> None:
 
             score_id = await persist_evaluation(mr, evaluation)
 
-            # Tool 7: linked remediation issue on block
+            # Tool 6: linked remediation issue on block
             followup_issue_url = None
             if evaluation.verdict == "block":
                 issue = await gl.create_issue(
@@ -168,7 +166,7 @@ async def _process_mr_event(event: dict[str, Any]) -> None:
                 followup_issue_url = issue.get("web_url")
                 logger.info("created followup issue !%s — %s", issue.get("iid"), followup_issue_url)
 
-            # Tool 8: upsert comment (find existing, update; else create)
+            # Tool 7: upsert comment (find existing, update; else create)
             comment_body = render_comment(
                 evaluation, mr,
                 followup_issue_url=followup_issue_url,
@@ -178,7 +176,7 @@ async def _process_mr_event(event: dict[str, Any]) -> None:
             logger.info("%s comment note_id=%s on MR !%s (score_id=%s)",
                         "posted" if created else "updated", note_id, mr_iid, score_id)
 
-            # Tool 9: labels
+            # Tool 8: labels
             labels_to_add = ["mr-sentinel-reviewed"]
             if evaluation.verdict == "block":
                 labels_to_add.append("blocked-compliance")
@@ -193,10 +191,11 @@ async def _process_mr_event(event: dict[str, Any]) -> None:
                     "followup_issue_url": followup_issue_url,
                     "pipeline_status": pipeline_status,
                     "rubric_source": override_source,
-                    # Count of distinct MR-affecting GitLab actions used (max 8 per
-                    # spec §4). The override-fetch is a config read, not an MR
-                    # action — it's recorded via rubric_source above.
-                    "mr_action_calls": 8 - (0 if pipeline else 1) - (1 if evaluation.verdict != "block" else 0),
+                    # Count of distinct MR-affecting GitLab REST actions used (max 7
+                    # in this path; diffs are now fetched via MCP inside the ADK agent).
+                    # The override-fetch is a config read, not an MR action — recorded
+                    # via rubric_source above.
+                    "mr_action_calls": 7 - (0 if pipeline else 1) - (1 if evaluation.verdict != "block" else 0),
                 },
             )
     except Exception as exc:
