@@ -182,6 +182,34 @@ Files changed: {len(diffs)}
 """
 
 
+def evaluation_from_payload(data: dict[str, Any], *, rubric_version: str) -> "Evaluation":
+    """Map a structured-score dict (Gemini JSON or record_verdict args) to an Evaluation.
+
+    Shared by the legacy direct-Gemini path (AgentRunner._parse_response) and the
+    new ADK path (AdkAgentRunner). Defensive: derives verdict/summary if omitted.
+    """
+    rule_evals = [
+        RuleEvaluation(
+            rule_id=r.get("rule_id", "unknown"),
+            outcome=r.get("outcome", "skip"),
+            evidence=r.get("evidence", ""),
+            remediation=r.get("remediation"),
+        )
+        for r in (data.get("rule_evaluations") or [])
+    ]
+    overall_score = float(data.get("overall_score", 5.0))
+    verdict = data.get("verdict") or _derive_verdict(rule_evals, overall_score)
+    summary = data.get("summary") or _derive_summary(rule_evals)
+    return Evaluation(
+        overall_score=overall_score,
+        verdict=verdict,
+        summary=summary,
+        rule_evaluations=rule_evals,
+        rubric_version=rubric_version,
+        raw_response=data,
+    )
+
+
 class AgentRunner:
     """Evaluates an MR against the rubric using Vertex AI Gemini."""
 
@@ -253,30 +281,7 @@ class AgentRunner:
         if not isinstance(data, dict):
             raise RuntimeError(f"Gemini returned non-object JSON: {type(data).__name__}")
 
-        rule_evals = [
-            RuleEvaluation(
-                rule_id=r.get("rule_id", "unknown"),
-                outcome=r.get("outcome", "skip"),
-                evidence=r.get("evidence", ""),
-                remediation=r.get("remediation"),
-            )
-            for r in (data.get("rule_evaluations") or [])
-        ]
-
-        # Defensive: derive sensible defaults if Gemini omitted required fields.
-        # response_schema in generation_config should prevent this but belt-and-braces.
-        overall_score = float(data.get("overall_score", 5.0))
-        verdict = data.get("verdict") or _derive_verdict(rule_evals, overall_score)
-        summary = data.get("summary") or _derive_summary(rule_evals)
-
-        return Evaluation(
-            overall_score=overall_score,
-            verdict=verdict,
-            summary=summary,
-            rule_evaluations=rule_evals,
-            rubric_version=self.rubric.get("version", ""),
-            raw_response=data,
-        )
+        return evaluation_from_payload(data, rubric_version=self.rubric.get("version", ""))
 
 
 def _derive_verdict(rule_evals: list[RuleEvaluation], score: float) -> str:
