@@ -264,3 +264,18 @@ def test_render_followup_issue_body_lists_failures_as_checklist() -> None:
     assert "add decorator" in body
     # Passes should not appear
     assert "quality-01" not in body
+
+
+def test_build_system_prompt_default_asks_for_json():
+    from app.agent_runner import build_system_prompt
+    p = build_system_prompt({"version": "v1", "rules": []})
+    assert "JSON" in p  # legacy direct-Gemini path returns a JSON text response
+
+
+def test_build_system_prompt_tool_use_variant_instructs_record_verdict():
+    from app.agent_runner import build_system_prompt
+    p = build_system_prompt({"version": "v1", "rules": []}, for_tool_use=True)
+    assert "record_verdict" in p
+    # the tool-use variant must NOT order the model to return a JSON blob
+    assert "valid JSON matching this shape" not in p
+    assert "Output structured JSON matching the schema" not in p
