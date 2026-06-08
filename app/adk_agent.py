@@ -22,6 +22,7 @@ from typing import Any
 # google.adk.tools.mcp_tool; StdioServerParameters comes from `mcp`.
 from google.adk.tools.mcp_tool import MCPToolset, StdioConnectionParams
 from mcp import StdioServerParameters
+from app.agent_runner import build_system_prompt, evaluation_from_payload, Evaluation
 
 logger = logging.getLogger("mr_sentinel.adk")
 
@@ -105,11 +106,9 @@ def build_gitlab_mcp_toolset() -> MCPToolset:
 
 # ---------------------------------------------------------------------------
 # Agent runner — builds an LlmAgent (Gemini + GitLab MCP + record_verdict) and
-# drives it to completion. Imported here at module level (no cycle: agent_runner
-# does not import adk_agent).
+# drives it to completion. Imported at module top (no cycle: agent_runner does
+# not import adk_agent).
 # ---------------------------------------------------------------------------
-
-from app.agent_runner import build_system_prompt, evaluation_from_payload  # noqa: E402
 
 EVAL_USER_PROMPT = (
     "Evaluate merge request {project}!{iid}.\n"
@@ -149,10 +148,15 @@ class _AdkRunner:
             role="user",
             parts=[types.Part(text=EVAL_USER_PROMPT.format(project=project_path, iid=mr_iid))],
         )
-        async for _event in runner.run_async(
+        async for event in runner.run_async(
             user_id="mr-sentinel", session_id=session.id, new_message=message
         ):
-            pass  # record_verdict side-effects into the collector; we just drain events.
+            # record_verdict side-effects into the collector; drain events, but
+            # surface any model-side error so a "no verdict" failure is debuggable.
+            if getattr(event, "error_code", None) or getattr(event, "error_message", None):
+                logger.warning("ADK agent error event: code=%s msg=%s",
+                               getattr(event, "error_code", None),
+                               getattr(event, "error_message", None))
 
 
 class AdkAgentRunner:
@@ -170,9 +174,7 @@ class AdkAgentRunner:
         self.rubric = rubric
         self._runner_factory = runner_factory or _AdkRunner
 
-    async def evaluate(self, project_path: str, mr_iid: int) -> "Evaluation":
-        from app.agent_runner import Evaluation  # noqa: F401  (return type)
-
+    async def evaluate(self, project_path: str, mr_iid: int) -> Evaluation:
         collector = VerdictCollector()
         record_verdict = make_record_verdict(collector)
         runner = self._runner_factory(record_verdict, rubric=self.rubric)
