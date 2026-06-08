@@ -345,11 +345,10 @@ Add to the imports / body of `app/adk_agent.py`:
 
 ```python
 # Imported at module top so tests can monkeypatch these names on the module.
-from google.adk.tools.mcp_tool import (  # noqa: E402
-    MCPToolset,
-    StdioConnectionParams,
-    StdioServerParameters,
-)
+# NOTE (verified against google-adk 2.2.0): MCPToolset + StdioConnectionParams are
+# exported from google.adk.tools.mcp_tool, but StdioServerParameters comes from `mcp`.
+from google.adk.tools.mcp_tool import MCPToolset, StdioConnectionParams  # noqa: E402
+from mcp import StdioServerParameters  # noqa: E402
 
 # `npm install -g @zereight/mcp-gitlab` installs this binary on PATH (see Dockerfile).
 GITLAB_MCP_COMMAND = os.environ.get("GITLAB_MCP_COMMAND", "mcp-gitlab")
@@ -609,6 +608,8 @@ mcp==1.13.1
 ```
 
 (Pin `mcp` to the version resolved in the venv — run `.venv/Scripts/python.exe -m pip show mcp` and use that exact version.)
+
+**Verified 2026-06-08:** `google-adk==2.2.0` requires `httpx>=0.27,<1`, so it is compatible with the existing `httpx==0.27.2` pin — do NOT bump httpx (a bump to 0.28 breaks `respx==0.21.1` in the GitLab tests). Keep httpx + respx pins unchanged; `pip install -r requirements.txt` resolves cleanly with httpx held at 0.27.2. The full 52-test baseline was confirmed green with google-adk + mcp installed alongside httpx 0.27.2.
 
 - [ ] **Step 4: Add Node + the MCP server to the image**
 
