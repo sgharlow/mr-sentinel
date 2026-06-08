@@ -125,12 +125,26 @@ _REQUIRED_OUTPUT_KEYS_HINT = (
     'Include every rule from the rubric in rule_evaluations.'
 )
 
+_TOOL_USE_OUTPUT_HINT = (
+    "When you have applied every rule, call the `record_verdict` tool exactly once with "
+    "your structured scoring: overall_score (0-10), verdict (pass|warn|block), summary, and "
+    "rule_evaluations — one entry per rubric rule, each with rule_id, outcome (pass|fail|skip), "
+    "evidence, and remediation for any fail. The record_verdict tool call is your ONLY output; "
+    "do not also write a prose or JSON response."
+)
 
-def build_system_prompt(rubric: dict[str, Any]) -> str:
+
+def build_system_prompt(rubric: dict[str, Any], *, for_tool_use: bool = False) -> str:
     rubric_json = json.dumps(rubric, indent=2)
+    output_hint = _TOOL_USE_OUTPUT_HINT if for_tool_use else _REQUIRED_OUTPUT_KEYS_HINT
+    final_step = (
+        "5. Call the record_verdict tool with your structured scoring (see above)."
+        if for_tool_use
+        else "5. Output structured JSON matching the schema, nothing else."
+    )
     return f"""You are MR Sentinel — a governance agent for code merge requests.
 
-{_REQUIRED_OUTPUT_KEYS_HINT}
+{output_hint}
 
 
 You apply a written rubric to every MR with the consistency of a machine and the
@@ -143,7 +157,7 @@ Your job for each MR:
    to this diff).
 3. Compute an overall_score from 0-10. Failing blockers = score ≤ 3.
 4. Decide a verdict: pass | warn | block.
-5. Output structured JSON matching the schema, nothing else.
+{final_step}
 
 Rules:
 - If the diff is missing context you need (e.g., a referenced spec), use skip

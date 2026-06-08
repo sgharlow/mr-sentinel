@@ -182,6 +182,11 @@ async def _process_mr_event(event: dict[str, Any]) -> None:
                 labels_to_add.append("blocked-compliance")
             await gl.add_merge_request_labels(project_path, mr_iid, labels_to_add)
 
+            # REST write/read actions actually performed this run (max 7; diffs moved to MCP):
+            # MR fetch, override fetch, pipeline fetch, jobs (skipped if no pipeline),
+            # vuln scan, comment upsert, labels. Issue-create only on a block verdict.
+            skipped_jobs_call = 0 if pipeline else 1
+            skipped_issue_call = 0 if evaluation.verdict == "block" else 1
             await audit(
                 actor="mr-sentinel", action="evaluate",
                 project_path=project_path, mr_iid=mr_iid,
@@ -195,7 +200,7 @@ async def _process_mr_event(event: dict[str, Any]) -> None:
                     # in this path; diffs are now fetched via MCP inside the ADK agent).
                     # The override-fetch is a config read, not an MR action — recorded
                     # via rubric_source above.
-                    "mr_action_calls": 7 - (0 if pipeline else 1) - (1 if evaluation.verdict != "block" else 0),
+                    "mr_action_calls": 7 - skipped_jobs_call - skipped_issue_call,
                 },
             )
     except Exception as exc:

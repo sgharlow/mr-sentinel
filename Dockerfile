@@ -10,7 +10,8 @@ WORKDIR /app
 
 # Node.js + GitLab MCP server (zereight/mcp-gitlab) for the ADK agent's tool transport.
 # The installed binary is `mcp-gitlab`; override via GITLAB_MCP_COMMAND env var if needed.
-RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates gnupg \
+RUN set -eux \
+    && apt-get update && apt-get install -y --no-install-recommends curl ca-certificates gnupg \
     && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y --no-install-recommends nodejs \
     && npm install -g @zereight/mcp-gitlab \

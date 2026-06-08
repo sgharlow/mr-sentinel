@@ -133,7 +133,7 @@ class _AdkRunner:
         self._agent = LlmAgent(
             name="mr_sentinel_evaluator",
             model=os.environ.get("GEMINI_MODEL", "gemini-2.5-flash"),
-            instruction=build_system_prompt(rubric),
+            instruction=build_system_prompt(rubric, for_tool_use=True),
             tools=[toolset, FunctionTool(record_verdict)],
         )
 
