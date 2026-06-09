@@ -1,7 +1,7 @@
 # GitLab MCP Endpoint Audit — Migration Reference
 
-**Last updated:** 2026-05-18
-**Status:** This matrix is preserved as a future-migration reference. MR Sentinel uses the GitLab REST API directly (right column) for every endpoint listed below. See [decision below](#decision-2026-05-18-rest-as-primary-transport) and the architectural-simplification note at the top of `app/agent_runner.py`.
+**Last updated:** 2026-06-08
+**Status (current):** MR Sentinel uses a **GitLab MCP server at runtime** — a Google ADK agent reads each MR through `@zereight/mcp-gitlab` (`get_merge_request`, `get_merge_request_diffs`, `list_merge_request_pipelines`). The **write-backs** (comment / label / issue) use the GitLab REST API, because the official GitLab Duo MCP server is Premium/Ultimate-only, OAuth-only, and exposes no MR-note/label tool. **See the [2026-06-08 addendum](#addendum--2026-06-08-hackathon-required-mcp-integration-path-b) at the bottom for the full decision.** The REST matrix below is now the **write-back reference**; the 2026-05-18 "REST as primary transport" rationale that follows is superseded for the read path.
 
 ## Decision — 2026-05-18: REST as primary transport
 

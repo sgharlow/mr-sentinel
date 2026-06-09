@@ -1,4 +1,12 @@
-"""Agent orchestration — loads rubric, calls Gemini, parses structured score.
+"""Rubric prompts, Evaluation mapping, comment/issue rendering — plus the LEGACY direct-Gemini evaluator.
+
+NOTE: the live webhook path no longer uses AgentRunner. `app/main.py` now evaluates
+through `app/adk_agent.py` — a Google ADK agent (Gemini 2.5 Flash) that reads each MR
+through GitLab's MCP server. AgentRunner is retained as a tested rollback and owns the
+shared helpers (build_system_prompt, evaluation_from_payload, render_comment,
+render_followup_issue_body) that the ADK path imports.
+
+Legacy AgentRunner — loads rubric, calls Gemini, parses structured score.
 
 Design:
 - The rubric is the product. We load `rubric/v1.yaml` once at module import.

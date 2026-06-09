@@ -4,7 +4,7 @@
 
 <h1 align="center">MR Sentinel</h1>
 
-> An AI governance agent for merge requests — applies a written compliance rubric in ~20 seconds (p95 under 30), with a paper trail.
+> An AI governance agent for merge requests — a Google ADK agent that reads each MR through GitLab's MCP server, judges it with Gemini against a written compliance rubric, and leaves an audit-grade paper trail.
 
 **▶ Watch the 3-minute demo:** [youtu.be/0IlB2KJsJ4A](https://youtu.be/0IlB2KJsJ4A)
 
@@ -26,9 +26,9 @@ A 60-second guided tour. Every link is live and needs no auth:
 3. **The auditor view** → [`/audit/sgharlow/governance-demo-app/10`](https://mr-sentinel-webhook-n6oitfxdra-uc.a.run.app/audit/sgharlow/governance-demo-app/10) — every rule outcome, its control mapping, and the audit-log timeline. The audit *is* the byproduct of doing the work, not a separate exercise.
 4. **The product's center of gravity** → [`rubric/v1.yaml`](rubric/v1.yaml) — 15 rules, each mapped 1:1 to a named compliance control. MIT-licensed; consumers override per-project by dropping a `.mr-sentinel.yaml` at their repo root.
 
-**What to notice:** every action ties back to a control an auditor recognizes — that's what makes this *compliance-grade governance* rather than "AI reviews a PR." The whole loop runs in ~20s on Cloud Run scale-to-zero and is fully replayable from the `audit_log`.
+**What to notice:** every action ties back to a control an auditor recognizes — that's what makes this *compliance-grade governance* rather than "AI reviews a PR." The agent runs on Cloud Run scale-to-zero and is fully replayable from the `audit_log`.
 
-**Judging-criteria map** — *Technological implementation:* 8 deterministic GitLab REST tool-calls + Gemini 2.5 Flash structured output, full GCP-native stack (Cloud Run, Cloud SQL, Secret Manager, Artifact Registry, Vertex AI, Cloud Build, Cloud Logging), replayable audit log. *Design:* three surfaces / three personas (above). *Potential impact:* every regulated-industry engineering org has this exact pain. *Quality of idea:* the rubric-as-product moat. Full write-up in [`docs/devpost-submission.md`](docs/devpost-submission.md).
+**Judging-criteria map** — *Technological implementation:* a Google ADK agent (Gemini 2.5 Flash) that reads each MR through **GitLab's MCP server** (`@zereight/mcp-gitlab`, attached via ADK `MCPToolset`) and records a structured verdict via a tool call — all three required technologies (Gemini, Agent Builder/ADK, the partner MCP server) invoked at runtime — on a full GCP-native stack (Cloud Run, Cloud SQL, Secret Manager, Artifact Registry, Vertex AI, Cloud Build, Cloud Logging), with a replayable audit log. *Design:* three surfaces / three personas (above). *Potential impact:* every regulated-industry engineering org has this exact pain. *Quality of idea:* the rubric-as-product moat. Full write-up in [`docs/devpost-submission.md`](docs/devpost-submission.md).
 
 ---
 
@@ -36,7 +36,7 @@ A 60-second guided tour. Every link is live and needs no auth:
 
 > ✅ **SUBMITTED to the Google Cloud Rapid Agent Hackathon (GitLab track) on 2026-05-31.** Demo video: https://youtu.be/0IlB2KJsJ4A. Project edits remain open until the June 11, 2026 — 17:00 EDT deadline.
 
-**Days 1-3, 4-8, 9-14, 15-19 milestones closed (4 of 6).** Day 16 of 26 — running ahead of the spec schedule (the Days 15-19 dashboard milestone shipped 2026-05-18). End-to-end loop verified live on Cloud Run: GitLab MR webhook → fetch MR + diffs + pipeline + vulnerabilities → fetch optional `.mr-sentinel.yaml` per-project rubric override → Vertex AI Gemini 2.5 Flash evaluation against 15 rubric rules → upsert structured comment + labels on the MR → open linked remediation issue on block verdicts → persist score + child rule outcomes + audit row to Cloud SQL. Leadership dashboard live at `/dashboard` + `/audit/{project}/{mr_iid}` (server-rendered, dark theme — Days 15-19 MVP shipped 2026-05-18). End-to-end latency (measured 2026-06-01 over 30 days of Cloud Logging, n=19 full webhook→comment legs): **p50 19.7s, p95 30.0s, p99 33.4s**. 52/52 tests green, CI green. GCP infrastructure on shared `aicin-477004`. See [`mr-sentinel-hackathon-spec.md`](mr-sentinel-hackathon-spec.md) for the full spec and 26-day build plan.
+**End-to-end loop on Cloud Run:** GitLab MR webhook → a **Google ADK agent** (Gemini 2.5 Flash) reads the MR, its diff, and its pipeline **through GitLab's MCP server**, resolves an optional `.mr-sentinel.yaml` per-project rubric override, evaluates against the 15 rubric rules, and records a structured verdict via a `record_verdict` tool → MR Sentinel upserts the structured comment + labels on the MR, opens a linked remediation issue on block verdicts, and persists score + child rule outcomes + audit row to Cloud SQL (write-backs over the GitLab REST API). Leadership dashboard at `/dashboard` + `/audit/{project}/{mr_iid}` (server-rendered, dark theme). **63 tests green, CI green.** End-to-end latency is being re-measured for the agentic ADK loop (the prior single-call REST path measured p50 ~20s / p95 ~30s; the multi-turn tool-calling loop runs somewhat longer). GCP infrastructure on shared `aicin-477004`. See [`mr-sentinel-hackathon-spec.md`](mr-sentinel-hackathon-spec.md) for the full spec.
 
 ### GCP resources live
 
@@ -48,10 +48,10 @@ A 60-second guided tour. Every link is live and needs no auth:
 | Artifact Registry | `us-central1-docker.pkg.dev/aicin-477004/mr-sentinel` |
 | GitLab demo repo | https://gitlab.com/sgharlow/governance-demo-app (webhook id 78485229) |
 | Secret: webhook token | `mr-sentinel-gitlab-webhook-secret` — bound to service as `GITLAB_WEBHOOK_SECRET` |
-| Secret: GitLab PAT | `mr-sentinel-gitlab-token` (v1) — for outbound GitLab REST API calls |
+| Secret: GitLab PAT | `mr-sentinel-gitlab-token` (v1) — outbound GitLab calls: the MCP server (agent reads) + the REST client (write-backs) |
 | Secret: DB app password | `mr-sentinel-db-app-password` — bound to service as `DB_PASSWORD` |
 | Secret: DB root password | `mr-sentinel-db-password` — postgres user; held for ops only |
-| APIs enabled | Vertex AI, Cloud Run, Cloud SQL, Secret Manager, Artifact Registry, Cloud Build, IAM, Service Networking, Cloud Resource Manager, Cloud Logging, Cloud Monitoring (Discovery Engine enabled by bootstrap but not in use — see `docs/mcp-endpoint-audit.md`) |
+| APIs enabled | Vertex AI (Gemini, via the Google ADK agent), Cloud Run, Cloud SQL, Secret Manager, Artifact Registry, Cloud Build, IAM, Service Networking, Cloud Resource Manager, Cloud Logging, Cloud Monitoring. (Vertex AI Search / Discovery Engine is *not* used — here "Agent Builder" means the Google Agent Development Kit; see `docs/mcp-endpoint-audit.md`.) |
 
 Service endpoints:
 - `GET /health` — liveness check (not `/healthz` — Cloud Run intercepts that path)
@@ -91,45 +91,36 @@ The agent class missing from the market is one that **applies a written rubric t
                                  │
                                  ▼
               ┌──────────────────────────────────────┐
-              │   Agent loop (app/main.py)           │
-              │                                      │
-              │   1. dedup check (sha + rubric_ver)  │
-              │   2-5. fetch MR/diffs/pipeline/jobs/ │
-              │        vulnerability findings        │
-              │   6. Gemini evaluate vs. rubric      │
-              │   7-9. persist · upsert comment ·    │
-              │        labels · followup issue       │
-              └──┬────────────────┬───────────────┬──┘
-                 │                │               │
-                 ▼                ▼               ▼
-         ┌───────────────┐ ┌─────────────┐ ┌────────────────┐
-         │ GitLab REST   │ │ Vertex AI   │ │ Secret Manager │
-         │ API (8 tools) │ │ Gemini 2.5  │ │ (4 secrets)    │
-         │               │ │ Flash       │ │                │
-         └───────────────┘ └─────────────┘ └────────────────┘
-                 │
-                 ▼
-         ┌────────────────────────────────┐
-         │  Cloud SQL (PostgreSQL 15):    │
-         │   – mr_scores                  │
-         │   – rule_outcomes              │
-         │   – audit_log                  │
-         │   – schema_migrations          │
-         └────────────┬───────────────────┘
-                      │
-                      ▼
-         ┌────────────────────────────────┐
-         │  Cloud Run: leadership UI      │
-         │   (server-rendered HTML,       │
-         │    same Cloud Run service)     │
-         └────────────────────────────────┘
+              │   Orchestration (app/main.py)        │
+              │   1. dedup (sha + rubric_version)    │
+              │   2. resolve per-project rubric      │
+              │   3. run the ADK evaluation agent ───┼────────┐
+              │   4. write verdict back + persist    │        │
+              └──────────────┬───────────────────────┘        │
+   write-backs (comment/     │                                │ evaluation
+   labels/issue) via REST     │                               ▼
+                 ┌────────────┴───┬───────────────┐  ┌─────────────────────────────────────┐
+                 ▼                ▼               ▼  │ ADK evaluation agent                │
+         ┌───────────────┐ ┌─────────────┐ ┌──────┐ │ (app/adk_agent.py = Agent Builder)  │
+         │ GitLab REST   │ │ Cloud SQL   │ │Secret│ │  • model: Vertex AI Gemini 2.5 Flash│
+         │ (write-backs) │ │ mr_scores / │ │ Mgr  │ │  • tools: GitLab MCP server (reads) │
+         └───────────────┘ │ rule_outcomes│ └──────┘ │    @zereight/mcp-gitlab (stdio):    │
+                           │ / audit_log │           │    get_merge_request / _diffs /     │
+                           └──────┬──────┘           │    _pipelines                       │
+                                  │                  │  • record_verdict (structured out)  │
+                                  ▼                  └─────────────────────────────────────┘
+                    ┌────────────────────────────┐
+                    │ Cloud Run: leadership UI   │
+                    │  /dashboard · /audit       │
+                    │  (server-rendered HTML)    │
+                    └────────────────────────────┘
 ```
 
 ## Cloud
 
-This project is **Google Cloud only**. By hackathon rule and by design choice, no AWS, no Azure, no third-party LLM APIs. AI is Vertex AI Gemini 2.5 Flash via the direct Vertex SDK. Compute is Cloud Run (one service hosting both webhook and dashboard). State is Cloud SQL PostgreSQL 15. Secrets are Secret Manager. GitLab integration is the REST API (8 endpoints per MR — `docs/mcp-endpoint-audit.md` holds the matrix as a future-migration reference for the MCP transport).
+This project is **Google Cloud only**. By hackathon rule and by design choice, no AWS, no Azure, no third-party LLM APIs. The evaluation is a **Google Agent Development Kit (ADK) agent** — the hackathon's "Agent Builder" surface — whose model is **Vertex AI Gemini 2.5 Flash** and whose context-gathering tools come from **GitLab's MCP server** (`@zereight/mcp-gitlab`, attached via ADK `MCPToolset` over stdio). Compute is Cloud Run (one service hosting both webhook and dashboard). State is Cloud SQL PostgreSQL 15. Secrets are Secret Manager.
 
-The architectural simplifications taken — direct Vertex SDK instead of Agent Builder, inlined rubric instead of a Vertex Data Store, GitLab REST instead of MCP — are documented at the top of `app/agent_runner.py`. They keep the orchestration loop visible in plain Python, the audit trail replayable from Cloud SQL, and the deployment surface small.
+**The three required technologies, at runtime:** *Gemini* is the ADK agent's model; *Agent Builder* is the ADK agent itself (`LlmAgent` + `Runner` in `app/adk_agent.py`); the *GitLab MCP server* supplies the agent's read tools (`get_merge_request`, `get_merge_request_diffs`, `list_merge_request_pipelines`), which the agent calls on every evaluation. This is a deliberate **hybrid**: the agent *reads* the MR through the MCP server, but the *write-backs* (comment, labels, remediation issue) stay on the GitLab REST API — because the official GitLab Duo MCP server is Premium/Ultimate-only, OAuth-only, and exposes no tool to post an MR note or set MR labels. So a community GitLab MCP server (`@zereight/mcp-gitlab`) carries the reads while REST keeps the formatting-sensitive writes deterministic. The full decision is documented in [`docs/mcp-endpoint-audit.md`](docs/mcp-endpoint-audit.md).
 
 ## Setup (local development)
 
@@ -189,13 +180,15 @@ mr-sentinel/
 ├── app/                              # FastAPI service + agent orchestration
 │   ├── __init__.py
 │   ├── main.py                       # webhook handler + _process_mr_event loop
-│   ├── agent_runner.py               # rubric load + Gemini call + parse + comment render
-│   ├── gitlab_client.py              # async GitLab REST client (8 endpoints)
+│   ├── adk_agent.py                  # ADK agent: Gemini + GitLab MCP toolset + record_verdict
+│   ├── agent_runner.py               # rubric load + prompts + Evaluation mapping + comment render
+│   ├── gitlab_client.py              # async GitLab REST client (write-backs: comment/label/issue)
 │   └── persistence.py                # asyncpg pool + mr_scores/rule_outcomes/audit_log writes
-├── tests/                            # pytest — 52 tests
+├── tests/                            # pytest — 63 tests
 │   ├── test_webhook.py               # /health + webhook auth + payload validation
+│   ├── test_adk_agent.py             # ADK runner + MCP toolset wiring + record_verdict (mocked)
 │   ├── test_agent_runner.py          # rubric load/parse + prompt assembly + comment render
-│   ├── test_gitlab_client.py         # 8 REST endpoints + override fetch + upsert pattern
+│   ├── test_gitlab_client.py         # REST write-back endpoints + override fetch + upsert pattern
 │   └── test_rubric.py                # schema validation + rule counts + id uniqueness
 ├── rubric/
 │   ├── v1.yaml                       # bundled rubric (15 rules, 4 categories)
@@ -225,7 +218,7 @@ mr-sentinel/
 │   └── ci.yml                        # pytest + rubric schema validation on push/PR
 ├── Dockerfile                        # Python 3.11-slim → uvicorn → :8080
 ├── Makefile                          # install / test / run-local / lint shortcuts
-├── requirements.txt                  # runtime deps (FastAPI, asyncpg, jsonschema, vertexai, ...)
+├── requirements.txt                  # runtime deps (FastAPI, asyncpg, vertexai, google-adk, mcp, ...)
 ├── requirements-dev.txt              # test/lint deps (pytest, respx, jsonschema, ...)
 ├── pyproject.toml                    # pytest + ruff config
 ├── .env.example                      # local-dev env vars template
