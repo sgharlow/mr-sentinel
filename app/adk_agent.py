@@ -141,22 +141,30 @@ class _AdkRunner:
         from google.genai import types
 
         runner = self._InMemoryRunner(self._agent, app_name="mr-sentinel")
-        session = await runner.session_service.create_session(
-            app_name="mr-sentinel", user_id="mr-sentinel"
-        )
-        message = types.Content(
-            role="user",
-            parts=[types.Part(text=EVAL_USER_PROMPT.format(project=project_path, iid=mr_iid))],
-        )
-        async for event in runner.run_async(
-            user_id="mr-sentinel", session_id=session.id, new_message=message
-        ):
-            # record_verdict side-effects into the collector; drain events, but
-            # surface any model-side error so a "no verdict" failure is debuggable.
-            if getattr(event, "error_code", None) or getattr(event, "error_message", None):
-                logger.warning("ADK agent error event: code=%s msg=%s",
-                               getattr(event, "error_code", None),
-                               getattr(event, "error_message", None))
+        try:
+            session = await runner.session_service.create_session(
+                app_name="mr-sentinel", user_id="mr-sentinel"
+            )
+            message = types.Content(
+                role="user",
+                parts=[types.Part(text=EVAL_USER_PROMPT.format(project=project_path, iid=mr_iid))],
+            )
+            async for event in runner.run_async(
+                user_id="mr-sentinel", session_id=session.id, new_message=message
+            ):
+                # record_verdict side-effects into the collector; drain events, but
+                # surface any model-side error so a "no verdict" failure is debuggable.
+                if getattr(event, "error_code", None) or getattr(event, "error_message", None):
+                    logger.warning("ADK agent error event: code=%s msg=%s",
+                                   getattr(event, "error_code", None),
+                                   getattr(event, "error_message", None))
+        finally:
+            # Terminate the runner and its MCP stdio subprocess (the mcp-gitlab Node
+            # child); without this, every evaluation leaks a process + file descriptors.
+            try:
+                await runner.close()
+            except Exception as exc:  # never let cleanup mask the real result/error
+                logger.warning("error closing ADK runner: %s", exc)
 
 
 class AdkAgentRunner:
