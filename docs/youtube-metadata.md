@@ -1,8 +1,9 @@
 # YouTube upload metadata — MR Sentinel demo
 
-Paste-ready metadata for the demo video. Published at **https://youtu.be/0IlB2KJsJ4A**
-(runtime 2:49, under the Devpost 3:00 cap). Chapter timestamps are anchored to the
-actual slide transitions in the final cut.
+Paste-ready metadata for the demo video. ⚠️ **RE-RECORD PENDING** — the published cut at
+**https://youtu.be/0IlB2KJsJ4A** (2:49) describes the pre-ADK architecture. The copy below is
+updated for the ADK + GitLab MCP loop; re-upload after recording from
+`docs/recording-teleprompter.md`. Chapter timestamps are approximate until the new cut exists.
 
 ---
 
@@ -25,11 +26,11 @@ MR Sentinel: an AI agent that applies a compliance rubric to every merge request
 ## Description (paste into the YouTube description field)
 
 ```
-An AI governance agent for GitLab merge requests. When an MR opens, MR Sentinel runs a deterministic plan across eight GitLab REST endpoints, hands the diff to Vertex AI Gemini 2.5 Flash against a 15-rule rubric, and acts: a structured verdict comment with each failing rule cited by ID, a linked remediation issue, and a replayable Postgres audit log.
+An AI governance agent for GitLab merge requests. When an MR opens, a Google ADK agent — Gemini 2.5 Flash as its model — reads the MR, its diff, and its pipeline through GitLab's MCP server, judges them against a 15-rule rubric, and acts: a structured verdict comment with each failing rule cited by ID, a linked remediation issue, and a replayable Postgres audit log.
 
 The differentiator isn't the AI — it's the rubric. Every rule maps 1:1 to a named compliance control: SOC 2, ISO 27001, OWASP ASVS, NIST. When a comment says an MR is blocked, that's a control number a compliance team can cite in a finding. The rubric ships MIT-licensed; teams fork it and override per-project via one YAML file.
 
-Built on Google Cloud, end to end: Cloud Run, Vertex AI (Gemini 2.5 Flash), Cloud SQL (Postgres), Secret Manager, Artifact Registry, Cloud Build.
+Built on Google Cloud, end to end: a Google Agent Development Kit agent, Vertex AI (Gemini 2.5 Flash), GitLab's MCP server for the agent's reads, Cloud Run, Cloud SQL (Postgres), Secret Manager, Artifact Registry, Cloud Build.
 
 — Links —
 Code (MIT):        https://github.com/sgharlow/mr-sentinel
@@ -39,17 +40,17 @@ Demo GitLab repo:  https://gitlab.com/sgharlow/governance-demo-app
 
 — Chapters —
 0:00  Intro — the Friday-afternoon MR
-0:31  Inside the diff: hard-coded secrets
-0:46  The rubric — 15 rules, named controls
-1:01  The agent loop on Cloud Run + Gemini
-1:22  The verdict: block, 0/10, controls cited
-1:49  Leadership dashboard
-2:12  Audit drill-down
-2:29  Recap
-2:45  Outro
+0:24  Inside the diff: hard-coded secrets
+0:42  The agent: Google ADK + Gemini + GitLab's MCP server
+1:00  The agent loop — MCP tool calls -> Gemini verdict
+1:24  The verdict: block, 0/10, controls cited
+1:52  Leadership dashboard
+2:20  Audit drill-down
+2:38  Recap + stack
+(timestamps approximate — re-align to the new cut)
 
 — Stack —
-Cloud Run · Vertex AI Gemini 2.5 Flash · Cloud SQL Postgres · Secret Manager · Artifact Registry · Cloud Build · FastAPI · GitLab REST API
+Google ADK (Agent Builder) · Vertex AI Gemini 2.5 Flash · GitLab MCP server (@zereight/mcp-gitlab) · Cloud Run · Cloud SQL Postgres · Secret Manager · Artifact Registry · Cloud Build · FastAPI · GitLab REST API (write-backs)
 
 Built in personal capacity for the Google Cloud Rapid Agent Hackathon (GitLab track).
 ```
@@ -59,7 +60,7 @@ Built in personal capacity for the Google Cloud Rapid Agent Hackathon (GitLab tr
 ## Tags (paste into the Tags field — 478 chars)
 
 ```
-mr sentinel, ai code review, merge request review, pull request review, compliance automation, compliance as code, devsecops, code governance, ai agent, ai governance, gitlab, google cloud, vertex ai, gemini, cloud run, cloud sql, secret manager, postgres, fastapi, soc 2, iso 27001, owasp, nist, audit log, hackathon, google cloud rapid agent
+mr sentinel, ai code review, merge request review, pull request review, compliance automation, compliance as code, devsecops, code governance, ai agent, ai governance, google adk, agent development kit, agent builder, model context protocol, mcp, gitlab, google cloud, vertex ai, gemini, cloud run, cloud sql, secret manager, postgres, fastapi, soc 2, iso 27001, owasp, nist, audit log, hackathon, google cloud rapid agent
 ```
 
 ---
