@@ -3,7 +3,9 @@
 **Last updated:** 2026-06-08
 **Status (current):** MR Sentinel uses a **GitLab MCP server at runtime** — a Google ADK agent reads each MR through `@zereight/mcp-gitlab` (`get_merge_request`, `get_merge_request_diffs`, `list_merge_request_pipelines`). The **write-backs** (comment / label / issue) use the GitLab REST API, because the official GitLab Duo MCP server is Premium/Ultimate-only, OAuth-only, and exposes no MR-note/label tool. **See the [2026-06-08 addendum](#addendum--2026-06-08-hackathon-required-mcp-integration-path-b) at the bottom for the full decision.** The REST matrix below is now the **write-back reference**; the 2026-05-18 "REST as primary transport" rationale that follows is superseded for the read path.
 
-## Decision — 2026-05-18: REST as primary transport
+## (SUPERSEDED) Decision — 2026-05-18: REST as primary transport
+
+> ⚠️ **Superseded by the [2026-06-08 addendum](#addendum--2026-06-08-hackathon-required-mcp-integration-path-b).** Retained for historical context only. The current design reads each MR through a GitLab MCP server (the ADK agent) and uses REST only for the write-backs the MCP server cannot perform. The four-point rationale below reflects the pre-ADK design and is **not** the current architecture.
 
 The spec originally framed the GitLab MCP server as the load-bearing integration with REST as a per-endpoint fallback. After scoping the actual loop (≤8 deterministic calls per MR), we inverted the choice: **REST is the primary transport; MCP is preserved as a future migration target.** Rationale:
 
@@ -15,6 +17,8 @@ The spec originally framed the GitLab MCP server as the load-bearing integration
 Future-MCP migration is a one-file change (`app/gitlab_client.py`) when GitLab's official MCP server reaches feature parity with REST for these endpoints.
 
 ## Endpoint matrix
+
+> ⚠️ **Historical (pre-ADK).** In the current design the READ endpoints (`get_merge_request`, `get_merge_request_diffs`, pipelines) are called by the ADK agent **through the GitLab MCP server**, not REST. The vulnerability-findings and pipeline-jobs fetches remain in `app/main.py` for the audit log / status line only — they are not passed into the agent's evaluation (this was also true of the legacy path). The REST rows below are accurate for the **write-backs** (comment, label, issue). See the [2026-06-08 addendum](#addendum--2026-06-08-hackathon-required-mcp-integration-path-b).
 
 | # | Spec tool name | Actual usage | Production transport | Implementation |
 |---|---|---|---|---|

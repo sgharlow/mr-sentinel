@@ -18,10 +18,10 @@ MR Sentinel
 ## Tagline (≤ 100 chars)
 
 ```
-An AI governance agent for merge requests — applies a written compliance rubric in 20 seconds.
+A Google ADK + Gemini agent that governs GitLab merge requests against a written rubric.
 ```
 
-(94 chars including the period — verified 2026-05-22.)
+(87 chars including the period — updated 2026-06-08; names the required tech, no stale latency claim.)
 
 ## Elevator pitch (3-4 sentences, ~300 chars)
 
@@ -45,7 +45,7 @@ MR Sentinel watches your GitLab merge requests. When one opens, a Google ADK age
 
 Three surfaces, three personas:
 
-  • The MR author sees the structured comment in roughly twenty seconds — same surface as a human reviewer, but with consistent rule application and a paper trail.
+  • The MR author sees the structured comment shortly after opening the MR — same surface as a human reviewer, but with consistent rule application and a paper trail.
   • The engineering leader opens `/dashboard` for a portfolio view: verdict distribution last 30 days, top-five failing rules, recent-MR drill-down.
   • The compliance auditor opens `/audit/{project}/{mr_iid}` — every rule outcome, every control mapping, the audit_log timeline, the exact prompt the agent used.
 
@@ -142,8 +142,9 @@ mit-license
 
 ## Links
 
-All six resource links below are **final and verified live 2026-06-01**. The demo
-video is uploaded — this table is submission-ready.
+Five of the six resource links below are live and verified. **The demo video is NOT yet
+submission-ready — it must be re-recorded** to reflect the ADK + GitLab MCP architecture
+(the current cut shows the old REST/direct-Vertex design).
 
 | Field | URL | Status |
 |---|---|---|
