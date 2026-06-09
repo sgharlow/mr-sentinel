@@ -9,12 +9,13 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /app
 
 # Node.js + GitLab MCP server (zereight/mcp-gitlab) for the ADK agent's tool transport.
-# The installed binary is `mcp-gitlab`; override via GITLAB_MCP_COMMAND env var if needed.
+# Pinned for reproducible builds; the installed binary is `mcp-gitlab` (verified via the
+# package's bin field), override via GITLAB_MCP_COMMAND env var if a future version changes it.
 RUN set -eux \
     && apt-get update && apt-get install -y --no-install-recommends curl ca-certificates gnupg \
     && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y --no-install-recommends nodejs \
-    && npm install -g @zereight/mcp-gitlab \
+    && npm install -g @zereight/mcp-gitlab@2.1.18 \
     && apt-get purge -y curl gnupg && apt-get autoremove -y && rm -rf /var/lib/apt/lists/*
 
 ENV GITLAB_API_URL=https://gitlab.com/api/v4
