@@ -26,7 +26,7 @@ An AI governance agent for merge requests — applies a written compliance rubri
 ## Elevator pitch (3-4 sentences, ~300 chars)
 
 ```
-A Gemini-powered governance agent for GitLab merge requests, running on Cloud Run. Every MR is scored against a 15-rule rubric where each rule maps 1:1 to a named compliance control (SOC 2, ISO 27001, OWASP, NIST). The rubric ships MIT-licensed and overrides per-project via one YAML file. The audit log is the byproduct of doing the work.
+A governance agent for GitLab merge requests, built with the Google Agent Development Kit and running on Cloud Run. A Gemini 2.5 Flash agent reads each MR through GitLab's MCP server and scores it against a 15-rule rubric where every rule maps 1:1 to a named compliance control (SOC 2, ISO 27001, OWASP, NIST). The rubric ships MIT-licensed and overrides per-project via one YAML file. The audit log is the byproduct of doing the work.
 ```
 
 (339 chars — verified 2026-05-22; tightened from 453 by dropping redundant framing.)
@@ -36,7 +36,7 @@ A Gemini-powered governance agent for GitLab merge requests, running on Cloud Ru
 ## "What it does" (long form, ~1500-2000 chars target)
 
 ```
-MR Sentinel watches your GitLab merge requests. When one opens, the agent runs a short deterministic plan against eight GitLab REST endpoints — pulling MR metadata, the diff, pipeline status, vulnerability scan, and (optionally) a project-specific rubric override at `.mr-sentinel.yaml`. It hands the diff to Vertex AI Gemini 2.5 Flash with the rubric inlined in the system prompt. Gemini returns a structured JSON verdict scoring each of the fifteen rules. The agent then takes real action against the MR:
+MR Sentinel watches your GitLab merge requests. When one opens, a Google ADK agent — Gemini 2.5 Flash as its model — reaches into GitLab through GitLab's MCP server to read the MR metadata, the diff, and the pipeline status, resolves an optional project-specific rubric override at `.mr-sentinel.yaml`, and judges the diff against the fifteen rubric rules inlined in its system prompt. It emits its scoring by calling a `record_verdict` tool. The agent then takes real action against the MR:
 
   • A structured Markdown comment: verdict badge, score, every failing rule cited by ID with the exact evidence, and a collapsed pass/skip section.
   • A `mr-sentinel-reviewed` label, plus `blocked-compliance` on block verdicts.
@@ -59,11 +59,11 @@ The rubric is the product's center of gravity. Fifteen rules across four categor
 ## "How we built it" (~1000-1500 chars target)
 
 ```
-Google Cloud, end to end. Cloud Run hosts the webhook and the leadership UI on one service. Vertex AI Gemini 2.5 Flash is the reasoning engine, called directly via the SDK with the rubric rendered into the system prompt. Cloud SQL Postgres 15 holds the scoring + rule_outcomes + audit_log tables. Secret Manager holds the webhook secret, GitLab PAT, and DB credentials. Artifact Registry holds the images; Cloud Build builds on every deploy.
+Google Cloud, end to end. The evaluation is a Google Agent Development Kit (ADK) agent — an `LlmAgent` whose model is Vertex AI Gemini 2.5 Flash, run by an ADK `Runner`. Its context-gathering tools come from GitLab's MCP server (`@zereight/mcp-gitlab`), attached via ADK's `MCPToolset` over stdio: on every evaluation the agent calls `get_merge_request`, `get_merge_request_diffs`, and `list_merge_request_pipelines` through the MCP server, applies the 15-rule rubric rendered into its system prompt, and emits its scoring by calling a `record_verdict` tool. Cloud Run hosts the webhook and leadership UI on one service; Cloud SQL Postgres 15 holds the scoring + rule_outcomes + audit_log tables; Secret Manager holds the webhook secret, GitLab PAT, and DB credentials; Artifact Registry + Cloud Build ship the image (which bundles Node + the MCP server).
 
-The agent loop is plain Python — FastAPI with a background task. We chose the direct Vertex SDK over Agent Builder and the GitLab REST API over the GitLab MCP server. The rationale: for fifteen rules and eight deterministic tool calls, the orchestration is the agent. Plan → tool call → reflect → act is visible in Cloud Logging; the full evaluation is replayable from `audit_log` rows.
+It's a deliberate hybrid. The agent READS the MR through GitLab's MCP server; the WRITE-BACKS — the structured comment, the labels, the remediation issue — go over the GitLab REST API. Why: the official GitLab Duo MCP server is Premium/Ultimate-only, OAuth-only, and exposes no tool to post an MR note or set MR labels, so it can't carry the write path on a free-tier project. A community GitLab MCP server carries the reads; REST keeps the formatting-sensitive writes deterministic and the demo output byte-stable.
 
-CI is GitHub Actions on the source repo: pytest plus rubric-schema validation. The webhook handler reads `X-Gitlab-Token`, constant-time compares against the secret, returns 202 Accepted, and dispatches a FastAPI BackgroundTask so the webhook latency budget is decoupled from the Gemini call.
+CI is GitHub Actions on the source repo: pytest (63 tests) plus rubric-schema validation. The webhook handler reads `X-Gitlab-Token`, constant-time compares against the secret, returns 202 Accepted, and dispatches a FastAPI BackgroundTask so the webhook latency budget is decoupled from the agent run.
 
 The demo repo at gitlab.com/sgharlow/governance-demo-app ("Medbill" — fictional outpatient-billing SaaS) ships with archetypal MRs designed to trip each rule cluster: an auth-missing endpoint, a committed `.env.production`, an alembic migration with no rollback, a refactor with no spec link, a dependency downgrade with known CVEs. Every archetype produces a verifiable agent comment, label, and (on block) a remediation issue.
 ```
@@ -77,11 +77,11 @@ The demo repo at gitlab.com/sgharlow/governance-demo-app ("Medbill" — fictiona
 ```
 Three real ones:
 
-1. Spec drift. The spec promised Agent Builder, GitLab MCP, and Vertex AI Data Store. Three milestones in we'd built none — direct Vertex SDK, GitLab REST, inlined rubric were each pragmatic. Fix: reconciled spec to reality, framed the simplifications as deliberate.
+1. The official GitLab MCP server couldn't carry the product. GitLab's Duo MCP server is Premium/Ultimate-only, OAuth-only, and has no tool to post an MR note or set MR labels — so it can't perform MR Sentinel's write-backs on a free-tier project. Fix: a hybrid — a community GitLab MCP server (`@zereight/mcp-gitlab`) attached via ADK `MCPToolset` carries the agent's reads at runtime, while the GitLab REST API keeps the comment/label/issue writes. Documented honestly in `docs/mcp-endpoint-audit.md`.
 
-2. Dedup vs override versions. Dedup was hardcoded to "v1," so once a consumer shipped a `.mr-sentinel.yaml` with a different version, every webhook re-fired a full Gemini call. Fix: resolve override first, dedup against active version.
+2. Structured output vs. tool use in ADK. Setting an `output_schema` on an ADK agent disables tool calling — but the agent needs both the MCP read tools AND a structured verdict. Fix: a final `record_verdict` function-tool the agent calls last; its arguments ARE the structured evaluation, captured into the same `Evaluation` shape the dashboard and Cloud SQL already expect.
 
-3. GitHub push protection caught the seed script's example AWS/Stripe patterns. We fragmented the pattern-shaped strings in source so the regex can't match; at runtime the fragments concatenate into the literal patterns Gemini flags in the diff.
+3. Dedup vs override versions. Dedup was hardcoded to "v1," so once a consumer shipped a `.mr-sentinel.yaml` with a different version, every webhook re-fired a full evaluation. Fix: resolve the override first, dedup against the active rubric version.
 ```
 
 (769 chars — verified 2026-05-22; tightened from 1084 by removing inline spec-section references. Slightly above 700 upper target but well under typical Devpost long-field cap.)
@@ -91,7 +91,7 @@ Three real ones:
 ## "Accomplishments that we're proud of" (~400-500 chars)
 
 ```
-The control-mapping framing turns this from "AI code reviewer" into "compliance-grade governance." Every comment ties back to a named control auditors recognize. The audit log is replayable end-to-end — same prompt, same diff, same response, persisted forever. The whole loop runs in about twenty seconds median (p95 under thirty) on Cloud Run scale-to-zero. The rubric ships as MIT-licensed reusable IP — any engineering organization can fork, customize the YAML, and run their own instance. 52 tests in CI, all green, no flakes.
+The control-mapping framing turns this from "AI code reviewer" into "compliance-grade governance." Every comment ties back to a named control auditors recognize. The audit log is replayable end-to-end — same prompt, same diff, same response, persisted forever. The agent runs on Cloud Run scale-to-zero, and all three required technologies — Gemini, the Google ADK (Agent Builder), and GitLab's MCP server — are exercised at runtime on every evaluation. The rubric ships as MIT-licensed reusable IP — any engineering organization can fork, customize the YAML, and run their own instance. 63 tests in CI, all green, no flakes.
 ```
 
 ---
@@ -99,7 +99,7 @@ The control-mapping framing turns this from "AI code reviewer" into "compliance-
 ## "What we learned" (~400-500 chars)
 
 ```
-Two lessons. First: ship the spec to match the code, not the other way around. We caught ourselves writing a 15-section spec with rich architectural promises before we'd actually built a webhook handler. The discipline of reconciling spec to reality every milestone close kept the demo video honest. Second: the rubric is the product. Most "AI code reviewer" demos lead with the model. We lead with the methodology — the rubric is what makes this defensible as a compliance posture, not just a developer tool.
+Two lessons. First: meet the platform where it actually is. The official GitLab MCP server's tier and auth constraints meant the clean "everything through MCP" design wasn't available — the honest answer was a hybrid (MCP for reads, REST for the writes the MCP server can't do), documented rather than hidden. ADK's `MCPToolset` made attaching a community MCP server to a Gemini agent a few lines of code. Second: the rubric is the product. Most "AI code reviewer" demos lead with the model. We lead with the methodology — the rubric is what makes this defensible as a compliance posture, not just a developer tool.
 ```
 
 ---
@@ -107,7 +107,7 @@ Two lessons. First: ship the spec to match the code, not the other way around. W
 ## "What's next for MR Sentinel" (~300-500 chars)
 
 ```
-Post-hackathon: open the rubric to per-project rule additions (currently full-replacement only); wire pytest-cov gates; backdate the demo repo's commit history to a believable 60-day arc; explore Agent Builder as the orchestration layer when the rubric grows past fifty rules and per-project planning becomes non-trivial. The MIT license means engineering organizations can adopt the rubric framing today — fork, customize, run their own instance. Pull requests welcome after June 11.
+Post-hackathon: open the rubric to per-project rule additions (currently full-replacement only); wire pytest-cov gates; route the write-backs through the GitLab MCP server too, once a server exposes MR-note and label tools we trust; and deploy the ADK agent to Vertex AI Agent Engine as a managed runtime. The MIT license means engineering organizations can adopt the rubric framing today — fork, customize, run their own instance. Pull requests welcome after June 11.
 ```
 
 ---
@@ -118,6 +118,9 @@ Post-hackathon: open the rubric to per-project rule additions (currently full-re
 google-cloud
 vertex-ai
 gemini
+google-adk
+agent-development-kit
+model-context-protocol
 cloud-run
 cloud-sql
 secret-manager
@@ -126,17 +129,14 @@ cloud-build
 postgresql
 python
 fastapi
-sqlalchemy
 asyncpg
 gitlab
 docker
 github-actions
-yaml
-jsonschema
 mit-license
 ```
 
-(Devpost typically caps at ~15; pick the most prominent — google-cloud, vertex-ai, gemini, cloud-run, cloud-sql, secret-manager, python, fastapi, postgresql, gitlab, docker, github-actions, yaml, mit-license. Drop "artifact-registry", "cloud-build", "sqlalchemy", "asyncpg", "jsonschema" if over the cap.)
+(Devpost typically caps at ~15; the first six carry the "required tech" story — KEEP them: google-cloud, vertex-ai, gemini, google-adk, agent-development-kit, model-context-protocol. Then cloud-run, cloud-sql, secret-manager, python, fastapi, postgresql, gitlab, docker, mit-license. Drop "artifact-registry", "cloud-build", "asyncpg", "github-actions" if over the cap.)
 
 ---
 
@@ -152,14 +152,14 @@ video is uploaded — this table is submission-ready.
 | Live Cloud Run webhook | `https://mr-sentinel-webhook-n6oitfxdra-uc.a.run.app` | ✅ /health 200 |
 | Live dashboard | `https://mr-sentinel-webhook-n6oitfxdra-uc.a.run.app/dashboard` | ✅ 14 MRs |
 | Sample audit page | `https://mr-sentinel-webhook-n6oitfxdra-uc.a.run.app/audit/sgharlow/governance-demo-app/10` | ✅ block 0.0 |
-| **Demo video** | `https://youtu.be/0IlB2KJsJ4A` | ✅ uploaded (2:50) |
+| **Demo video** | `https://youtu.be/0IlB2KJsJ4A` | ⚠️ RE-RECORD PENDING — current cut describes the pre-ADK (REST/direct-Vertex) architecture; must reflect the ADK + GitLab MCP loop. Outline in `docs/` (video task deferred). |
 
 ---
 
 ## Judging-criteria mapping (paste verbatim into the body if Devpost has a "How does this fit the judging criteria?" field)
 
 ```
-TECHNOLOGICAL IMPLEMENTATION — Multi-tool agent (8 deterministic GitLab REST endpoints per MR), Gemini 2.5 Flash with structured JSON output, full GCP-native stack (Cloud Run, Cloud SQL, Secret Manager, Artifact Registry, Vertex AI, Cloud Build, Cloud Logging). Real production patterns: constant-time webhook auth, sha-based dedup respecting per-project rubric versions, comment upsert via Markdown marker, persisted audit log with replayable prompt + response.
+TECHNOLOGICAL IMPLEMENTATION — A Google Agent Development Kit (ADK) agent whose model is Gemini 2.5 Flash and whose tools come from GitLab's MCP server (@zereight/mcp-gitlab via ADK MCPToolset): on every MR it calls get_merge_request, get_merge_request_diffs, and list_merge_request_pipelines through the MCP server, then records a structured verdict via a record_verdict tool. All three required technologies — Gemini, Agent Builder (ADK), and the partner's MCP server — run at runtime; the write-backs use the GitLab REST API because the official Duo MCP server can't post MR notes or labels. Full GCP-native stack (Cloud Run, Cloud SQL, Secret Manager, Artifact Registry, Vertex AI, Cloud Build, Cloud Logging). Real production patterns: constant-time webhook auth, sha-based dedup respecting per-project rubric versions, comment upsert via Markdown marker, persisted replayable audit log.
 
 DESIGN — Three surfaces, three personas. (1) Structured Markdown MR comment with verdict badge, score, failure list, collapsed pass/skip sections, linked follow-up issue. (2) /dashboard leadership view: verdict distribution, top-5 failing rules, recent-MR drill-down. (3) /audit/{project}/{mr_iid} per-MR view: rule outcomes table with control_mapping, audit_log timeline. Dark theme, server-rendered HTML, no client-side framework.
 
@@ -177,8 +177,8 @@ Devpost's submission form for the Google Cloud Rapid Agent Hackathon typically r
 | Asset | Spec | Source / status |
 |-------|------|-----------------|
 | **Thumbnail image** | 1280×720 PNG/JPG; appears on the gallery card | **DONE 2026-05-30** — `docs/assets/devpost-thumbnail.png` (1280×720). Verdict-badge concept: 🛑 BLOCK card (score 0.0/10, `no-secrets-in-diff`, SOC2/ISO/OWASP control line) on dark teal-accent theme + "Built on Google Cloud" mark. Vector source `devpost-thumbnail.svg`; re-render via `_thumb-render.html` (headless Chrome). |
-| **Demo video** | ≤3 min, YouTube URL | **DONE** — https://youtu.be/0IlB2KJsJ4A (2:50). |
-| **Gallery screenshots** | 3-6 images, typically 1920×1080 | **DONE** — 7 captured in `docs/screenshots/` (01-dashboard, 02-mr-comment, 03-audit, 04-rubric, 05-agent-loop, mr-header, mr-diff). JPG, ~1900×960; re-export to 1920×1080 PNG if Devpost rejects the dimensions. |
+| **Demo video** | ≤3 min, YouTube URL | ⚠️ RE-RECORD PENDING — current cut (2:50) shows the pre-ADK architecture; re-shoot against the ADK + GitLab MCP loop before final submit. |
+| **Gallery screenshots** | 3-6 images, typically 1920×1080 | **MOSTLY DONE** — 7 captured in `docs/screenshots/`. ⚠️ Re-capture `05-agent-loop` post-deploy to show the GitLab **MCP** tool calls (the current one shows the old REST loop). JPG, ~1900×960; re-export to 1920×1080 PNG if Devpost rejects the dimensions. |
 | **Logo** | 256×256 typical | **DONE 2026-05-30** — `docs/assets/logo-256.png` (256×256). Octagon "MR" monogram matching the thumbnail palette (red stop-sign + teal accent ring on dark rounded tile). Vector source `logo-256.svg`; re-render via `_logo-render.html`. |
 | **Try-it links** | Live URLs reachable from the public internet | All four already live and verified (see Links table above). |
 | **GitHub repo** | Public URL | https://github.com/sgharlow/mr-sentinel — already public. |
