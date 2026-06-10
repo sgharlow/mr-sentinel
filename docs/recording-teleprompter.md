@@ -1,114 +1,152 @@
-# Recording teleprompter — ADK + GitLab MCP cut — one continuous take (~2:50)
+# MR Sentinel — recording master (script → capture → audio)
 
-> ⚠️ **Record only AFTER the ADK + GitLab MCP build is deployed and validated** (see
-> `docs/adk-mcp-deploy-runbook.md` §2 deploy, §4 MCP tool-trace, §6 hero-MR regression).
-> Recording before deploy would film the old REST/direct-Vertex behavior. If the §6 hero-MR
-> check shows `!10` drifted from block/0.0, fix that BEFORE recording — the script below
-> assumes `!10` still lands block, 0.0/10, `no-secrets-in-diff`.
->
-> **This cut is restructured to the 20/90/30/20 arc** (problem → app running → deliberate
-> architecture choice → so-what). Rationale + the criteria map are in
-> `docs/video-winning-profile-2026-06-09.md`. The biggest change from the prior version: the
-> architecture explanation moves **after** the judge has SEEN the agent work, not before.
+**The single turnkey doc for the re-record.** Three phases, in order:
+1. **THE SCRIPT** — beat-by-beat SCREEN / DO / SAY, the 20·90·30·20 arc (below).
+2. **CAPTURE** — record the silent screen sequences (phase 2).
+3. **AUDIO** — record the voiceover against this teleprompter, then sync (phase 3).
 
-Read top to bottom while recording. **Voiceover-only, single screen capture.** Numbers in
-[brackets] are placeholders to fill from your live state before/while recording.
-
-Legend: **[SCREEN]** what's visible · **[DO]** the click/scroll · **[SAY]** narration.
+Analysis behind every choice: `docs/video-winning-profile-2026-06-09.md`.
 
 ---
 
-## Layout (one 1920×1080 screen capture)
-- **Browser**, dark mode, bookmarks bar hidden. Open these tabs left→right:
-  1. GitLab MR `!10` — `https://gitlab.com/sgharlow/governance-demo-app/-/merge_requests/10`
-  2. Dashboard — `https://mr-sentinel-webhook-n6oitfxdra-uc.a.run.app/dashboard`
-  3. Audit — `https://mr-sentinel-webhook-n6oitfxdra-uc.a.run.app/audit/sgharlow/governance-demo-app/10`
-  4. Rubric — `https://github.com/sgharlow/mr-sentinel/blob/main/rubric/v1.yaml`
-- **Terminal window** (for the agent-loop / MCP-trace shot) — see pre-flight P3.
+## North star — what makes THIS video win
 
-## Pre-flight — do ALL of this BEFORE you hit record
-- **P1.** Deploy + validate per the runbook (§2/§4/§6). Confirm `/health` is 200 and the dashboard renders.
-- **P2.** `bash scripts/demo-capture.sh` → all three surfaces green.
-- **P3.** In the terminal: `bash scripts/demo-capture.sh fire 9` → wait until the agent runs.
-  The log MUST show the **GitLab MCP read-tool calls** the ADK agent makes
-  (`get_merge_request`, `get_merge_request_diffs`, `list_merge_request_pipelines`) followed by
-  the `evaluation: score=…` line, the `record_verdict` emit, and the posted comment. **Leave
-  that output on screen** — it IS your Shot 4 visual and your runtime-eligibility proof.
-  **If the three MCP tool lines don't appear, STOP and fix per runbook §4a before recording —
-  this is the shot the whole submission's eligibility leans on.**
-- **P4.** Open the four tabs in order; hard-refresh each. Mic: record a 10-second pad and do one
-  silent practice Alt-Tab pass.
-- **P5.** Note your **measured latency** from the runbook §8 re-capture — you'll say it in Shot 4.
-- **P6.** Do NOT say a Gemini version number aloud. Say "Gemini, on Vertex AI." (See
-  `video-winning-profile-2026-06-09.md` §1 — the overview banner says "Gemini 3," we run 2.5
-  Flash; the rules say "Gemini models," which we satisfy. Don't hand a judge a number mismatch.)
+Four judging axes, **equal weight (25% each)**: Technological Implementation · Design · Potential Impact · Quality of the Idea. We're in the **GitLab track** — judged against other GitLab-MCP agents, by Google Cloud + GitLab engineers. So the video must, in under 3:00:
 
-> Window switching: Shots A/B/C/E (verdict) = MR tab · Shot D = Terminal · Shot F = Dashboard ·
-> Shot G = Audit · Shot H (architecture) = Rubric tab · Shot I = close (audit or end card).
+- **Make the GitLab MCP server LOAD-BEARING and VISIBLE at runtime** — the one shot the whole eligibility leans on (Shot D). Judges want to *see* the partner's MCP server actually used, not named.
+- **Show it ACCOMPLISH A TASK, not chat** — it posts a verdict, labels the MR, opens a remediation issue. Real side effects in GitLab.
+- **Lead with the moat idea** — *the rubric is the product*: every rule maps 1:1 to a named compliance control. That reframes "AI reviews a PR" (crowded) into "compliance-grade governance with an audit trail" (novel = Quality of the Idea).
+- **Show real UX, live data — never slides** (Design): three surfaces, three personas.
+- **Name a fundable pain** (Impact): a tired reviewer rubber-stamps a secret on a Friday; an auditor finds it six months later.
+
+**Three upgrades vs the prior cut** (the reasons this version scores higher):
+1. **Timing rebalanced to the real arc.** The prior cut starved the "deliberate architecture choice" beat (~12s, impossible word count). Expert judges reward an *intentional* tech choice — the analog of "why this database." It now gets **~30s** (Shot H) to actually make the case.
+2. **The MCP-trace shot is the spine of the 90s "app in action,"** narrated to the lines that are *actually on screen* (`ADK evaluate … via GitLab MCP`, `Starting GitLab MCP Server`) — honest, not claims.
+3. **Hero MR `!10` stays pristine** (block / 0.0, untouched). The live agent loop is captured on a *working* MR (`!9`) and framed as the mechanism; `!10` is the showcase verdict. Two real MRs by one agent = breadth, not a seam.
 
 ---
 
-## THE TAKE (hit record, then go)
+## Layout (one 1920×1080 canvas)
+**Browser**, dark mode, bookmarks bar hidden. Tabs, left→right:
+1. **GitLab MR `!10`** — `https://gitlab.com/sgharlow/governance-demo-app/-/merge_requests/10`
+2. **Dashboard** — `https://mr-sentinel-webhook-n6oitfxdra-uc.a.run.app/dashboard`
+3. **Audit** — `https://mr-sentinel-webhook-n6oitfxdra-uc.a.run.app/audit/sgharlow/governance-demo-app/10`
+4. **Rubric** — `https://github.com/sgharlow/mr-sentinel/blob/main/rubric/v1.yaml`
 
-> Arc markers in the headers tell you which beat you're in. Keep the energy up through the
-> 90-second "app in action" stretch (Shots C–G) — that's where eligibility and Design are won.
+**Terminal** (dark, large font ≥16pt) for the Shot D MCP trace.
 
-### ── PROBLEM (≈0:00–0:24) ──
+## Pre-flight — BEFORE you record
+- **P1.** `curl -s …/health` → `{"status":"ok"}`; dashboard + audit `!10` (block / 0.0) render. *(Verified live 2026-06-10 on rev `00016-45d`.)*
+- **P2.** Stage the trace (WSL): `bash scripts/demo-capture.sh fire 9` → wait ~40s → then print the trace into the terminal:
+  ```bash
+  gcloud logging read 'resource.type="cloud_run_revision" AND resource.labels.service_name="mr-sentinel-webhook" AND timestamp>="'$(date -u -d '4 minutes ago' +%Y-%m-%dT%H:%M:%SZ)'"' \
+    --project=aicin-477004 --format='value(timestamp,textPayload)' --order=asc --limit=120 \
+    | grep -Ei 'ADK evaluate|via GitLab MCP|Starting GitLab MCP|MCPToolset|evaluation: score|tool='
+  ```
+  You want, on screen: `ADK evaluate sgharlow/governance-demo-app!9 via GitLab MCP` → `Starting GitLab MCP Server with stdio transport` → `… MCPToolset` → `evaluation: score=… verdict=block rules=15 mr_iid=9`. **Leave it on screen — it IS the Shot D visual.** (Optional booster — ask Claude to add per-MCP-tool INFO logging so each `get_merge_request_diffs` call prints; not required, the lines above already prove MCP runs.)
+- **P3.** Note the **measured loop latency** (~25–30s observed) — you say it in Shot D.
+- **P4.** Hard-refresh all four tabs. **Do NOT say a Gemini version number** — say "Gemini, on Vertex AI" (banner says "3", we run 2.5 Flash; rules say "Gemini models").
 
-### Shot A · 0:00–0:10 · Cold open
-- **[SCREEN]** MR `!10`, Changes tab, `.env.production` file visible.
-- **[SAY]** "Friday, four-fifty PM. An MR lands — 'add the production env file.' The reviewer is tired, and has eight more in the queue."
+---
 
-### Shot B · 0:10–0:24 · The stakes + the diff
-- **[DO]** Expand the `.env.production` diff; cursor over the `AWS_ACCESS_KEY_ID` line.
-- **[SAY]** "I've spent two decades shipping software in regulated industries. The pattern that ends careers isn't malice — it's that tired engineer rubber-stamping this. And inside this diff: a database password, a JWT secret, a live Stripe key, an AWS access key — everything the policy says must never enter the repo. MR Sentinel is the agent I wish I'd had."
+## THE SCRIPT — 20·90·30·20 (~2:40)
 
-### ── APP IN ACTION (≈0:24–1:52) ──
+Legend: **[SCREEN]** what's visible · **[DO]** the action · **[SAY]** narration · **[CAPTURE]** how to record it.
 
-### Shot C · 0:24–0:40 · Hand off to the agent
-- **[SCREEN]** Stay on the MR `!10` diff a beat, then start Alt-Tabbing toward the terminal.
-- **[SAY]** "So when this MR opens, MR Sentinel — a Google Agent Development Kit agent running on Cloud Run — wakes up and goes to work. Watch it actually run."
+### ── PROBLEM · 0:00–0:20 ──
 
-### Shot D · 0:40–1:18 · The agent loop — GitLab MCP trace (THE load-bearing shot)
-- **[DO]** Alt-Tab to the **Terminal** (the `fire 9` output). Scroll slowly: the three MCP
-  read-tool calls → the evaluation line → `record_verdict` → posted comment. Pause the cursor
-  on the MCP tool lines for ~1 second so they're legible.
-- **[SAY]** "It reaches into GitLab through **GitLab's own MCP server** — calling get-merge-request, get-merge-request-diffs, and list-pipelines to pull the context. It hands all of that to **Gemini, on Vertex AI**, which judges the diff against fifteen rules at once and emits a structured verdict by calling record-verdict. Every MCP call, every decision — logged and replayable. The whole evaluation runs in about [STATE MEASURED LATENCY, e.g. 'thirty seconds']."
+**Shot A · 0:00–0:09 · Cold open**
+- **[SCREEN]** MR `!10`, Changes tab, `.env.production` diff visible.
+- **[SAY]** "Friday, four-fifty PM. A merge request lands — 'add the production env file.' The reviewer's tired, with eight more in the queue."
+- **[CAPTURE]** Screen-record the MR `!10` Changes tab, diff already expanded.
 
-> If the captured trace is missing the MCP tool lines, you cannot record this shot honestly —
-> re-fire (non-determinism) or add the per-tool INFO logs first (runbook §4/§4a). This shot is
-> the proof that all three required technologies run at runtime.
+**Shot B · 0:09–0:20 · The stakes**
+- **[DO]** Cursor down the diff, pause on the `AWS_ACCESS_KEY_ID` line.
+- **[SAY]** "Inside this diff: a database password, a JWT secret, a live Stripe key, an AWS access key — everything policy says must never hit the repo. This is how secrets ship. MR Sentinel is the reviewer that never gets tired."
 
-### Shot E · 1:18–1:52 · The verdict lands
-- **[DO]** Alt-Tab to the **MR `!10`** tab; scroll to the MR Sentinel comment. Cursor: badge → evidence quote → linked issue → `blocked-compliance` label in the sidebar.
-- **[SAY]** "And here's what it leaves behind. Verdict: block. Score: zero out of ten. It cites `no-secrets-in-diff` by exact rule ID — mapped to SOC 2 CC6.1, ISO 27001 A.9.4.3, OWASP-ASVS V2 — quotes the exact lines that tripped it, auto-opens a remediation issue with a checklist, and labels the MR blocked-compliance so the merge button is one step further away. Every action ties back to a named control."
+### ── APP IN ACTION · 0:20–1:50 ──
 
-### Shot F · 1:52–2:14 · Leadership dashboard
-- **[DO]** Alt-Tab to the **Dashboard** tab. Full screen. Cursor down the list.
-- **[SAY]** "That's one MR. Here's the portfolio. An engineering leader opens the dashboard: the last thirty days — [STATE LIVE COUNT, e.g. 'thirteen'] MRs scored, most blocked on compliance, the top failing rules, every one a control mapped to an audit framework. Click any MR…"
+**Shot C · 0:20–0:30 · Hand off to the agent**
+- **[SCREEN]** Hold on the `!10` diff a beat, begin moving toward the terminal.
+- **[SAY]** "The moment an MR opens, MR Sentinel — a Google Agent Development Kit agent on Cloud Run — wakes up. Watch it actually run."
 
-### Shot G · 2:14–2:30 · Audit drill-down
-- **[DO]** Alt-Tab to the **Audit** tab (`/audit/.../10`). Hover the failing rules + the control_mapping column + the timeline.
-- **[SAY]** "…and you're in the audit log. Every rule outcome, every control mapping, the exact prompt the agent used, the timeline of every action. This is what a compliance auditor asks for at year-end — and here it's just the byproduct of doing the work."
+**Shot D · 0:30–1:02 · The agent loop — GitLab MCP trace ⭐ (load-bearing)**
+- **[DO]** Cut to the **terminal** trace. Cursor-highlight, in order: `via GitLab MCP` → `Starting GitLab MCP Server` → `evaluation: score=`.
+- **[SAY]** "Read the log. 'ADK evaluate, via GitLab MCP' — it spins up **GitLab's own MCP server** and pulls the merge request, its diff, and its pipeline *through* it. It hands all that to **Gemini, on Vertex AI**, which judges the diff against fifteen rules at once and emits a structured verdict by calling record-verdict. Every step logged and replayable — the whole loop runs in about [LATENCY ~30] seconds."
+- **[CAPTURE]** Record the terminal with the staged trace; slow cursor pass over the MCP lines.
+- ⚠️ If the trace lacks `Starting GitLab MCP Server` / `via GitLab MCP`, re-fire (P2) before recording — this is the eligibility proof.
 
-### ── DELIBERATE ARCHITECTURE CHOICE (≈2:30–2:42) ──
+**Shot E · 1:02–1:28 · The verdict lands**
+- **[DO]** Cut to **MR `!10`** → the MR Sentinel comment. Cursor: verdict badge → the cited evidence line → linked remediation issue → `blocked-compliance` label in the sidebar.
+- **[SAY]** "And here's what it leaves on the merge request that started this. Verdict: block. Score: zero out of ten. It cites no-secrets-in-diff by rule ID — mapped to SOC 2, ISO 27001, OWASP — quotes the exact lines, opens a remediation issue with a checklist, and labels it blocked-compliance so the merge button is one step further away. Every action ties back to a named control."
 
-### Shot H · 2:30–2:42 · Why this build
-- **[DO]** Alt-Tab to the **Rubric** tab; scroll to the `no-secrets-in-diff` rule so the control_mapping array is on screen.
-- **[SAY]** "Three deliberate choices. The MCP server, because it's a portable tool surface — the same agent points at gitlab.com or a self-hosted instance without rewiring. ADK, because governance needs a real tool-calling loop and a structured verdict, not a chat reply. And Vertex, so no diff ever leaves Google Cloud. Reads go through MCP; the write-backs use GitLab's REST API — because the official Duo MCP server can't post a comment yet. Honest hybrid, by design."
+**Shot F · 1:28–1:42 · Leadership dashboard**
+- **[DO]** Cut to **Dashboard**, full screen; cursor down the verdict distribution + top failing rules.
+- **[SAY]** "That's one MR. Here's the portfolio — the last thirty days, every MR scored, most blocked on compliance, the top failing rules, each one a control mapped to an audit framework."
 
-### ── SO WHAT (≈2:42–2:50) ──
+**Shot G · 1:42–1:50 · Audit drill-down**
+- **[DO]** Cut to **Audit** (`/audit/.../10`); hover the rule outcomes + control_mapping column + timeline.
+- **[SAY]** "Click any one and you're in the audit log — every outcome, every control mapping, the timeline. At year-end, that's just… there."
 
-### Shot I · 2:42–2:50 · Close
-- **[SCREEN]** Stay on the rubric (control_mapping visible), or cut to an end card in edit.
-- **[SAY]** "Every regulated engineering org has this exact pain. One ADK agent, Gemini for judgment, GitLab's MCP server for reach — and one rubric where every rule is a named control. The rubric ships open-source. MR Sentinel."
+### ── DELIBERATE ARCHITECTURE CHOICE · 1:50–2:20 ──
+
+**Shot H · 1:50–2:20 · Why this build** *(the beat expert judges score)*
+- **[DO]** Cut to the **Rubric** tab; scroll to the `no-secrets-in-diff` rule so its `control_mapping` array is on screen.
+- **[SAY]** "Three deliberate choices. **GitLab's MCP server** for the reads — because it's a portable tool surface: the same agent points at gitlab.com or a self-hosted instance with no rewiring. **ADK**, because governance needs a real tool-calling loop and a *structured* verdict, not a chat reply. And **Gemini on Vertex**, so no diff ever leaves Google Cloud. One honest seam: the reads run through MCP, the write-backs use GitLab's REST API — because the official Duo MCP server can't post a comment yet. I built that hybrid on purpose, and documented exactly why."
+
+### ── SO WHAT · 2:20–2:40 ──
+
+**Shot I · 2:20–2:40 · Close**
+- **[SCREEN]** Stay on the rubric (control_mapping visible) → cut to end card in edit.
+- **[SAY]** "Every regulated engineering org has this exact pain — and most ship the secret anyway. One ADK agent, Gemini for the judgment, GitLab's MCP server for reach, and one rubric where every rule is a named compliance control. It ships MIT — fork it, drop a YAML, run your own. The audit trail is just the byproduct. MR Sentinel."
 
 **Stop recording.**
 
+### Word budget (~150 wpm)
+| Shot | Beat | Sec | ~Words |
+|---|---|---|---|
+| A+B | problem | 20 | 50 |
+| C | app·handoff | 10 | 26 |
+| D | app·MCP trace | 32 | 78 |
+| E | app·verdict | 26 | 70 |
+| F | app·dashboard | 14 | 38 |
+| G | app·audit | 8 | 24 |
+| H | architecture | 30 | 74 |
+| I | so-what | 20 | 52 |
+| **Total** | | **~160 (2:40)** | **~412** |
+
+If long, trim Shot H's "or a self-hosted instance" clause and Shot E's label sentence. **Never cut Shot D or the `!10` verdict.** Hard cap 3:00.
+
 ---
 
-## End card (still, pulled into the edit — ≈3–5s after the cut)
+## PHASE 2 — CAPTURE (record the screen, silent)
 
+Record **silent** screen clips first; narrate separately in Phase 3 (far more forgiving than a live one-take). Tool: **OBS Studio** (free), 1920×1080, 60fps, capture the browser/terminal window, dark theme.
+
+Capture these clips (order doesn't matter; each a few seconds longer than its shot for trim slack):
+1. **Terminal trace** (Shot D) — stage per pre-flight P2, then record a slow cursor pass over the MCP lines. *Capture this FIRST while the trace is fresh.*
+2. **MR `!10`** (Shots A, B, E) — the `.env.production` diff (expanded, cursor on the AWS key), then scroll to the MR Sentinel verdict comment (badge → evidence → linked issue → label).
+3. **Dashboard** (Shot F) — full-screen, slow scroll over verdict distribution + top failing rules.
+4. **Audit `!10`** (Shot G) — hover rule outcomes + control_mapping + timeline.
+5. **Rubric** (Shot H) — scroll to `no-secrets-in-diff`, control_mapping array on screen.
+
+Also re-grab the **5 gallery screenshots** from these same tabs (`docs/screenshots/CAPTURE-GUIDE.md`) — **especially `05-agent-loop`, which must now show the GitLab MCP trace**, not the old REST `tool=` ×8 loop.
+
+---
+
+## PHASE 3 — AUDIO (voiceover against this teleprompter)
+
+Record the narration separately, reading the **[SAY]** lines top to bottom. Two clean options:
+- **Your voice:** a decent mic + Audacity/your DAW. Quiet room, ~15 cm off-axis, record a 10s room-tone pad. Read each shot's line; leave a beat between shots.
+- **AI voiceover (allowed, often cleaner):** paste the [SAY] lines into **ElevenLabs** or **Descript**; pick one consistent voice; export the track. The rules permit this.
+
+Either way: target **~-16 LUFS**, no clipping. **Check audio before anything else** — judges tolerate a rough picture, not inaudible sound.
+
+**Assemble:** lay the VO over the silent clips in order (A→I); trim each clip to the narration; add light captions (also satisfies the English-subtitles rule and helps muted viewers). Keep **under 3:00**.
+
+---
+
+## End card (still, ~3–5s, pulled into the edit)
 ```
 MR Sentinel
 github.com/sgharlow/mr-sentinel  ·  gitlab.com/sgharlow/governance-demo-app
@@ -116,49 +154,6 @@ Google ADK + Gemini (Vertex AI) + GitLab MCP server  ·  Cloud Run · Cloud SQL
 MIT licensed · Google Cloud Rapid Agent Hackathon · GitLab track
 ```
 
----
-
-## Word-count budget (≈150 wpm)
-
-| Shot | Beat | Seconds | ~Words |
-|---|---|---|---|
-| A | problem | 10 | 26 |
-| B | problem | 14 | 60 |
-| C | app | 16 | 38 |
-| D | app (MCP trace) | 38 | 75 |
-| E | app (verdict) | 34 | 78 |
-| F | app (dashboard) | 22 | 55 |
-| G | app (audit) | 16 | 50 |
-| H | architecture | 12 | 78 |
-| I | so-what | 8 | 40 |
-| **Total** | | **170** | **500** |
-
-Shot H is dense — if it feels rushed, drop the "self-hosted instance" clause first. If the whole
-take runs long, trim per `video-winning-profile-2026-06-09.md` §5 (protect Shots D and E).
-
----
-
-## After the take
-- **Edit:** trim the first/last second; burn in captions (rules allow English subtitles in lieu
-  of English audio — captions also help muted-on-transit judges); loudness ~-16 LUFS. Keep it
-  **under 3:00** (hard rules cap).
-- **Screenshots:** re-grab the 5 gallery shots (`screenshots/CAPTURE-GUIDE.md`) from the same
-  tabs — **especially `05-agent-loop`, which must now show the three GitLab MCP read-tool
-  calls** (`get_merge_request` / `get_merge_request_diffs` / `list_merge_request_pipelines`),
-  not the old eight-REST-call loop.
-- **Upload:** **public** (rules require publicly visible on YouTube/Vimeo — not Unlisted as the
-  safest reading of "publicly visible"); paste title + description + tags + chapters from
-  `docs/youtube-metadata.md`. Then put the new URL into the Devpost form and into `README.md` +
-  `docs/devpost-submission.md`.
-
-## What changed from the prior cut (so you know what to re-narrate)
-- **Arc reordered** to 20/90/30/20: architecture moved from ~0:42 (before the payoff) to ~2:30
-  (after the judge has seen it work). Per `video-winning-profile-2026-06-09.md`.
-- **Shot D is now the load-bearing MCP-trace shot** — narration names the three MCP read tools
-  explicitly and ties them to the Gemini eval + `record_verdict`. This is the runtime-
-  eligibility proof; it sits inside the 90s "app in action" stretch on purpose.
-- **Shot H volunteers the honest hybrid** (MCP reads + REST write-backs, and *why*) in one
-  sentence — a net positive with expert judges.
-- **No Gemini version number is spoken** ("Gemini, on Vertex AI") — avoids the banner-says-3 /
-  we-run-2.5 mismatch.
-- **Latency** — say your re-measured agentic-loop number, not the old "~twenty seconds."
+## Upload & propagate
+- YouTube, **Public** (rules require "publicly visible" — not Unlisted). Title/description/tags/chapters from `docs/youtube-metadata.md`.
+- Put the new URL into: the **Devpost form**, `README.md`, and `docs/devpost-submission.md` (Links table + asset checklist).
