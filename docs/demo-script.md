@@ -201,8 +201,8 @@ MIT licensed · Google Cloud Rapid Agent Hackathon · GitLab track
 
 ## Backup talking points (if first take feels flat)
 
-- **If asked "why not Agent Builder":** "Agent Builder adds orchestration value when you have many tools and dynamic planning. For a fifteen-rule rubric and eight deterministic actions, the orchestration is the agent. Visible in plain Python. Replayable from the audit log."
-- **If asked "why not MCP":** "REST gave us stability across GitLab tiers and clear semantics in Cloud Logging. The endpoint matrix is preserved as a future-MCP migration reference."
+- **If asked "how do you use Agent Builder / ADK":** "The evaluation is a Google ADK `LlmAgent` driven by an ADK `Runner`, with Gemini 2.5 Flash on Vertex AI as the model. It runs a real multi-turn tool-calling loop and emits its score by calling a `record_verdict` function-tool — visible in Cloud Logging, replayable from the audit log."
+- **If asked "why the MCP/REST hybrid":** "The agent READS each MR through GitLab's MCP server (`@zereight/mcp-gitlab` via ADK `MCPToolset`) — a portable tool surface that works across GitLab tiers. The write-backs go over GitLab REST because the official Duo MCP server is Premium/Ultimate-only and exposes no tool to post an MR note or set a label. Documented honestly in `docs/mcp-endpoint-audit.md`."
 - **If asked "what's the moat":** "The rubric. Most submissions will be 'AI reviews PR.' MR Sentinel ships *with* a methodology — every rule maps to a named control auditors recognize. It's configurable per project via `.mr-sentinel.yaml` at the consumer's repo root."
 
 ---
