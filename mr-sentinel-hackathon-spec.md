@@ -191,7 +191,7 @@ The demo target is a purpose-built public GitLab repo (`gitlab.com/sgharlow/gove
 
 ## 13. What's explicitly out of scope
 
-- IDE integration — this is a server-side agent, not a copilot
+- IDE integration — this is a server-side agent, not an in-editor assistant
 - Slack/Teams bot for chat-based review — deliberately rejected to keep "beyond chat" sharp
 - Multi-language rubric translation — English only for hackathon
 - SOC2-style audit export — mentioned in the pitch as a future direction, not built for submission
