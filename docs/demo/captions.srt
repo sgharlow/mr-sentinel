@@ -1,0 +1,141 @@
+1
+00:00:00,000 --> 00:00:04,500
+Friday, four-fifty PM. A merge request lands —
+"add the production env file."
+
+2
+00:00:04,500 --> 00:00:09,000
+The reviewer's tired, with eight more in the queue.
+
+3
+00:00:09,000 --> 00:00:13,500
+Inside this diff: a database password, a JWT secret,
+a live Stripe key, an AWS access key —
+
+4
+00:00:13,500 --> 00:00:17,000
+everything policy says must never hit the repo.
+This is how secrets ship.
+
+5
+00:00:17,000 --> 00:00:20,000
+MR Sentinel is the reviewer that never gets tired.
+
+6
+00:00:20,000 --> 00:00:25,500
+The moment an MR opens, MR Sentinel — a Google Agent
+Development Kit agent on Cloud Run — wakes up.
+
+7
+00:00:25,500 --> 00:00:30,000
+Watch it actually run.
+
+8
+00:00:30,000 --> 00:00:35,000
+Read the log — this is the agent running.
+
+9
+00:00:35,000 --> 00:00:41,000
+"ADK evaluate, via GitLab MCP": it spins up
+GitLab's own MCP server and calls it directly —
+
+10
+00:00:41,000 --> 00:00:48,000
+get-merge-request, get-merge-request-diffs,
+list-pipelines, each one going through MCP.
+
+11
+00:00:48,000 --> 00:00:55,000
+It hands all that to Gemini, on Vertex AI, which
+judges the diff against fifteen rules at once
+
+12
+00:00:55,000 --> 00:01:02,000
+and records a structured verdict. Every MCP call
+logged and replayable — about thirty seconds end to end.
+
+13
+00:01:02,000 --> 00:01:07,000
+And here's what it leaves on the merge request
+that started this.
+
+14
+00:01:07,000 --> 00:01:11,500
+Verdict: block. Score: zero out of ten.
+
+15
+00:01:11,500 --> 00:01:18,000
+It cites no-secrets-in-diff by rule ID — mapped to
+SOC 2, ISO 27001, OWASP — and quotes the exact lines,
+
+16
+00:01:18,000 --> 00:01:24,000
+opens a remediation issue with a checklist,
+and labels it blocked-compliance.
+
+17
+00:01:24,000 --> 00:01:28,000
+Every action ties back to a named control.
+
+18
+00:01:28,000 --> 00:01:34,000
+That's one MR. Here's the portfolio — the last
+thirty days, every MR scored,
+
+19
+00:01:34,000 --> 00:01:42,000
+most blocked on compliance, the top failing rules,
+each one a control mapped to an audit framework.
+
+20
+00:01:42,000 --> 00:01:46,000
+Click any one and you're in the audit log —
+
+21
+00:01:46,000 --> 00:01:50,000
+every outcome, every control mapping, the timeline.
+At year-end, that's just… there.
+
+22
+00:01:50,000 --> 00:01:56,000
+Three deliberate choices. GitLab's MCP server for
+the reads — a portable tool surface:
+
+23
+00:01:56,000 --> 00:02:02,000
+the same agent points at gitlab.com or a
+self-hosted instance with no rewiring.
+
+24
+00:02:02,000 --> 00:02:08,000
+ADK, because governance needs a real tool-calling
+loop and a structured verdict, not a chat reply.
+
+25
+00:02:08,000 --> 00:02:13,000
+And Gemini on Vertex, so no diff
+ever leaves Google Cloud.
+
+26
+00:02:13,000 --> 00:02:20,000
+One honest seam: reads run through MCP, write-backs
+use GitLab's REST API — the Duo server can't post yet.
+
+27
+00:02:20,000 --> 00:02:26,000
+Every regulated engineering org has this exact
+pain — and most ship the secret anyway.
+
+28
+00:02:26,000 --> 00:02:32,000
+One ADK agent, Gemini for the judgment,
+GitLab's MCP server for reach,
+
+29
+00:02:32,000 --> 00:02:37,000
+and one rubric where every rule is a named compliance
+control. It ships MIT — fork it, run your own.
+
+30
+00:02:37,000 --> 00:02:40,000
+The audit trail is just the byproduct. MR Sentinel.
