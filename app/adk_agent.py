@@ -133,6 +133,21 @@ EVAL_USER_PROMPT = (
 )
 
 
+def _log_tool_call(tool, args, tool_context):
+    """ADK before_tool_callback — log every tool the agent invokes so the runtime
+    trace shows each GitLab MCP read-tool call (and the final record_verdict). Tags
+    MCP tools vs the local function-tool. Returns None → ADK runs the tool normally.
+    Wrapped in try/except so a logging hiccup can never break an evaluation.
+    """
+    try:
+        name = getattr(tool, "name", str(tool))
+        via = "GitLab MCP" if name in GITLAB_MCP_TOOL_FILTER else "local"
+        logger.info("agent tool-call [%s] -> %s", via, name)
+    except Exception:  # never let logging break the agent loop
+        pass
+    return None
+
+
 class _AdkRunner:
     """Real runner: assembles the LlmAgent (Gemini + GitLab MCP + record_verdict) and runs it."""
 
@@ -148,6 +163,7 @@ class _AdkRunner:
             model=os.environ.get("GEMINI_MODEL", "gemini-2.5-flash"),
             instruction=build_system_prompt(rubric, for_tool_use=True),
             tools=[toolset, FunctionTool(record_verdict)],
+            before_tool_callback=_log_tool_call,
         )
 
     async def run_and_collect(self, *, project_path: str, mr_iid: int) -> None:
