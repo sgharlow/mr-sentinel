@@ -7,6 +7,18 @@ from app.agent_runner import evaluation_from_payload, Evaluation
 from app.adk_agent import VerdictCollector, make_record_verdict
 
 
+def test_adk_module_selects_vertex_ai_backend():
+    """Importing adk_agent must route google-genai to Vertex AI, not the
+    Developer API. If this regresses, the live agent dies with 'No API key was
+    provided' and inference would (if a key were present) run outside Google
+    Cloud — both rule violations. See the os.environ.setdefault block."""
+    import os
+
+    assert os.environ.get("GOOGLE_GENAI_USE_VERTEXAI") == "TRUE"
+    # location always defaulted; project only when GCP_PROJECT_ID is present.
+    assert os.environ.get("GOOGLE_CLOUD_LOCATION")
+
+
 def test_evaluation_from_payload_maps_all_fields():
     payload = {
         "overall_score": 0.0,

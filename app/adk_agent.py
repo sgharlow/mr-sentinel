@@ -26,6 +26,19 @@ from app.agent_runner import build_system_prompt, evaluation_from_payload, Evalu
 
 logger = logging.getLogger("mr_sentinel.adk")
 
+# Route ADK's google-genai client to Google Cloud **Vertex AI** (ADC + project),
+# NOT the Gemini Developer API. Without GOOGLE_GENAI_USE_VERTEXAI=TRUE the client
+# defaults to the Developer API and raises "No API key was provided" — and a key
+# is exactly what we must not use: all inference has to run inside Google Cloud
+# (Vertex AI) per the hackathon rules. Project/location come from the env the
+# deploy already sets (GCP_PROJECT_ID). setdefault so an explicit override (e.g.
+# Cloud Run --set-env-vars, or a test) still wins.
+os.environ.setdefault("GOOGLE_GENAI_USE_VERTEXAI", "TRUE")
+_gcp_project = os.environ.get("GCP_PROJECT_ID") or os.environ.get("GCP_PROJECT")
+if _gcp_project:
+    os.environ.setdefault("GOOGLE_CLOUD_PROJECT", _gcp_project)
+os.environ.setdefault("GOOGLE_CLOUD_LOCATION", os.environ.get("GCP_LOCATION", "us-central1"))
+
 # GitLab MCP tools the agent is allowed to call (read-only context gathering).
 GITLAB_MCP_TOOL_FILTER = [
     "get_merge_request",
