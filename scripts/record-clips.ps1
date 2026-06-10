@@ -1,7 +1,7 @@
 <#
 .SYNOPSIS
   Repeatable screen-capture of the 3 manual demo clips (C1 trace, C4 GitLab diff,
-  C5 GitLab comment) using ffmpeg's Windows screen grabber (gdigrab) — no OBS needed.
+  C5 GitLab comment) using ffmpeg's Windows screen grabber (gdigrab) - no OBS needed.
 
   Same script for the TEST RUN and the REAL TAKE:
     .\scripts\record-clips.ps1 -Clip C1 -Test     # rehearsal -> clips/C1-trace-TEST.mp4
@@ -13,11 +13,11 @@
   then records the PRIMARY monitor for the clip's duration and writes a 1920x1080 mp4.
   You perform the on-screen actions during the recording window (scroll, etc.).
   -AutoKey attempts the keypresses for you (F11 fullscreen, R replay for C1,
-  Page-Down auto-scroll for C4/C5) — convenience only; manual still works if it misfires.
+  Page-Down auto-scroll for C4/C5) - convenience only; manual still works if it misfires.
 
 .NOTES
   Output: docs\demo\clips\<name>.mp4   (these are gitignored working files)
-  Silent by design (no audio) — narration is recorded separately.
+  Silent by design (no audio) - narration is recorded separately.
 #>
 param(
   [ValidateSet('C1','C4','C5','all')][string]$Clip = 'all',
@@ -54,7 +54,7 @@ $DEFS = @{
           surface='https://gitlab.com/sgharlow/governance-demo-app/-/merge_requests/10'; isFile=$false;
           steps=@('LOG IN to gitlab.com first','F11 = full-screen','Scroll to the MR Sentinel comment',
                   'During RECORDING: pan badge -> evidence -> linked issue -> blocked-compliance label',
-                  '(Optional clip — you can use C3-audit.mp4 for Shot E instead)') }
+                  '(Optional clip - you can use C3-audit.mp4 for Shot E instead)') }
 }
 
 function Record-One($key) {
@@ -79,13 +79,13 @@ function Record-One($key) {
 
   # build ffmpeg gdigrab args -> normalize to 1920x1080 letterboxed
   $vf = 'scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2'
-  # Capture the FULL desktop (physical pixels) and scale to 1920x1080 — robust to DPI
+  # Capture the FULL desktop (physical pixels) and scale to 1920x1080 - robust to DPI
   # scaling (a 1920x1080 panel at 125% reports 1536x864 logical; gdigrab grabs physical).
   $args = @('-y','-f','gdigrab','-framerate','30',
             '-i','desktop','-t',$d.dur,'-vf',$vf,'-c:v','libx264','-pix_fmt','yuv420p','-preset','veryfast',$out)
 
   [console]::Beep(900,250)   # BEEP = recording started -> begin your slow scroll
-  Write-Host ">>> RECORDING $($d.dur)s — go! (scroll slowly; pause on the key line)" -ForegroundColor Green
+  Write-Host ">>> RECORDING $($d.dur)s - go! (scroll slowly; pause on the key line)" -ForegroundColor Green
   $proc = Start-Process -FilePath ffmpeg -ArgumentList $args -PassThru -WindowStyle Hidden
 
   if ($AutoKey) {
