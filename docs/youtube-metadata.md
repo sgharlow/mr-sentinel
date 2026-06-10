@@ -1,24 +1,29 @@
 # YouTube upload metadata — MR Sentinel demo
 
 Paste-ready metadata for the demo video. ⚠️ **RE-RECORD PENDING** — the published cut at
-**https://youtu.be/0IlB2KJsJ4A** (2:49) describes the pre-ADK architecture. The copy below is
-updated for the ADK + GitLab MCP loop; re-upload after recording from
-`docs/recording-teleprompter.md`. Chapter timestamps are approximate until the new cut exists.
+**https://youtu.be/0IlB2KJsJ4A** (2:49) describes the pre-ADK architecture AND uses the old
+shot order (architecture front-loaded). The copy below is updated for the re-cut: the ADK +
+GitLab MCP loop, restructured to the 20/90/30/20 arc (see `docs/recording-teleprompter.md` and
+`docs/video-winning-profile-2026-06-09.md`). Chapter timestamps are approximate until the new
+cut exists. **Upload PUBLIC** (the rules require "publicly visible on YouTube or Vimeo").
 
 ---
 
-## Title (published)
+## Title (recommended for the re-cut)
+
+Lead with the partner (GitLab) + the required tech (ADK + MCP) — that's the judges' first-pass
+scan, and we compete in the GitLab track.
 
 ```
-MR Sentinel — the rubric is the product | Google Cloud Rapid Agent Hackathon demo
+MR Sentinel — an ADK agent that governs GitLab MRs through GitLab's MCP server | Google Cloud Rapid Agent
 ```
 
-Alternates (if re-titling):
+Alternates:
 ```
-MR Sentinel — AI Compliance Governance for GitLab Merge Requests | Cloud Run + Gemini
+MR Sentinel — Gemini + Google ADK + GitLab MCP: compliance governance for every merge request
 ```
 ```
-MR Sentinel: an AI agent that applies a compliance rubric to every merge request
+MR Sentinel — the rubric is the product | Google Cloud Rapid Agent Hackathon (GitLab track)
 ```
 
 ---
@@ -26,7 +31,7 @@ MR Sentinel: an AI agent that applies a compliance rubric to every merge request
 ## Description (paste into the YouTube description field)
 
 ```
-An AI governance agent for GitLab merge requests. When an MR opens, a Google ADK agent — Gemini 2.5 Flash as its model — reads the MR, its diff, and its pipeline through GitLab's MCP server, judges them against a 15-rule rubric, and acts: a structured verdict comment with each failing rule cited by ID, a linked remediation issue, and a replayable Postgres audit log.
+An AI governance agent that doesn't chat — it acts. When a GitLab merge request opens, a Google Agent Development Kit (ADK) agent reaches into GitLab through GitLab's MCP server to read the MR, its diff, and its pipeline, hands them to Gemini on Vertex AI, judges them against a 15-rule rubric, and takes action: a structured verdict comment with each failing rule cited by ID, a `blocked-compliance` label, an auto-opened remediation issue, and a replayable Postgres audit log.
 
 The differentiator isn't the AI — it's the rubric. Every rule maps 1:1 to a named compliance control: SOC 2, ISO 27001, OWASP ASVS, NIST. When a comment says an MR is blocked, that's a control number a compliance team can cite in a finding. The rubric ships MIT-licensed; teams fork it and override per-project via one YAML file.
 
@@ -39,15 +44,15 @@ Sample audit page: https://mr-sentinel-webhook-n6oitfxdra-uc.a.run.app/audit/sgh
 Demo GitLab repo:  https://gitlab.com/sgharlow/governance-demo-app
 
 — Chapters —
-0:00  Intro — the Friday-afternoon MR
-0:24  Inside the diff: hard-coded secrets
-0:42  The agent: Google ADK + Gemini + GitLab's MCP server
-1:00  The agent loop — MCP tool calls -> Gemini verdict
-1:24  The verdict: block, 0/10, controls cited
+0:00  The Friday-afternoon MR: secrets in the diff
+0:24  Hand off to the ADK agent
+0:40  The agent loop — GitLab MCP read tools -> Gemini verdict
+1:18  The verdict lands: block, 0/10, controls cited
 1:52  Leadership dashboard
-2:20  Audit drill-down
-2:38  Recap + stack
-(timestamps approximate — re-align to the new cut)
+2:14  Audit drill-down
+2:30  Why ADK + GitLab MCP + Gemini-on-Vertex (the deliberate choice)
+2:42  Who uses it + the open-source rubric
+(timestamps approximate — re-align to the new cut after editing)
 
 — Stack —
 Google ADK (Agent Builder) · Vertex AI Gemini 2.5 Flash · GitLab MCP server (@zereight/mcp-gitlab) · Cloud Run · Cloud SQL Postgres · Secret Manager · Artifact Registry · Cloud Build · FastAPI · GitLab REST API (write-backs)
