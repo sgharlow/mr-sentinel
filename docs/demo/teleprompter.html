@@ -50,7 +50,7 @@
     <label style="color:var(--dim);font-size:13px">video:
       <input id="file" type="file" accept="video/*" style="font-size:12px">
     </label>
-    <span class="clock" id="clock">0:00 / 2:34</span>
+    <span class="clock" id="clock">0:00 / 2:46</span>
   </header>
 
   <div class="stage">
@@ -67,23 +67,23 @@
 
 <script>
 // Segments: {start, end, label, text} — boundaries match demo-silent.mp4 cuts.
-const TOTAL = 154; // seconds — matches demo-silent.mp4 (intro 5s + content 144s + outro 5s)
+const TOTAL = 166; // seconds — matches demo-silent.mp4 (intro 5s + content 144s + outro 5s)
 const SEGS = [
   {start:0,   end:5,   label:"Intro — title card", text:
     "MR Sentinel — a governance agent that reviews every GitLab merge request."},
-  {start:5,   end:27,  label:"Shots A·B — the problem (the secret diff)", text:
+  {start:5,   end:29,  label:"Shots A·B — the problem (the secret diff)", text:
     "Friday, four-fifty PM. A merge request lands — “add the production env file.” The reviewer's tired, with eight more in the queue. Inside this diff: a database password, a JWT secret, a live Stripe key, an AWS access key — everything policy says must never hit the repo. This is how secrets ship. MR Sentinel is the reviewer that never gets tired."},
-  {start:27,  end:63,  label:"Shots C·D — handoff + the agent loop (GitLab MCP)", text:
+  {start:29,  end:66,  label:"Shots C·D — handoff + the agent loop (GitLab MCP)", text:
     "The moment an MR opens, MR Sentinel — a Google Agent Development Kit agent on Cloud Run — wakes up. Watch it run. Read the log: “ADK evaluate, via GitLab MCP” — it spins up GitLab's own MCP server and calls it directly: get-merge-request, get-merge-request-diffs, list-pipelines, each one going through MCP. It hands all that to Gemini, on Vertex AI, which judges the diff against fifteen rules at once and records a structured verdict. Every MCP call logged and replayable — about thirty seconds end to end."},
-  {start:63,  end:88,  label:"Shot E — the verdict", text:
+  {start:66,  end:93,  label:"Shot E — the verdict", text:
     "And here's what it leaves on the merge request that started this. Verdict: block. Score: zero out of ten. It cites no-secrets-in-diff by rule ID — mapped to SOC 2, ISO 27001, OWASP — quotes the exact lines, opens a remediation issue with a checklist, and labels it blocked-compliance so the merge button is one step further away. Every action ties back to a named control."},
-  {start:88,  end:102, label:"Shot F — the portfolio", text:
+  {start:93,  end:107, label:"Shot F — the portfolio", text:
     "That's one MR. Here's the portfolio — the last thirty days, every MR scored, most blocked on compliance, the top failing rules, each one a control mapped to an audit framework."},
-  {start:102, end:111, label:"Shot G — the audit log", text:
+  {start:107, end:116, label:"Shot G — the audit log", text:
     "Click any one and you're in the audit log — every outcome, every control mapping, the timeline. At year-end, that's just… there."},
-  {start:111, end:149, label:"Shots H·I — architecture + close", text:
-    "Three deliberate choices. GitLab's MCP server for the reads — because it's a portable tool surface: the same agent points at gitlab.com or a self-hosted instance with no rewiring. ADK, because governance needs a real tool-calling loop and a structured verdict, not a chat reply. And Gemini on Vertex, so no diff ever leaves Google Cloud. One honest seam: the reads run through MCP, the write-backs use GitLab's REST API — because the official Duo MCP server can't post a comment yet. I built that hybrid on purpose, and documented exactly why. Every regulated engineering org has this exact pain — and most ship the secret anyway. One ADK agent, Gemini for the judgment, GitLab's MCP server for reach, and one rubric where every rule is a named compliance control. It ships MIT — fork it, drop a YAML, run your own. The audit trail is just the byproduct. MR Sentinel."},
-  {start:149, end:154, label:"Outro — end card", text:
+  {start:116, end:160, label:"Shots H·I — architecture + close", text:
+    "Three deliberate choices. GitLab's MCP server for the reads — a portable tool surface that works against gitlab.com or a self-hosted instance, no rewiring. ADK gives a real tool-calling loop and a structured verdict, not a chat reply. And Gemini on Vertex keeps every diff inside Google Cloud. One honest seam: reads go through MCP, write-backs use REST — the official Duo server can't post a comment yet. I built that on purpose, and documented why. Every regulated engineering org has this exact pain. One agent, Gemini for the judgment, GitLab's MCP server for reach, and a rubric where every rule is a named compliance control. Open source. The audit trail is just the byproduct. MR Sentinel."},
+  {start:160, end:166, label:"Outro — end card", text:
     "Gemini, Google ADK, and GitLab's MCP server — all on Google Cloud. Open source, MIT licensed."},
 ];
 
