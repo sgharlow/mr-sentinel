@@ -206,3 +206,61 @@ Devpost's submission form for the Google Cloud Rapid Agent Hackathon typically r
 6. **T-15 min: track + tags.** Choose track: **GitLab**. Add tags from the Built-with section.
 7. **T-10 min: read-through.** One full read of the rendered preview. Fix anything that wraps badly or has a broken link.
 8. ✅ **SUBMITTED to Devpost (GitLab track) 2026-05-31** — well ahead of the 2026-06-11 14:00 PT / 17:00 EDT deadline. Edits remain open until then.
+
+---
+
+# 2026-06-09 rewrite — builder-voice writeup (USE THESE for the final edit)
+
+> The blocks below replace the corresponding fields in the submitted form. They're written in a
+> first-person builder voice on purpose — the generic "leverages cutting-edge AI to revolutionize"
+> register reads as AI-generated and scores worse on Quality of the Idea. Keep the older field
+> copy above for reference, but paste these into the live form. Honest about the hybrid; no
+> Gemini version number where the banner/rules disagree (see
+> `docs/video-winning-profile-2026-06-09.md` §1).
+
+## What it does (builder voice)
+
+```
+I've spent twenty years shipping software in regulated industries, and the same thing kills teams every time: it's not a hacker, it's a tired senior engineer approving a merge request at 4:50 on a Friday with eight more in the queue. Six months later an auditor finds the secret that went into the repo that afternoon.
+
+MR Sentinel is the reviewer I always wanted on the team. It watches your GitLab merge requests, and when one opens it reads the MR, the diff, and the pipeline through GitLab's MCP server, then judges the change against a 15-rule rubric. Here's the part I care about: every rule maps 1:1 to a named compliance control — SOC 2 CC6.1, ISO 27001 A.9.4.3, OWASP-ASVS V2, NIST. So when it blocks an MR, it isn't saying "I don't like this." It's saying "this violates SOC 2 CC6.1," and it quotes the exact lines.
+
+Then it does the work a human would skip when they're tired. It posts a structured comment — verdict, score out of ten, every failing rule cited by ID with the evidence. It labels blocked MRs `blocked-compliance` so the merge button is one click further away. It auto-opens a remediation issue with a checklist. And it writes the whole thing to Postgres, so the audit trail isn't a separate end-of-year scramble — it's just the byproduct of doing the review.
+
+Three people, three views. The MR author sees the comment, same as a human reviewer. The eng leader opens /dashboard — 30-day verdict distribution, top failing rules, drill-down. The auditor opens /audit/{project}/{mr} and sees every rule outcome, its control mapping, and the exact prompt the agent reasoned from.
+
+The rubric is the actual product. It's MIT-licensed; drop a `.mr-sentinel.yaml` at your repo root and you've forked the controls to your own org.
+```
+
+## How we built it (builder voice)
+
+```
+Google Cloud, top to bottom, because the rules require it and because for a governance tool you genuinely don't want diffs leaving your cloud.
+
+The evaluation is a Google Agent Development Kit agent — an LlmAgent driven by an ADK Runner, with Gemini on Vertex AI as the model. I attached GitLab's MCP server (`@zereight/mcp-gitlab`, over stdio) using ADK's MCPToolset, so the agent's read tools — get_merge_request, get_merge_request_diffs, list_merge_request_pipelines — are literally GitLab's MCP tools, called fresh on every MR. The agent gathers context across those calls, reasons over the diff against all fifteen rules at once, and emits its result by calling a record_verdict function-tool whose arguments ARE the structured Evaluation the dashboard and Cloud SQL already expect.
+
+I went with MCP for the reads on purpose, not to tick the box. MCP gives me a portable tool surface: the same agent points at gitlab.com or a self-hosted GitLab without me rewriting the integration. For a tool that has to run across customers' GitLab tiers, that's the contract you want to standardize on. ADK gives me the multi-turn tool-calling loop and the structured output for free instead of hand-rolling an agent. Vertex keeps inference inside Google Cloud.
+
+Now the honest part, because expert judges will spot it anyway: it's a hybrid. The agent READS through the MCP server, but the WRITE-BACKS — the comment, the labels, the issue — go over GitLab's REST API. Why? The official GitLab Duo MCP server is Premium/Ultimate-only, OAuth-DCR-only, and exposes no tool to post an MR note or set a label. It physically can't carry the write path on a free-tier project. So a community GitLab MCP server carries the reads, and REST keeps the formatting-sensitive writes byte-stable. I documented that decision in docs/mcp-endpoint-audit.md rather than hiding it.
+
+The plumbing: Cloud Run hosts both the webhook and the dashboard on one service. The webhook reads X-Gitlab-Token, constant-time-compares it, returns 202, and dispatches a FastAPI BackgroundTask so the agent run never blocks the webhook. Cloud SQL Postgres 15 holds mr_scores + rule_outcomes + audit_log. Secret Manager holds the webhook secret, the GitLab PAT, and the DB creds. Artifact Registry + Cloud Build ship the image, which bundles Node and the MCP server. CI is GitHub Actions: pytest plus rubric-schema validation, green.
+
+The demo repo (gitlab.com/sgharlow/governance-demo-app, a fictional outpatient-billing SaaS called "Medbill") ships archetype MRs built to trip each rule cluster — an auth-missing endpoint, a committed .env.production, a migration with no rollback, a refactor with no spec link. The hero MR !10 is the committed secrets one, and it lands block / 0.0 every time.
+```
+
+## What we learned (builder voice)
+
+```
+Two things stuck.
+
+First: meet the platform where it actually is, and say so. My clean "everything flows through MCP" design didn't survive contact with reality — the official GitLab MCP server's tier and auth constraints meant it couldn't do the writes. The instinct under hackathon pressure is to paper over that. The better call was to build the honest hybrid, document exactly why, and treat the seam as engineering judgment instead of a flaw. ADK's MCPToolset made attaching a community MCP server to a Gemini agent a few lines, which made that hybrid cheap to build cleanly.
+
+Second: the rubric is the product, not the model. Almost every "AI reviews your PR" demo leads with the model and the model is interchangeable. I led with the methodology — fifteen rules, each tied to a control an auditor already recognizes. That's the part that's defensible, forkable, and worth paying for. The agent is the delivery mechanism; the control mapping is the moat.
+
+A smaller one: setting an output_schema on an ADK agent disables tool calling, but I needed both the MCP read tools AND structured output. The fix — a final record_verdict tool whose arguments are the structured verdict — is now my default pattern for "agent that must use tools and return a typed result."
+```
+
+> **Tagline / elevator pitch:** the submitted versions (above, ~339 chars) are already in
+> builder register and name the required tech without a Gemini version number — leave them.
+> If you want one extra punch in the tagline slot, the alt below tests well:
+> `The reviewer that never gets tired on a Friday: an ADK + GitLab-MCP agent that maps every merge request to a named compliance control.`
