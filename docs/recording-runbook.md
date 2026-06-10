@@ -1,5 +1,7 @@
 # MR Sentinel — recording-day runbook (1-pass)
 
+> ⚠️ **Updated 2026-06-10 for the ADK+MCP re-record.** Narrate from [`recording-teleprompter.md`](recording-teleprompter.md) (the ADK + GitLab MCP cut), NOT the superseded `demo-script.md`. Shot 5 must show the **GitLab MCP** tool trace (`scripts/demo-capture.sh fire 9` → the `ADK evaluate … via GitLab MCP` / `Starting GitLab MCP Server` / `evaluation: score=` lines), not the old REST `tool=` ×8 loop. Upload the video **PUBLIC** (the rules say "publicly visible"), not unlisted. Use the re-measured agentic-loop latency (~25–30s), not "~twenty seconds".
+
 Exact commands, in order, to capture the demo video and submit. **Every command
 runs in a WSL Ubuntu terminal** (gcloud/PAT calls are Norton-blocked elsewhere).
 **Never paste multi-line PAT commands** — always use the `scripts/*.sh` files (they

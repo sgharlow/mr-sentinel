@@ -36,7 +36,7 @@ A 60-second guided tour. Every link is live and needs no auth:
 
 > ✅ **SUBMITTED to the Google Cloud Rapid Agent Hackathon (GitLab track) on 2026-05-31.** Demo video: https://youtu.be/0IlB2KJsJ4A. Project edits remain open until the June 11, 2026 — 17:00 EDT deadline.
 
-**End-to-end loop on Cloud Run:** GitLab MR webhook → a **Google ADK agent** (Gemini 2.5 Flash) reads the MR, its diff, and its pipeline **through GitLab's MCP server**, resolves an optional `.mr-sentinel.yaml` per-project rubric override, evaluates against the 15 rubric rules, and records a structured verdict via a `record_verdict` tool → MR Sentinel upserts the structured comment + labels on the MR, opens a linked remediation issue on block verdicts, and persists score + child rule outcomes + audit row to Cloud SQL (write-backs over the GitLab REST API). Leadership dashboard at `/dashboard` + `/audit/{project}/{mr_iid}` (server-rendered, dark theme). **63 tests green, CI green.** End-to-end latency is being re-measured for the agentic ADK loop (the prior single-call REST path measured p50 ~20s / p95 ~30s; the multi-turn tool-calling loop runs somewhat longer). GCP infrastructure on shared `aicin-477004`. See [`mr-sentinel-hackathon-spec.md`](mr-sentinel-hackathon-spec.md) for the full spec.
+**End-to-end loop on Cloud Run:** GitLab MR webhook → a **Google ADK agent** (Gemini 2.5 Flash) reads the MR, its diff, and its pipeline **through GitLab's MCP server**, resolves an optional `.mr-sentinel.yaml` per-project rubric override, evaluates against the 15 rubric rules, and records a structured verdict via a `record_verdict` tool → MR Sentinel upserts the structured comment + labels on the MR, opens a linked remediation issue on block verdicts, and persists score + child rule outcomes + audit row to Cloud SQL (write-backs over the GitLab REST API). Leadership dashboard at `/dashboard` + `/audit/{project}/{mr_iid}` (server-rendered, dark theme). **64 tests green, CI green.** End-to-end latency for the agentic ADK loop runs ~25–30s per evaluation (observed live; the prior single-call REST path measured p50 ~20s — the multi-turn MCP tool-calling loop is expectedly longer). GCP infrastructure on shared `aicin-477004`. See [`mr-sentinel-hackathon-spec.md`](mr-sentinel-hackathon-spec.md) for the full spec.
 
 ### GCP resources live
 
@@ -184,11 +184,12 @@ mr-sentinel/
 │   ├── agent_runner.py               # rubric load + prompts + Evaluation mapping + comment render
 │   ├── gitlab_client.py              # async GitLab REST client (write-backs: comment/label/issue)
 │   └── persistence.py                # asyncpg pool + mr_scores/rule_outcomes/audit_log writes
-├── tests/                            # pytest — 63 tests
+├── tests/                            # pytest — 64 tests
 │   ├── test_webhook.py               # /health + webhook auth + payload validation
-│   ├── test_adk_agent.py             # ADK runner + MCP toolset wiring + record_verdict (mocked)
+│   ├── test_adk_agent.py             # ADK runner + MCP toolset wiring + record_verdict + Vertex-backend (mocked)
 │   ├── test_agent_runner.py          # rubric load/parse + prompt assembly + comment render
 │   ├── test_gitlab_client.py         # REST write-back endpoints + override fetch + upsert pattern
+│   ├── test_dashboard.py             # /dashboard + /audit rendering (TestClient, patched data)
 │   └── test_rubric.py                # schema validation + rule counts + id uniqueness
 ├── rubric/
 │   ├── v1.yaml                       # bundled rubric (15 rules, 4 categories)

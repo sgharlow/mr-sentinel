@@ -63,7 +63,7 @@ Google Cloud, end to end. The evaluation is a Google Agent Development Kit (ADK)
 
 It's a deliberate hybrid. The agent READS the MR through GitLab's MCP server; the WRITE-BACKS — the structured comment, the labels, the remediation issue — go over the GitLab REST API. Why: the official GitLab Duo MCP server is Premium/Ultimate-only, OAuth-only, and exposes no tool to post an MR note or set MR labels, so it can't carry the write path on a free-tier project. A community GitLab MCP server carries the reads; REST keeps the formatting-sensitive writes deterministic and the demo output byte-stable.
 
-CI is GitHub Actions on the source repo: pytest (63 tests) plus rubric-schema validation. The webhook handler reads `X-Gitlab-Token`, constant-time compares against the secret, returns 202 Accepted, and dispatches a FastAPI BackgroundTask so the webhook latency budget is decoupled from the agent run.
+CI is GitHub Actions on the source repo: pytest (64 tests) plus rubric-schema validation. The webhook handler reads `X-Gitlab-Token`, constant-time compares against the secret, returns 202 Accepted, and dispatches a FastAPI BackgroundTask so the webhook latency budget is decoupled from the agent run.
 
 The demo repo at gitlab.com/sgharlow/governance-demo-app ("Medbill" — fictional outpatient-billing SaaS) ships with archetypal MRs designed to trip each rule cluster: an auth-missing endpoint, a committed `.env.production`, an alembic migration with no rollback, a refactor with no spec link, a dependency downgrade with known CVEs. Every archetype produces a verifiable agent comment, label, and (on block) a remediation issue.
 ```
@@ -91,7 +91,7 @@ Three real ones:
 ## "Accomplishments that we're proud of" (~400-500 chars)
 
 ```
-The control-mapping framing turns this from "AI code reviewer" into "compliance-grade governance." Every comment ties back to a named control auditors recognize. The audit log is replayable end-to-end — same prompt, same diff, same response, persisted forever. The agent runs on Cloud Run scale-to-zero, and all three required technologies — Gemini, the Google ADK (Agent Builder), and GitLab's MCP server — are exercised at runtime on every evaluation. The rubric ships as MIT-licensed reusable IP — any engineering organization can fork, customize the YAML, and run their own instance. 63 tests in CI, all green, no flakes.
+The control-mapping framing turns this from "AI code reviewer" into "compliance-grade governance." Every comment ties back to a named control auditors recognize. The audit log is replayable end-to-end — same prompt, same diff, same response, persisted forever. The agent runs on Cloud Run scale-to-zero, and all three required technologies — Gemini, the Google ADK (Agent Builder), and GitLab's MCP server — are exercised at runtime on every evaluation. The rubric ships as MIT-licensed reusable IP — any engineering organization can fork, customize the YAML, and run their own instance. 64 tests in CI, all green, no flakes.
 ```
 
 ---
@@ -151,7 +151,7 @@ submission-ready — it must be re-recorded** to reflect the ADK + GitLab MCP ar
 | GitHub repo | `https://github.com/sgharlow/mr-sentinel` | ✅ public |
 | Demo GitLab repo | `https://gitlab.com/sgharlow/governance-demo-app` | ✅ public |
 | Live Cloud Run webhook | `https://mr-sentinel-webhook-n6oitfxdra-uc.a.run.app` | ✅ /health 200 |
-| Live dashboard | `https://mr-sentinel-webhook-n6oitfxdra-uc.a.run.app/dashboard` | ✅ 14 MRs |
+| Live dashboard | `https://mr-sentinel-webhook-n6oitfxdra-uc.a.run.app/dashboard` | ✅ 13 MRs |
 | Sample audit page | `https://mr-sentinel-webhook-n6oitfxdra-uc.a.run.app/audit/sgharlow/governance-demo-app/10` | ✅ block 0.0 |
 | **Demo video** | `https://youtu.be/0IlB2KJsJ4A` | ⚠️ RE-RECORD PENDING — current cut describes the pre-ADK (REST/direct-Vertex) architecture; must reflect the ADK + GitLab MCP loop. Outline in `docs/` (video task deferred). |
 

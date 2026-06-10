@@ -1,5 +1,7 @@
 # MR Sentinel — 3-minute demo video script
 
+> ⚠️ **SUPERSEDED for the re-record (2026-06-10).** This is the ORIGINAL cut, written for the pre-ADK architecture (direct-Vertex + 8 GitLab REST calls). The shipped architecture is now a **Google ADK agent reading through the GitLab MCP server**, so the narration below ("eight tool calls, one Gemini call", "~twenty seconds") no longer matches the product. **Record from [`recording-teleprompter.md`](recording-teleprompter.md)** (the ADK+MCP cut, 20/90/30/20 arc) instead. The hero MR `!10` storyboard and the screenshot/asset notes here are still valid and reusable.
+
 **Total runtime:** 3:00
 **Format:** 1080p screen capture with picture-in-picture for on-camera shots
 **Hero MR:** `gitlab.com/sgharlow/governance-demo-app/-/merge_requests/10` — the secret-in-diff archetype. Most visually striking verdict (0.0/10, block, `no-secrets-in-diff` blocker mapped to SOC 2 + ISO 27001 + OWASP-ASVS, automated remediation issue). Live audit confirms 2 fail rows (`contract-has-spec-link` warning + `no-secrets-in-diff` blocker), commit sha8 `1fb25ad2`.

@@ -37,7 +37,7 @@ this is the index + the bits that are easy to fumble. **Deadline: June 11, 2026 
 
 ## Don't forget (the fumble list)
 - Track = **GitLab** (not the generic track).
-- Video must be **Unlisted or Public**, not Private (judges can't open Private).
+- Video must be set to **Public** — the rules say "publicly visible." (Unlisted *may* be read as non-compliant; don't risk it. Never Private.)
 - License is MIT and already detectable in the repo About — no action.
 - Solo submission: team = `sgharlow` only.
 - All AI is Google-only (Gemini/Vertex) — matches the rules; nothing to disclose.

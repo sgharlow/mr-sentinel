@@ -2,7 +2,9 @@
 
 **Branch:** `feat/adk-gitlab-mcp` · **Plan:** `docs/superpowers/plans/2026-06-08-adk-gitlab-mcp.md`
 
-**Why this is Steve-run:** the deploy needs `gcloud` + Docker, which Norton blocks on Git Bash — run everything below from **WSL**. The Python code + 63 unit tests are already green; what remains is live validation that the real agent invokes Gemini + the GitLab MCP server at runtime, and that the hero demo is unbroken.
+**Why this is Steve-run:** the deploy needs `gcloud` + Docker, which Norton blocks on Git Bash — run everything below from **WSL**. The Python code + 64 unit tests are already green.
+
+> ✅ **DEPLOYED + LIVE-VERIFIED 2026-06-10** on rev `mr-sentinel-webhook-00016-45d` (image `webhook:4c45778`). Two deploy-blockers were fixed first: a google-adk dependency conflict (fastapi/httpx/uvicorn bumped) and the ADK Vertex-backend env (`GOOGLE_GENAI_USE_VERTEXAI=TRUE`). Live logs on MR !7/!9 confirmed ADK → GitLab MCP server → Gemini(Vertex) → `record_verdict`. Hero !10 left pinned at block/0.0. This runbook is retained as the reproducible deploy reference.
 
 **What changed (so you know what to watch):** the webhook's MR *evaluation* now runs through a Google ADK agent (`LlmAgent`, Gemini 2.5 Flash) that calls a **community GitLab MCP server** (`@zereight/mcp-gitlab`, stdio) for its read tools (`get_merge_request`, `get_merge_request_diffs`, `list_merge_request_pipelines`). Write-backs (comment/labels/issue) still go over REST — unchanged. The image now installs Node + the MCP server.
 

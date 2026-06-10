@@ -128,8 +128,10 @@ After capture, edit the table in **Results** below with the actual values, then 
 
 ## Results
 
+> ⚠️ **These are the PRE-ADK (direct-Vertex + REST) numbers.** They were captured 2026-06-01, before the 2026-06-10 ADK + GitLab MCP migration. The current agentic ADK loop (multi-turn MCP tool calls) runs **~25–30s per evaluation** (observed live on rev `00016-45d`, MR !7/!9). Re-run this capture against the ADK path for a clean p50/p95 before citing latency as "current."
+
 **Captured:** 2026-06-01 in WSL (post-SEED, `docs/closeout-20260531/03-latency-results.txt`)
-**Window:** last 30 days ending 2026-06-01
+**Window:** last 30 days ending 2026-06-01 (pre-ADK REST path)
 **Sample size:** 19 full-loop legs / 144 Gemini-call legs
 
 | Metric | p50 | p95 | p99 | max |
