@@ -42,6 +42,13 @@ Related files (already produced): `docs/recording-teleprompter.md` (full script)
 
 ## 2. Record the three clips
 
+> ⚡ **Scripted option (no OBS needed):** `scripts\record-clips.ps1` captures each clip with ffmpeg's
+> screen grabber. Same script for rehearsal and the real take:
+> `.\scripts\record-clips.ps1 -Clip C1 -Test` (→ `C1-trace-TEST.mp4`) then drop `-Test` for the real one;
+> `-Clip all` does C1→C4→C5 in order; `-AutoKey` also presses F11/R/Page-Down for you. It opens the
+> surface, counts you in, then records the clip's duration to `docs\demo\clips\`. The manual OBS steps
+> below are the fallback / reference for what to do on screen during each recording.
+
 ### 🎬 C1 — agent loop / GitLab MCP trace · Shot D · ~16s ⭐ (the eligibility shot)
 1. Open **`docs\demo\agent-trace.html`** in your browser (double-click, or Ctrl+O). Press **F11** (full-screen).
 2. It auto-plays a ~11s log reveal, then holds. Press **`R`** to replay it cleanly.
