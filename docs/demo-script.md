@@ -196,7 +196,7 @@ MIT licensed · Google Cloud Rapid Agent Hackathon · GitLab track
 - [ ] Shot 7 dashboard bars animate cleanly — no jitter
 - [ ] Captions burned in (Devpost judges sometimes watch muted on transit)
 - [ ] Final still-frame end card holds 2 full seconds before the cut
-- [x] Video uploaded to YouTube — https://youtu.be/0IlB2KJsJ4A
+- [x] Video uploaded to YouTube — https://youtu.be/S93xnolHRe0
 - [ ] One reduced 720p copy attached directly to the Devpost form as a fallback
 
 ---

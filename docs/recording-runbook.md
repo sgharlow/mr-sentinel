@@ -78,7 +78,7 @@ bash scripts/demo-capture.sh
 ## Phase D — Post-record
 
 ```bash
-# D1. DONE — published: https://youtu.be/0IlB2KJsJ4A
+# D1. DONE — published: https://youtu.be/S93xnolHRe0
 
 # D3. clean up everything the fire/verify runs created (dup issues + marker files).
 #     If Phase A added new legit follow-up issues, extend KEEP, e.g. KEEP="1 2 3 4 5 14 15".

@@ -8,7 +8,7 @@ this is the index + the bits that are easy to fumble. **Deadline: June 11, 2026 
 > deadline, so the checklist below stays useful for any pre-deadline updates.
 
 ## Before you open the form
-- [x] Final video uploaded to **YouTube** — https://youtu.be/0IlB2KJsJ4A
+- [x] Final video uploaded to **YouTube** — https://youtu.be/S93xnolHRe0
 - [x] URL pasted into the `devpost-submission.md` Links table (Demo video row)
 - [x] Gallery screenshots in `docs/screenshots/` (7 captured; JPG ~1900×960)
 - [ ] `bash scripts/demo-capture.sh` → all green (live demo still up)

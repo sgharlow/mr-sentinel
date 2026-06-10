@@ -142,9 +142,8 @@ mit-license
 
 ## Links
 
-Five of the six resource links below are live and verified. **The demo video is NOT yet
-submission-ready — it must be re-recorded** to reflect the ADK + GitLab MCP architecture
-(the current cut shows the old REST/direct-Vertex design).
+All six resource links below are live and verified — including the demo video, re-recorded for
+the ADK + GitLab MCP cut (2:46, public).
 
 | Field | URL | Status |
 |---|---|---|
@@ -153,7 +152,7 @@ submission-ready — it must be re-recorded** to reflect the ADK + GitLab MCP ar
 | Live Cloud Run webhook | `https://mr-sentinel-webhook-n6oitfxdra-uc.a.run.app` | ✅ /health 200 |
 | Live dashboard | `https://mr-sentinel-webhook-n6oitfxdra-uc.a.run.app/dashboard` | ✅ live — scored MRs + verdict distribution (13 block / 3 warn / 2 pass at last check) |
 | Sample audit page | `https://mr-sentinel-webhook-n6oitfxdra-uc.a.run.app/audit/sgharlow/governance-demo-app/10` | ✅ block 0.0 |
-| **Demo video** | `https://youtu.be/0IlB2KJsJ4A` | ⚠️ RE-RECORD PENDING — current cut describes the pre-ADK (REST/direct-Vertex) architecture; must reflect the ADK + GitLab MCP loop. Outline in `docs/` (video task deferred). |
+| **Demo video** | `https://youtu.be/S93xnolHRe0` | ✅ live — ADK + GitLab MCP cut (2:46), public, voiceover + chapters |
 
 ---
 
@@ -178,7 +177,7 @@ Devpost's submission form for the Google Cloud Rapid Agent Hackathon typically r
 | Asset | Spec | Source / status |
 |-------|------|-----------------|
 | **Thumbnail image** | 1280×720 PNG/JPG; appears on the gallery card | **DONE 2026-05-30** — `docs/assets/devpost-thumbnail.png` (1280×720). Verdict-badge concept: 🛑 BLOCK card (score 0.0/10, `no-secrets-in-diff`, SOC2/ISO/OWASP control line) on dark teal-accent theme + "Built on Google Cloud" mark. Vector source `devpost-thumbnail.svg`; re-render via `_thumb-render.html` (headless Chrome). |
-| **Demo video** | ≤3 min, YouTube URL | ⚠️ RE-RECORD PENDING — current cut (2:50) shows the pre-ADK architecture; re-shoot against the ADK + GitLab MCP loop before final submit. |
+| **Demo video** | ≤3 min, YouTube URL | **DONE 2026-06-10** — https://youtu.be/S93xnolHRe0 (2:46, ADK + GitLab MCP cut, public). |
 | **Gallery screenshots** | 3-6 images, typically 1920×1080 | **MOSTLY DONE** — 7 captured in `docs/screenshots/`. ⚠️ Re-capture `05-agent-loop` post-deploy to show the GitLab **MCP** tool calls (the current one shows the old REST loop). JPG, ~1900×960; re-export to 1920×1080 PNG if Devpost rejects the dimensions. |
 | **Logo** | 256×256 typical | **DONE 2026-05-30** — `docs/assets/logo-256.png` (256×256). Octagon "MR" monogram matching the thumbnail palette (red stop-sign + teal accent ring on dark rounded tile). Vector source `logo-256.svg`; re-render via `_logo-render.html`. |
 | **Try-it links** | Live URLs reachable from the public internet | All four already live and verified (see Links table above). |

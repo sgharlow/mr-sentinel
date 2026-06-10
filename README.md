@@ -6,7 +6,7 @@
 
 > An AI governance agent for merge requests — a Google ADK agent that reads each MR through GitLab's MCP server, judges it with Gemini against a written compliance rubric, and leaves an audit-grade paper trail.
 
-**▶ Watch the 3-minute demo:** [youtu.be/0IlB2KJsJ4A](https://youtu.be/0IlB2KJsJ4A)
+**▶ Watch the 3-minute demo:** [youtu.be/S93xnolHRe0](https://youtu.be/S93xnolHRe0)
 
 **Try it now:** [live dashboard](https://mr-sentinel-webhook-n6oitfxdra-uc.a.run.app/dashboard) · [sample audit page](https://mr-sentinel-webhook-n6oitfxdra-uc.a.run.app/audit/sgharlow/governance-demo-app/10) · [demo MR](https://gitlab.com/sgharlow/governance-demo-app/-/merge_requests/10)
 
@@ -34,7 +34,7 @@ A 60-second guided tour. Every link is live and needs no auth:
 
 ## Status
 
-> ✅ **SUBMITTED to the Google Cloud Rapid Agent Hackathon (GitLab track) on 2026-05-31.** Demo video: https://youtu.be/0IlB2KJsJ4A. Project edits remain open until the June 11, 2026 — 17:00 EDT deadline.
+> ✅ **SUBMITTED to the Google Cloud Rapid Agent Hackathon (GitLab track) on 2026-05-31.** Demo video: https://youtu.be/S93xnolHRe0. Project edits remain open until the June 11, 2026 — 17:00 EDT deadline.
 
 **End-to-end loop on Cloud Run:** GitLab MR webhook → a **Google ADK agent** (Gemini 2.5 Flash) reads the MR, its diff, and its pipeline **through GitLab's MCP server**, resolves an optional `.mr-sentinel.yaml` per-project rubric override, evaluates against the 15 rubric rules, and records a structured verdict via a `record_verdict` tool → MR Sentinel upserts the structured comment + labels on the MR, opens a linked remediation issue on block verdicts, and persists score + child rule outcomes + audit row to Cloud SQL (write-backs over the GitLab REST API). Leadership dashboard at `/dashboard` + `/audit/{project}/{mr_iid}` (server-rendered, dark theme). **64 tests green, CI green.** End-to-end latency for the agentic ADK loop runs ~25–30s per evaluation (observed live; the prior single-call REST path measured p50 ~20s — the multi-turn MCP tool-calling loop is expectedly longer). GCP infrastructure on shared `aicin-477004`. See [`mr-sentinel-hackathon-spec.md`](mr-sentinel-hackathon-spec.md) for the full spec.
 
