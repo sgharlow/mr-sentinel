@@ -43,7 +43,19 @@ Four judging axes, **equal weight (25% each)**: Technological Implementation · 
     --project=aicin-477004 --format='value(timestamp,textPayload)' --order=asc --limit=120 \
     | grep -Ei 'ADK evaluate|via GitLab MCP|Starting GitLab MCP|MCPToolset|evaluation: score|tool='
   ```
-  You want, on screen: `ADK evaluate sgharlow/governance-demo-app!9 via GitLab MCP` → `Starting GitLab MCP Server with stdio transport` → `… MCPToolset` → `evaluation: score=… verdict=block rules=15 mr_iid=9`. **Leave it on screen — it IS the Shot D visual.** (Optional booster — ask Claude to add per-MCP-tool INFO logging so each `get_merge_request_diffs` call prints; not required, the lines above already prove MCP runs.)
+  The trace now prints **each MCP read tool explicitly** (per-tool logging shipped 2026-06-10, rev `00017-d54`):
+  ```
+  mr_sentinel.adk  ADK evaluate sgharlow/governance-demo-app!9 via GitLab MCP
+  mcp-gitlab        Starting GitLab MCP Server with stdio transport
+  mr_sentinel.adk  agent tool-call [GitLab MCP] -> get_merge_request
+  mr_sentinel.adk  agent tool-call [GitLab MCP] -> get_merge_request_diffs
+  mr_sentinel.adk  agent tool-call [GitLab MCP] -> list_merge_request_pipelines
+  mr_sentinel.adk  agent tool-call [local] -> record_verdict
+  mr_sentinel      evaluation: score=… verdict=block rules=15 mr_iid=9
+  ```
+  **Don't record the raw terminal — use `docs/demo/agent-trace.html`** (built from this exact real
+  capture, terminal-styled, self-reveals on load). Open it full-screen in your browser and capture it;
+  it's the Shot D visual and the runtime-eligibility proof. See `docs/video-capture-plan.md`.
 - **P3.** Note the **measured loop latency** (~25–30s observed) — you say it in Shot D.
 - **P4.** Hard-refresh all four tabs. **Do NOT say a Gemini version number** — say "Gemini, on Vertex AI" (banner says "3", we run 2.5 Flash; rules say "Gemini models").
 
@@ -71,10 +83,11 @@ Legend: **[SCREEN]** what's visible · **[DO]** the action · **[SAY]** narratio
 - **[SAY]** "The moment an MR opens, MR Sentinel — a Google Agent Development Kit agent on Cloud Run — wakes up. Watch it actually run."
 
 **Shot D · 0:30–1:02 · The agent loop — GitLab MCP trace ⭐ (load-bearing)**
-- **[DO]** Cut to the **terminal** trace. Cursor-highlight, in order: `via GitLab MCP` → `Starting GitLab MCP Server` → `evaluation: score=`.
-- **[SAY]** "Read the log. 'ADK evaluate, via GitLab MCP' — it spins up **GitLab's own MCP server** and pulls the merge request, its diff, and its pipeline *through* it. It hands all that to **Gemini, on Vertex AI**, which judges the diff against fifteen rules at once and emits a structured verdict by calling record-verdict. Every step logged and replayable — the whole loop runs in about [LATENCY ~30] seconds."
-- **[CAPTURE]** Record the terminal with the staged trace; slow cursor pass over the MCP lines.
-- ⚠️ If the trace lacks `Starting GitLab MCP Server` / `via GitLab MCP`, re-fire (P2) before recording — this is the eligibility proof.
+- **[SCREEN]** `docs/demo/agent-trace.html`, full screen (it self-reveals the real captured log).
+- **[DO]** Let the lines reveal; the three `[GitLab MCP] -> get_merge_request…` lines land, then `record_verdict`, then the red `block` verdict.
+- **[SAY]** "Read the log — this is the agent running. 'ADK evaluate, via GitLab MCP': it spins up **GitLab's own MCP server** and calls it directly — get-merge-request, get-merge-request-diffs, list-pipelines, each one going through MCP. It hands all that to **Gemini, on Vertex AI**, which judges the diff against fifteen rules at once and records a structured verdict. Every MCP call logged and replayable — the whole loop runs in about [LATENCY ~30] seconds."
+- **[CAPTURE]** Record `agent-trace.html` (the three GitLab MCP tool-call lines are the proof). Press `R` to replay the reveal.
+- ⚠️ The eligibility hinges on those three `[GitLab MCP] ->` lines being on screen — they are, in the committed HTML (real capture, rev `00017-d54`).
 
 **Shot E · 1:02–1:28 · The verdict lands**
 - **[DO]** Cut to **MR `!10`** → the MR Sentinel comment. Cursor: verdict badge → the cited evidence line → linked remediation issue → `blocked-compliance` label in the sidebar.
