@@ -56,3 +56,7 @@ docs/closeout-*/*-raw.json
 video/
 *.mp4
 *.m4a
+
+# Demo capture working files (local scratch for the video edit; agent-trace.html IS tracked)
+docs/demo/shots/
+docs/demo/clips/
