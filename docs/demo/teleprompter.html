@@ -123,7 +123,7 @@ async function start(withMic){
       rec.onstop=()=>{const b=new Blob(chunks,{type:'audio/webm'});dl.href=URL.createObjectURL(b);dl.style.display='inline-block';};
     }catch(e){alert('Mic blocked: '+e.message);return;}
   }
-  vid.currentTime=0; await vid.play();
+  curIdx=-1; vid.currentTime=0; renderSeg(0); await vid.play();  // force segment 0 to render on play
   if(withMic && rec) rec.start();
   recBtn.disabled=true; playBtn.disabled=true; stopBtn.disabled=false;
 }
@@ -133,6 +133,7 @@ recBtn.onclick=()=>start(true);
 playBtn.onclick=()=>start(false);
 stopBtn.onclick=stop;
 document.getElementById('file').onchange=e=>{const f=e.target.files[0]; if(f){vid.src=URL.createObjectURL(f);}};
+try{ vid.src='demo-silent.mp4?cb='+Date.now(); }catch(e){}   // always load the latest cut
 renderSeg(0); cur.innerHTML='Press <b>● Record + Play</b>, allow the mic, then read the highlighted words in time with the video.';
 </script>
 <!--
