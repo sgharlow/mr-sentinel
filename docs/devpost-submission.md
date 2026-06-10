@@ -151,7 +151,7 @@ submission-ready — it must be re-recorded** to reflect the ADK + GitLab MCP ar
 | GitHub repo | `https://github.com/sgharlow/mr-sentinel` | ✅ public |
 | Demo GitLab repo | `https://gitlab.com/sgharlow/governance-demo-app` | ✅ public |
 | Live Cloud Run webhook | `https://mr-sentinel-webhook-n6oitfxdra-uc.a.run.app` | ✅ /health 200 |
-| Live dashboard | `https://mr-sentinel-webhook-n6oitfxdra-uc.a.run.app/dashboard` | ✅ 13 MRs |
+| Live dashboard | `https://mr-sentinel-webhook-n6oitfxdra-uc.a.run.app/dashboard` | ✅ live — scored MRs + verdict distribution (13 block / 3 warn / 2 pass at last check) |
 | Sample audit page | `https://mr-sentinel-webhook-n6oitfxdra-uc.a.run.app/audit/sgharlow/governance-demo-app/10` | ✅ block 0.0 |
 | **Demo video** | `https://youtu.be/0IlB2KJsJ4A` | ⚠️ RE-RECORD PENDING — current cut describes the pre-ADK (REST/direct-Vertex) architecture; must reflect the ADK + GitLab MCP loop. Outline in `docs/` (video task deferred). |
 
