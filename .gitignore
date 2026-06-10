@@ -39,7 +39,6 @@ gcp-credentials.json
 service-account*.json
 
 # local dev-assistant/editor config — never committed
-.claude/
 
 # OS
 Thumbs.db
