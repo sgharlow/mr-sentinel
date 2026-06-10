@@ -46,11 +46,11 @@ $DEFS = @{
           surface=$trace; isFile=$true;
           steps=@('F11 = full-screen','When RECORDING starts: press R to replay the log reveal',
                   'Watch the 3 [GitLab MCP] tool-call lines + the red block verdict appear') }
-  C4 = @{ name='C4-gitlab-diff'; dur=20; title='merge request';
+  C4 = @{ name='C4-gitlab-diff'; dur=20; title='chore: add .env';
           surface='https://gitlab.com/sgharlow/governance-demo-app/-/merge_requests/10/diffs'; isFile=$false;
           steps=@('LOG IN to gitlab.com first (anon is sign-in-walled)','F11 = full-screen',
                   'Ensure .env.production is expanded','During RECORDING: slow-scroll; pause ~1s on AWS_ACCESS_KEY_ID') }
-  C5 = @{ name='C5-gitlab-comment'; dur=26; title='merge request';
+  C5 = @{ name='C5-gitlab-comment'; dur=26; title='chore: add .env';
           surface='https://gitlab.com/sgharlow/governance-demo-app/-/merge_requests/10'; isFile=$false;
           steps=@('LOG IN to gitlab.com first','F11 = full-screen','Scroll to the MR Sentinel comment',
                   'During RECORDING: pan badge -> evidence -> linked issue -> blocked-compliance label',
@@ -72,7 +72,9 @@ function Record-One($key) {
   Start-Process $d.surface | Out-Null
   Start-Sleep -Seconds 2
 
-  # countdown to get ready (log in / focus / F11)
+  # countdown to get ready (log in / click the page / press F11 to fullscreen)
+  Write-Host "  >> CLICK the page, then press F11 (fullscreen) during this countdown <<" -ForegroundColor Yellow
+  [console]::Beep(660,150)
   for ($i = $Countdown; $i -ge 1; $i--) { Write-Host ("  starting in {0}..." -f $i) -ForegroundColor DarkGray; Start-Sleep -Seconds 1 }
 
   # build ffmpeg gdigrab args -> normalize to 1920x1080 letterboxed
@@ -82,7 +84,8 @@ function Record-One($key) {
   $args = @('-y','-f','gdigrab','-framerate','30',
             '-i','desktop','-t',$d.dur,'-vf',$vf,'-c:v','libx264','-pix_fmt','yuv420p','-preset','veryfast',$out)
 
-  Write-Host ">>> RECORDING $($d.dur)s — go!" -ForegroundColor Green
+  [console]::Beep(900,250)   # BEEP = recording started -> begin your slow scroll
+  Write-Host ">>> RECORDING $($d.dur)s — go! (scroll slowly; pause on the key line)" -ForegroundColor Green
   $proc = Start-Process -FilePath ffmpeg -ArgumentList $args -PassThru -WindowStyle Hidden
 
   if ($AutoKey) {
@@ -93,12 +96,13 @@ function Record-One($key) {
     if ($key -eq 'C1') {
       $ws.SendKeys('r')                                  # replay the reveal
     } else {
-      $ticks = [int]([math]::Floor($d.dur / 1.6))        # gentle auto-scroll
-      for ($t=0; $t -lt $ticks; $t++) { Start-Sleep -Milliseconds 1600; [void]$ws.AppActivate($d.title); $ws.SendKeys('{PGDN}') }
+      $ticks = [int]([math]::Floor($d.dur / 6.0))        # gentle auto-scroll (~every 6s)
+      for ($t=0; $t -lt $ticks; $t++) { Start-Sleep -Seconds 6; [void]$ws.AppActivate($d.title); $ws.SendKeys('{PGDN}') }
     }
   }
 
   $proc | Wait-Process -Timeout ($d.dur + 20)
+  [console]::Beep(450,400)   # BEEP = recording stopped
   if (Test-Path $out) {
     $sz = [math]::Round((Get-Item $out).Length/1MB,2)
     Write-Host "DONE -> $out  (${sz} MB)" -ForegroundColor Green
